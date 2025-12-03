@@ -17,7 +17,7 @@ import org.springframework.context.annotation.Bean;
 public class MyCityGovApplication {
 
 	public static void main(String[] args) {
-		SpringApplication.run(MyCityGovApplication.class, args);
+        SpringApplication.run(MyCityGovApplication.class, args);
 	}
 
 	@Bean
@@ -38,9 +38,9 @@ public class MyCityGovApplication {
 			System.out.println("Employee saved: " + emp.getFirstName() + " (Dept: " + emp.getDepartment().getName() + ")");
 
 			// 3. Create and Save a Citizen
-			Citizen citizen = new Citizen("alice99", "pass123", "Alice", "Smith", "alice@gmail.com", "AFM123456", "6900123456");
+			Citizen citizen = new Citizen("alice99", "pass123", "Alice", "Smith", "alice@gmail.com", "AFM123456", "6900123456", "spiti");
 			citizenRepository.save(citizen);
-			System.out.println("Citizen saved: " + citizen.getFirstName() + " (AFM: " + citizen.getNational_id() + ")");
+			System.out.println("Citizen saved: " + citizen.getFirstName() + " (AFM: " + citizen.getNationalId() + ")");
 
 			// 4. Test Queries
 			System.out.println("\n--- VERIFYING DATA ---");
@@ -60,5 +60,4 @@ public class MyCityGovApplication {
 			System.out.println("--- TESTING FINISHED ---");
 		};
 	}
-
 }

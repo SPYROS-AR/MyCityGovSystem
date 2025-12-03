@@ -1,6 +1,8 @@
 package gr.hua.dit.mycitygov.core.service;
 
 import gr.hua.dit.mycitygov.core.model.Citizen;
+import gr.hua.dit.mycitygov.core.service.model.CreateCitizenRequest;
+import gr.hua.dit.mycitygov.core.service.model.CreateCitizenResult;
 
 import java.util.List;
 
@@ -10,5 +12,5 @@ import java.util.List;
  */
 public interface CitizenService {
     List<Citizen> getCitizens();
-    Citizen createCitizen(Citizen citizen);
+    CreateCitizenResult createCitizen(CreateCitizenRequest request);
 }

@@ -3,7 +3,7 @@ spring:
     name: MyCityGov
 
   datasource:
-    url: jdbc:h2:file:./LOCAL_DATA/h2/app;DB_CLOSE_DELAY=-1;DATABASE_TO_LOWER=TRUE
+    url: jdbc:h2:file:D:/municipality_db;DB_CLOSE_DELAY=-1;DATABASE_TO_LOWER=TRUE
     username: username
     password: password
     driver-class-name: org.h2.Driver
