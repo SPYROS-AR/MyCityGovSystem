@@ -1,12 +1,15 @@
 package gr.hua.dit.mycitygov.core.repository;
 
 import gr.hua.dit.mycitygov.core.model.Citizen;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
 
 import java.util.Optional;
 
-public interface CitizenRepository {
+@Repository
+public interface CitizenRepository extends JpaRepository<Citizen,String> {
 
-    Optional<Citizen> findByNational_id(String national_id);
+    Optional<Citizen> findByNationalId(String nationalId);
 
     Optional<Citizen> findByEmail(String email);
 }
