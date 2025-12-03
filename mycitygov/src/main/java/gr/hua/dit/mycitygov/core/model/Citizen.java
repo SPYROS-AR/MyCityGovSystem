@@ -34,6 +34,7 @@ public class Citizen extends User {
         super(username, password, firstName, lastName, email);
         this.nationalId = nationalId;
         this.mobilePhoneNumber = mobilePhoneNumber;
+        this.setRole(Role.CITIZEN);
     }
 
 
