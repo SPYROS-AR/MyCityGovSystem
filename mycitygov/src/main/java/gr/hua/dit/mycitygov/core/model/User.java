@@ -39,9 +39,6 @@ public abstract class User {
     @Column(name = "email_address", nullable = false, length = 100)
     private String email;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "department_id", nullable = true)
-    private Department department;
 
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;
@@ -50,14 +47,20 @@ public abstract class User {
     protected void onCreate() {
         createdAt = LocalDateTime.now();
     }
+    public User(){}
+
+    public User(String username, String password, String firstName, String lastName, String email) {
+        this.username = username;
+        this.password = password;
+        this.firstName = firstName;
+        this.lastName = lastName;
+        this.email = email;
+    }
 
     public Long getId() {
         return id;
     }
 
-    public void setId(Long id) {
-        this.id = id;
-    }
 
     public String getPassword() {
         return password;
