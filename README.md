@@ -30,37 +30,37 @@ Municipality services can process all of the above with traceability and citizen
 
 Before running the project, ensure you have the following installed:
 
-* **Java Development Kit (JDK) 21** or newer
-* **Maven** (Optional: You can use the included `mvnw` wrapper script instead)
+* [Java Development Kit (JDK) 21](https://www.oracle.com/java/technologies/downloads/#java21)
+* [Maven](https://maven.apache.org/download.cgi) (Optional: You can use the included `mvnw` wrapper script instead)
 
 ## Tech Stack
 
-This project is built using **Java 21** and **Spring Boot 3.5.8**.
+This project is built using [Java 21](https://docs.oracle.com/en/java/javase/21/) and [Spring Boot 3.5.8](https://docs.spring.io/spring-boot/3.5/).
 
 ### Core & Web
 
-* **Spring Boot Starter Web:** Handles the web layer (Spring MVC) and includes an embedded Tomcat server.
-* **Thymeleaf:** Server-side Java template engine for rendering HTML views.
-* **Validation:** Implements Hibernate Validator for checking data integrity (e.g., `@NotNull`, `@Size`).
+* [Spring Boot Starter Web](https://mvnrepository.com/artifact/org.springframework.boot/spring-boot-starter-web): Handles the web layer ([Spring MVC](https://docs.spring.io/spring-framework/reference/web/webmvc.html)) and includes an embedded [Tomcat](https://tomcat.apache.org/) server.
+* [Thymeleaf](https://www.thymeleaf.org/): Server-side Java template engine for rendering HTML views.
+* Validation: Implements [Hibernate Validator](https://hibernate.org/validator/) for checking data integrity (e.g., `@NotNull`, `@Size`).
 
 ### Data & Persistence
 
-* **Spring Data JPA:** Abstraction over Hibernate to interact with databases using Java Interfaces.
-* **H2 Database:** An in-memory database used for development and testing environments.
+* [Spring Data JPA](https://spring.io/projects/spring-data-jpa): Abstraction over Hibernate to interact with databases using Java Interfaces.
+* [H2 Database](https://www.h2database.com/html/main.html): An in-memory database used for development and testing environments.
 
 ### Security
 
-* **Spring Security:** Handles authentication and authorization controls for the application.
+* [Spring Security](https://spring.io/projects/spring-security): Handles authentication and authorization controls for the application.
 
 ### Developer Tools
 
-* **Lombok:** Annotation library to reduce boilerplate code (Getters, Setters, Constructors).
-* **Spring Boot DevTools:** Provides fast application restarts and LiveReload for an enhanced development experience.
+* [Lombok](https://projectlombok.org): Annotation library to reduce boilerplate code (Getters, Setters, Constructors).
+* [Spring Boot DevTools](https://docs.spring.io/spring-boot/reference/using/devtools.html): Provides fast application restarts and [LiveReload](https://livereload.net/) for an enhanced development experience.
 
 ### Testing
 
-* **Spring Boot Starter Test:** Includes JUnit 5, Mockito, and AssertJ.
-* **Spring Security Test:** Utilities for testing authentication flows.
+* [Spring Boot Starter Test](https://docs.spring.io/spring-boot/reference/testing/index.html): Includes [JUnit 5](https://junit.org), [Mockito](https://site.mockito.org), and [AssertJ](https://assertj.github.io/doc).
+* [Spring Security Test](https://docs.spring.io/spring-security/reference/servlet/test/index.html): Utilities for testing authentication flows.
 ---
 
 ## Build & Run
