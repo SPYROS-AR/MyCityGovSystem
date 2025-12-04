@@ -27,19 +27,40 @@ Municipality services can process all of the above with traceability and citizen
 ---
 
 ## Prerequisites
-- [Java Development Kit 21](https://www.oracle.com/java/technologies/javase/jdk21-archive-downloads.html) or [newer](https://www.oracle.com/java/technologies/downloads/)
-- [Maven](https://maven.apache.org/download.cgi)
 
----
+Before running the project, ensure you have the following installed:
 
-## Dependencies
+* **Java Development Kit (JDK) 21** or newer
+* **Maven** (Optional: You can use the included `mvnw` wrapper script instead)
 
-- Backend Framework: [Spring Boot (v3.5.8)](https://spring.io/projects/spring-boot)
-- Persistence: [Spring Data JPA](https://spring.io/projects/spring-data-jpa)
-- Security: [Spring Security](https://spring.io/projects/spring-security)
-- Frontend: [Thymeleaf](https://www.thymeleaf.org/)
-- Database (Development): [H2 Database](https://www.h2database.com/html/main.html)
+## Tech Stack
 
+This project is built using **Java 21** and **Spring Boot 3.5.8**.
+
+### Core & Web
+
+* **Spring Boot Starter Web:** Handles the web layer (Spring MVC) and includes an embedded Tomcat server.
+* **Thymeleaf:** Server-side Java template engine for rendering HTML views.
+* **Validation:** Implements Hibernate Validator for checking data integrity (e.g., `@NotNull`, `@Size`).
+
+### Data & Persistence
+
+* **Spring Data JPA:** Abstraction over Hibernate to interact with databases using Java Interfaces.
+* **H2 Database:** An in-memory database used for development and testing environments.
+
+### Security
+
+* **Spring Security:** Handles authentication and authorization controls for the application.
+
+### Developer Tools
+
+* **Lombok:** Annotation library to reduce boilerplate code (Getters, Setters, Constructors).
+* **Spring Boot DevTools:** Provides fast application restarts and LiveReload for an enhanced development experience.
+
+### Testing
+
+* **Spring Boot Starter Test:** Includes JUnit 5, Mockito, and AssertJ.
+* **Spring Security Test:** Utilities for testing authentication flows.
 ---
 
 ## Build & Run
