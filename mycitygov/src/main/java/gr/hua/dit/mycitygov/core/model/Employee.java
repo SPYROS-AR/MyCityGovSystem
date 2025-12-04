@@ -2,8 +2,11 @@ package gr.hua.dit.mycitygov.core.model;
 
 
 import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.Setter;
 
 @Entity
+@Getter @Setter
 @Table(name = "employees")
 @PrimaryKeyJoinColumn(name = "user_id")
 public class Employee extends User {
@@ -23,11 +26,4 @@ public class Employee extends User {
         this.setRole(Role.EMPLOYEE);
     }
 
-    public Department getDepartment() {
-        return department;
-    }
-
-    public void setDepartment(Department department) {
-        this.department = department;
-    }
 }
