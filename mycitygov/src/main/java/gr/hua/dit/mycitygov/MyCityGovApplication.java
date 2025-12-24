@@ -12,52 +12,51 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration;
 import org.springframework.context.annotation.Bean;
 
-//@SpringBootApplication
 @SpringBootApplication(exclude = { SecurityAutoConfiguration.class }) //TODO REMOVE
 public class MyCityGovApplication {
 
-	public static void main(String[] args) {
+    public static void main(String[] args) {
         SpringApplication.run(MyCityGovApplication.class, args);
-	}
+    }
 
-	@Bean
-	public CommandLineRunner testDatabase(DepartmentRepository departmentRepository,
-										  EmployeeRepository employeeRepository,
-										  CitizenRepository citizenRepository) {
-		return args -> {
-			System.out.println("--- STARTED TESTING DATABASE ---");
+    @Bean
+    public CommandLineRunner testDatabase(DepartmentRepository departmentRepository,
+                                          EmployeeRepository employeeRepository,
+                                          CitizenRepository citizenRepository) {
+        return args -> {
+            System.out.println("--- STARTED TESTING DATABASE ---");
 
-			// 1. Create and Save a Department
-			Department dept = new Department("Technical Service", "Handles roads and lights");
-			departmentRepository.save(dept);
-			System.out.println("Department saved: " + dept.getName());
+            // 1. Create Department if not exists
+            Department dept = departmentRepository.findByName("Technical Service")
+                    .orElseGet(() -> {
+                        Department newDept = new Department("Technical Service", "Handles roads and lights");
+                        return departmentRepository.save(newDept);
+                    });
+            System.out.println("Department: " + dept.getName());
 
-			// 2. Create and Save an Employee linked to that Department
-			Employee emp = new Employee("jdoe", "secret123", "John", "Doe", "john.doe@city.gov", dept);
-			employeeRepository.save(emp);
-			System.out.println("Employee saved: " + emp.getFirstName() + " (Dept: " + emp.getDepartment().getName() + ")");
+            // 2. Create Employee if not exists
+            if (employeeRepository.findByDepartmentId(dept.getId()).isEmpty()) {
+                try {
+                    Employee emp = new Employee("jdoe", "secret123", "John", "Doe", "john.doe@city.gov", dept);
+                    employeeRepository.save(emp);
+                    System.out.println("Employee saved: " + emp.getFirstName());
+                } catch (Exception e) {
+                    System.out.println("Employee jdoe probably already exists.");
+                }
+            } else {
+                System.out.println("Employees for Technical Service already exist.");
+            }
 
-			// 3. Create and Save a Citizen
-			Citizen citizen = new Citizen("alice99", "pass123", "Alice", "Smith", "alice@gmail.com", "AFM123456", "6900123456", "spiti");
-			citizenRepository.save(citizen);
-			System.out.println("Citizen saved: " + citizen.getFirstName() + " (AFM: " + citizen.getNationalId() + ")");
+            // 3. Create Citizen if not exists
+            if (citizenRepository.findByEmail("alice@gmail.com").isEmpty()) {
+                Citizen citizen = new Citizen("alice99", "pass123", "Alice", "Smith", "alice@gmail.com", "AFM123456", "6900123456", "spiti");
+                citizenRepository.save(citizen);
+                System.out.println("Citizen saved: " + citizen.getFirstName());
+            } else {
+                System.out.println("Citizen alice already exists.");
+            }
 
-			// 4. Test Queries
-			System.out.println("\n--- VERIFYING DATA ---");
-
-			departmentRepository.findAll().forEach(d ->
-					System.out.println("Found Dept: " + d.getName())
-			);
-
-			employeeRepository.findByDepartmentId(dept.getId()).forEach(e ->
-					System.out.println("Found Employee in Technical Service: " + e.getLastName())
-			);
-
-			citizenRepository.findByEmail("alice@gmail.com").ifPresent(c ->
-					System.out.println("Found Citizen by Email: " + c.getUsername())
-			);
-
-			System.out.println("--- TESTING FINISHED ---");
-		};
-	}
+            System.out.println("--- TESTING FINISHED ---");
+        };
+    }
 }
