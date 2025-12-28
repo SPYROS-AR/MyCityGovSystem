@@ -62,7 +62,8 @@ public class Request {
                    Citizen citizen,
                    RequestType requestType,
                    User assignedEmployee,
-                   List<RequestLog> logs) {
+                   List<RequestLog> logs,
+                   Department department) {
         this.protocolNumber = protocolNumber;
         this.submittedDate = submittedDate;
         this.dueDate = dueDate;
