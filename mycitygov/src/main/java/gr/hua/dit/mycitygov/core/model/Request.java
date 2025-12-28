@@ -47,10 +47,22 @@ public class Request {
     @OneToMany(mappedBy = "request", cascade = CascadeType.ALL)
     private List<RequestLog> logs = new ArrayList<>();
 
+    @ManyToOne
+    @JoinColumn(name = "department_id", nullable = false)
+    private Department department;
+
     public Request() {
     }
 
-    public Request(String protocolNumber, LocalDateTime submittedDate, LocalDateTime dueDate, Status status, String description, Citizen citizen, RequestType requestType, User assignedEmployee, List<RequestLog> logs) {
+    public Request(String protocolNumber,
+                   LocalDateTime submittedDate,
+                   LocalDateTime dueDate,
+                   Status status,
+                   String description,
+                   Citizen citizen,
+                   RequestType requestType,
+                   User assignedEmployee,
+                   List<RequestLog> logs) {
         this.protocolNumber = protocolNumber;
         this.submittedDate = submittedDate;
         this.dueDate = dueDate;

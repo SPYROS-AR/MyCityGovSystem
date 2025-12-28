@@ -40,7 +40,12 @@ public class RequestLog {
     public RequestLog() {
     }
 
-    public RequestLog(LocalDateTime actionDate, Request.Status oldStatus, Request.Status newStatus, String comment, Request request, Employee employee) {
+    public RequestLog(LocalDateTime actionDate,
+                      Request.Status oldStatus,
+                      Request.Status newStatus,
+                      String comment,
+                      Request request,
+                      Employee employee) {
         this.actionDate = actionDate;
         this.oldStatus = oldStatus;
         this.newStatus = newStatus;

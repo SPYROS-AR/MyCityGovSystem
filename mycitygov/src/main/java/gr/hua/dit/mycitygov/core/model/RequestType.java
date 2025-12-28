@@ -42,7 +42,12 @@ public class RequestType {
     public RequestType() {
     }
 
-    public RequestType(String name, RequestCategory requestCategory, Integer slaDays, String requiredDocuments, boolean isActive, Department department) {
+    public RequestType(String name,
+                       RequestCategory requestCategory,
+                       Integer slaDays,
+                       String requiredDocuments,
+                       boolean isActive,
+                       Department department) {
         this.name = name;
         this.requestCategory = requestCategory;
         this.slaDays = slaDays;
