@@ -4,15 +4,15 @@ FROM eclipse-temurin:21-jdk-alpine
 # Set working directory inside the container
 WORKDIR /app
 
-# Αντιγραφή του maven wrapper και του pom.xml
+# Copy maven wrapper and pom.xml to working directory
 COPY .mvn/ .mvn
 COPY mvnw pom.xml ./
 
-# Αντιγραφή του source code
+# Copy source code
 COPY src ./src
 
-# Χτίσιμο της εφαρμογής (skip tests για ταχύτητα στο build του docker)
+# Build the app
 RUN ./mvnw package -DskipTests
 
-# Η εντολή που θα τρέξει όταν ξεκινήσει το container
+# Run the Java application as soon as container starts
 CMD ["java", "-jar", "target/mycitygov-0.0.1-SNAPSHOT.jar"]
