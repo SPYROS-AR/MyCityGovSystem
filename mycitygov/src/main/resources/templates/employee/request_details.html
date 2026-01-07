@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <title>Λεπτομέρειες Αιτήματος</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body class="bg-light">
+
+<div class="container mt-5">
+  <a th:href="@{/employee/dashboard}" class="btn btn-outline-secondary mb-3">← Πίσω στο Dashboard</a>
+
+  <div class="card shadow">
+    <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+      <h4 class="mb-0">Αίτημα: <span th:text="${request.protocolNumber}"></span></h4>
+      <span class="badge bg-light text-dark" th:text="${request.status}"></span>
+    </div>
+    <div class="card-body">
+
+      <div class="row mb-4">
+        <div class="col-md-6">
+          <h5>👤 Στοιχεία Πολίτη</h5>
+          <hr>
+          <p><strong>Ονοματεπώνυμο:</strong> <span th:text="${request.citizen.firstName + ' ' + request.citizen.lastName}"></span></p>
+          <p><strong>ΑΦΜ:</strong> <span th:text="${request.citizen.nationalId}"></span></p>
+          <p><strong>Email:</strong> <span th:text="${request.citizen.email}"></span></p>
+          <p><strong>Τηλέφωνο:</strong> <span th:text="${request.citizen.mobilePhoneNumber}"></span></p>
+        </div>
+        <div class="col-md-6">
+          <h5>📄 Λεπτομέρειες Αιτήματος</h5>
+          <hr>
+          <p><strong>Τύπος:</strong> <span th:text="${request.requestType.name}"></span></p>
+          <p><strong>Τμήμα:</strong> <span th:text="${request.department.name}"></span></p>
+          <p><strong>Ημ/νία Υποβολής:</strong> <span th:text="${#temporals.format(request.submittedDate, 'dd/MM/yyyy HH:mm')}"></span></p>
+        </div>
+      </div>
+
+      <div class="mb-4">
+        <h5>📝 Περιγραφή / Αίτημα Πολίτη</h5>
+        <div class="p-3 bg-light border rounded">
+          <p class="mb-0" th:text="${request.description}"></p>
+        </div>
+      </div>
+
+      <div class="mb-4">
+        <h5>🕒 Ιστορικό Ενεργειών</h5>
+        <table class="table table-sm table-striped border">
+          <thead class="table-light">
+          <tr>
+            <th>Ημερομηνία</th>
+            <th>Χρήστης</th>
+            <th>Σχόλιο / Ενέργεια</th>
+          </tr>
+          </thead>
+          <tbody>
+          <tr th:each="log : ${request.logs}">
+            <td th:text="${#temporals.format(log.actionDate, 'dd/MM/yyyy HH:mm')}"></td>
+            <td>
+              <span th:if="${log.employee != null}" th:text="${log.employee.lastName}"></span>
+              <span th:if="${log.employee == null}" class="text-muted">System</span>
+            </td>
+            <td th:text="${log.comment}"></td>
+          </tr>
+          <tr th:if="${#lists.isEmpty(request.logs)}">
+            <td colspan="3" class="text-muted text-center">Δεν υπάρχει ιστορικό ακόμα.</td>
+          </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div th:if="${request.status.name() == 'PROCESSING'}" class="border-top pt-3">
+        <h5>⚡ Ενέργειες</h5>
+        <div class="d-flex gap-3">
+
+          <form th:action="@{/employee/request/{id}/approve(id=${request.id})}" method="post">
+            <button type="submit" class="btn btn-success btn-lg">✔ Έγκριση Αιτήματος</button>
+          </form>
+
+          <button class="btn btn-danger btn-lg" type="button" data-bs-toggle="collapse" data-bs-target="#rejectCollapse">
+            ✘ Απόρριψη...
+          </button>
+        </div>
+
+        <div class="collapse mt-3" id="rejectCollapse">
+          <div class="card card-body border-danger">
+            <form th:action="@{/employee/request/{id}/reject(id=${request.id})}" method="post">
+              <label class="form-label fw-bold text-danger">Αιτιολογία Απόρριψης (Υποχρεωτικό):</label>
+              <textarea name="reason" class="form-control mb-2" rows="3" required placeholder="Γράψτε γιατί απορρίπτεται η αίτηση..."></textarea>
+              <button type="submit" class="btn btn-danger">Οριστική Απόρριψη</button>
+            </form>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

@@ -72,7 +72,8 @@ public class Request {
         this.citizen = citizen;
         this.requestType = requestType;
         this.assignedEmployee = assignedEmployee;
-        this.logs = logs;
+        this.logs = (logs != null) ? logs : new ArrayList<>();
+        this.department = department;
     }
 
     public enum Status {
