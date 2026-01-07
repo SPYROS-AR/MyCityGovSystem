@@ -3,7 +3,6 @@ package gr.hua.dit.mycitygov.core.service;
 import gr.hua.dit.mycitygov.core.model.Appointment;
 import gr.hua.dit.mycitygov.core.model.Employee;
 import gr.hua.dit.mycitygov.core.model.Request;
-import gr.hua.dit.mycitygov.core.service.model.EmployeeView;
 
 import java.util.List;
 
@@ -89,7 +88,7 @@ public interface EmployeeService {
     /**
      * Changes the date of an appointment and notifies the citizen
      * @param appointmentId The appointment ID
-     * @param newDate The new date and time
+     * @param rescheduledDateTime The new date and time
      */
     void rescheduleAppointment(Long appointmentId, java.time.LocalDateTime rescheduledDateTime);
 }
