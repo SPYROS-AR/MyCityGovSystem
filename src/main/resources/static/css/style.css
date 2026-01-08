@@ -1,0 +1,105 @@
+body {
+    font-family: 'Verdana', Geneva, sans-serif;
+    background-color: #f4f4f4;
+    color: #333;
+    margin: 0;
+    padding: 0;
+}
+
+h2, h4, h5 {
+    color: #333;
+    margin-bottom: 20px;
+}
+
+.navbar-custom {
+    background-color: #009879;
+    color: white;
+    padding: 5px;
+    margin-bottom: 5px;
+
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+.navbar-custom a {
+    color: white;
+    text-decoration: none;
+    font-weight: bold;
+}
+
+.styled-table {
+    border-collapse: collapse;
+    margin: 25px 0;
+    font-size: 0.9em;
+    font-family: sans-serif;
+    width: 100%;
+
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.15);
+    background-color: white;
+    border-radius: 15px;
+    overflow: hidden;
+    border: none;
+}
+
+.styled-table thead tr {
+    background-color: #009879;
+    color: #ffffff;
+    text-align: left;
+}
+
+.styled-table th,
+.styled-table td {
+    padding: 12px 15px;
+}
+
+.styled-table tbody tr {
+    border-bottom: 1px solid #dddddd;
+}
+
+.styled-table tbody tr:nth-of-type(even) {
+    background-color: #f3f3f3;
+}
+
+.styled-table tbody tr:last-of-type {
+    border-bottom: none;
+}
+
+.status-badge {
+    padding: 5px 10px;
+    border-radius: 10px;
+    font-size: 0.85em;
+    font-weight: bold;
+    text-transform: uppercase;
+}
+.status-SUBMITTED { background-color: #ffc107; color: black; }
+.status-PROCESSING { background-color: #17a2b8; color: white; }
+.status-COMPLETED { background-color: #28a745; color: white; }
+.status-REJECTED { background-color: #dc3545; color: white; }
+.status-CONFIRMED { background-color: #28a745; color: white; }
+.status-CANCELLED { background-color: #dc3545; color: white; }
+.status-SCHEDULED { background-color: #ffc107; color: black; }
+
+.btn-custom {
+    padding: 6px 12px;
+    border: none;
+    border-radius: 20px;
+    cursor: pointer;
+    font-size: 14px;
+    text-decoration: none;
+    display: inline-block;
+}
+.btn-primary-custom { background-color: #009879; color: white; }
+.btn-danger-custom { background-color: #d32f2f; color: white; }
+.btn-warning-custom { background-color: #fbc02d; color: black; }
+.btn-secondary-custom { background-color: #555; color: white; }
+
+.btn-custom:hover { opacity: 0.9; }
+
+.container {
+    max-width: 1000px;
+    margin: auto;
+    padding: 10px;
+    border-radius: 10px;
+}
