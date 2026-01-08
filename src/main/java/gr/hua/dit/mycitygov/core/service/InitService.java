@@ -34,20 +34,21 @@ public class InitService implements CommandLineRunner {
     }
 
     @Override
-    public void run(String... args) throws Exception {
+    public void run(String... args) {
         System.out.println("--- STARTING DATABASE INITIALIZATION ---");
 
-        // 1. Τμήμα (Cleanliness)
+        // Department
         Department cleanlinessDept = departmentRepository.findByName("Cleanliness")
                 .orElseGet(() -> {
                     Department d = new Department();
                     d.setName("Cleanliness");
-                    d.setDescription("Cleaning Services");
+                    d.setDescription("Υπηρεσίες Καθαριότητας και Ανακύκλωσης");
                     return departmentRepository.save(d);
                 });
 
-        // 2. Υπάλληλος (Giannis)
-        if (employeeRepository.findByDepartmentId(cleanlinessDept.getId()).isEmpty()) {
+        // Employee
+        Employee empGiannis = employeeRepository.findByEmail("emp1@city.gov");
+        if (empGiannis == null) {
             Employee emp = new Employee();
             emp.setUsername("emp1");
             emp.setPassword("password");
@@ -55,11 +56,11 @@ public class InitService implements CommandLineRunner {
             emp.setLastName("Employee");
             emp.setEmail("emp1@city.gov");
             emp.setDepartment(cleanlinessDept);
-            employeeRepository.save(emp);
+            empGiannis = employeeRepository.save(emp);
         }
 
-        // 3. Πολίτης (Maria)
-        Citizen citizen = citizenRepository.findByEmail("cit@gmail.com").orElseGet(() -> {
+        // Citizen
+        Citizen citizenMaria = citizenRepository.findByEmail("cit@gmail.com").orElseGet(() -> {
             Citizen c = new Citizen();
             c.setUsername("citizen1");
             c.setPassword("password");
@@ -72,42 +73,163 @@ public class InitService implements CommandLineRunner {
             return citizenRepository.save(c);
         });
 
-        // 4. Τύπος Αιτήματος (CERTIFICATE)
+        Citizen citizenNikos = citizenRepository.findByEmail("nikos@gmail.com").orElseGet(() -> {
+            Citizen c = new Citizen();
+            c.setUsername("nikos1");
+            c.setPassword("password");
+            c.setFirstName("Nikos");
+            c.setLastName("Papadopoulos");
+            c.setEmail("nikos@gmail.com");
+            c.setNationalId("987654321");
+            c.setMobilePhoneNumber("6900987654");
+            c.setAddress("Thessaloniki, Greece");
+            return citizenRepository.save(c);
+        });
+
+        // Request Type
         RequestType certType = requestTypeRepository.findByName("CERTIFICATE")
                 .orElseGet(() -> {
                     RequestType rt = new RequestType();
                     rt.setName("CERTIFICATE");
                     rt.setRequestCategory(RequestType.RequestCategory.CERTIFICATE);
-                    // --- Η ΔΙΟΡΘΩΣΗ ΕΙΝΑΙ ΕΔΩ ---
-                    rt.setDepartment(cleanlinessDept); // Συνδέουμε τον τύπο με το τμήμα
-                    // -----------------------------
+                    rt.setDepartment(cleanlinessDept);
                     return requestTypeRepository.save(rt);
                 });
 
-        // 5. Αίτηση (Request)
-        if (requestRepository.findByDepartmentId(cleanlinessDept.getId()).isEmpty()) {
+        RequestType garbageType = requestTypeRepository.findByName("BULK_WASTE")
+                .orElseGet(() -> {
+                    RequestType rt = new RequestType();
+                    rt.setName("BULK_WASTE"); // Ογκώδη Αντικείμενα
+                    rt.setRequestCategory(RequestType.RequestCategory.PROBLEM);
+                    rt.setDepartment(cleanlinessDept);
+                    return requestTypeRepository.save(rt);
+                });
+
+        // Requests
+        // SUBMITTED
+        if (requestRepository.findByProtocolNumber("REQ-2025-001").isEmpty()) {
             Request req = new Request();
             req.setProtocolNumber("REQ-2025-001");
-            req.setSubmittedDate(LocalDateTime.now());
-            req.setDescription("Υπάρχουν σκουπίδια στην πλατεία.");
+            req.setSubmittedDate(LocalDateTime.now().minusHours(2));
+            req.setDescription("Υπάρχουν σκουπίδια στην πλατεία Ελευθερίας.");
             req.setStatus(Request.Status.SUBMITTED);
-
             req.setDepartment(cleanlinessDept);
-            req.setCitizen(citizen);
-            req.setRequestType(certType);
-
+            req.setCitizen(citizenMaria);
+            req.setRequestType(certType); // (Τυπικά λάθος τύπος για παράπονο, αλλά οκ για το demo)
             requestRepository.save(req);
-            System.out.println("Created Mock Request for Cleanliness department");
         }
 
+        // PROCESSING
+        if (requestRepository.findByProtocolNumber("REQ-2025-002").isEmpty()) {
+            Request req = new Request();
+            req.setProtocolNumber("REQ-2025-002");
+            req.setSubmittedDate(LocalDateTime.now().minusDays(1));
+            req.setDescription("Παρακαλώ να μαζέψετε έναν παλιό καναπέ από την οδό Ερμού 12.");
+            req.setStatus(Request.Status.PROCESSING);
+            req.setDepartment(cleanlinessDept);
+            req.setCitizen(citizenNikos);
+            req.setRequestType(garbageType);
+            req.setAssignedEmployee(empGiannis);
+
+            // Log
+            RequestLog log = new RequestLog();
+            log.setActionDate(LocalDateTime.now().minusHours(5));
+            log.setComment("Ανατέθηκε στον υπάλληλο Giannis Employee");
+            log.setOldStatus(Request.Status.SUBMITTED);
+            log.setNewStatus(Request.Status.PROCESSING);
+            log.setEmployee(empGiannis);
+            log.setRequest(req);
+            req.getLogs().add(log);
+
+            requestRepository.save(req);
+        }
+
+        // COMPLETED
+        if (requestRepository.findByProtocolNumber("REQ-2025-003").isEmpty()) {
+            Request req = new Request();
+            req.setProtocolNumber("REQ-2025-003");
+            req.setSubmittedDate(LocalDateTime.now().minusDays(5));
+            req.setDescription("Καθαρισμός κάδου ανακύκλωσης.");
+            req.setStatus(Request.Status.COMPLETED);
+            req.setDepartment(cleanlinessDept);
+            req.setCitizen(citizenMaria);
+            req.setRequestType(certType);
+            req.setAssignedEmployee(empGiannis);
+
+            // Log 1: Assigned
+            RequestLog log1 = new RequestLog();
+            log1.setActionDate(LocalDateTime.now().minusDays(4));
+            log1.setComment("Ανάθεση αιτήματος");
+            log1.setOldStatus(Request.Status.SUBMITTED);
+            log1.setNewStatus(Request.Status.PROCESSING);
+            log1.setEmployee(empGiannis);
+            log1.setRequest(req);
+            req.getLogs().add(log1);
+
+            // Log 2: COMPLETED
+            RequestLog log2 = new RequestLog();
+            log2.setActionDate(LocalDateTime.now().minusDays(1));
+            log2.setComment("Ο κάδος καθαρίστηκε επιτυχώς.");
+            log2.setOldStatus(Request.Status.PROCESSING);
+            log2.setNewStatus(Request.Status.COMPLETED);
+            log2.setEmployee(empGiannis);
+            log2.setRequest(req);
+            req.getLogs().add(log2);
+
+            requestRepository.save(req);
+        }
+
+        // REJECTED
+        if (requestRepository.findByProtocolNumber("REQ-2025-004").isEmpty()) {
+            Request req = new Request();
+            req.setProtocolNumber("REQ-2025-004");
+            req.setSubmittedDate(LocalDateTime.now().minusDays(2));
+            req.setDescription("Να κόψετε το δέντρο του γείτονα.");
+            req.setStatus(Request.Status.REJECTED);
+            req.setDepartment(cleanlinessDept);
+            req.setCitizen(citizenNikos);
+            req.setRequestType(garbageType);
+            req.setAssignedEmployee(empGiannis);
+
+            RequestLog log = new RequestLog();
+            log.setActionDate(LocalDateTime.now());
+            log.setComment("Απορρίφθηκε: Δεν είναι αρμοδιότητα του Δήμου (Ιδιωτικός χώρος).");
+            log.setOldStatus(Request.Status.PROCESSING);
+            log.setNewStatus(Request.Status.REJECTED);
+            log.setEmployee(empGiannis);
+            log.setRequest(req);
+            req.getLogs().add(log);
+
+            requestRepository.save(req);
+        }
+
+        // Appointments
         if (appointmentRepository.count() == 0) {
+            // SCHEDULED
             Appointment app1 = new Appointment();
-            app1.setCitizen(citizen);
+            app1.setCitizen(citizenMaria);
             app1.setDepartment(cleanlinessDept);
             app1.setAppointmentDate(LocalDateTime.now().plusDays(2).withHour(10).withMinute(0));
             app1.setStatus(Appointment.AppointmentStatus.SCHEDULED);
             appointmentRepository.save(app1);
-            System.out.println("Created Mock Appointment 1");
+
+            // COMPLETED
+            Appointment app2 = new Appointment();
+            app2.setCitizen(citizenNikos);
+            app2.setDepartment(cleanlinessDept);
+            app2.setAppointmentDate(LocalDateTime.now().plusDays(5).withHour(12).withMinute(30));
+            app2.setStatus(Appointment.AppointmentStatus.COMPLETED);
+            appointmentRepository.save(app2);
+
+            // CANCELLED
+            Appointment app3 = new Appointment();
+            app3.setCitizen(citizenMaria);
+            app3.setDepartment(cleanlinessDept);
+            app3.setAppointmentDate(LocalDateTime.now().plusDays(1).withHour(0).withMinute(0)); // Dummy date
+            app3.setStatus(Appointment.AppointmentStatus.CANCELLED);
+            appointmentRepository.save(app3);
+
+            System.out.println("Created Mock Appointments");
         }
 
         System.out.println("--- DATABASE INITIALIZATION FINISHED ---");
