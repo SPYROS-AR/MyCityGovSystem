@@ -1,0 +1,4 @@
+package gr.hua.dit.mycitygov.core.service.impl;
+
+public class AdminServiceImpl {
+}
