@@ -18,3 +18,14 @@ spring:
       hibernate:
         dialect: org.hibernate.dialect.PostgreSQLDialect
         format_sql: true
+  mail:
+    host: sandbox.smtp.mailtrap.io
+    port: 2525
+    username: <username> # TODO put mailtrap mail and password
+    password: <password>
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true

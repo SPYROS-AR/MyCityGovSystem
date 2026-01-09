@@ -91,6 +91,7 @@ This method launches the entire stack (App + DB + Admin) in isolated containers,
 3.  Wait for the logs to indicate startup (`Started MyCityGovApplication in ... seconds`).
 4.  Access the services:
     * **Web Application**: [http://localhost:8080](http://localhost:8080)
+    * **Swagger API Docs**: [http://localhost:8080/swagger-ui/index.html](http://localhost:8080/swagger-ui/index.html)
     * **pgAdmin 4**: [http://localhost:5050](http://localhost:5050)
 
 ### Option B: Hybrid Mode (Local Java + Docker DB)
@@ -109,6 +110,30 @@ Use this mode for development or debugging the Java code while keeping the datab
         ```bash
         ./mvnw spring-boot:run
         ```
+---
+
+## Email Notifications (Testing)
+
+The application uses **Mailtrap** for email testing. Emails are **not** sent to real addresses but are captured in a sandbox environment.
+
+**To view sent emails:**
+1.  Log in to [Mailtrap.io](https://mailtrap.io).
+2.  Go to **Email Testing** > **Inboxes**.
+3.  All system notifications (Approvals, Rejections, Appointment changes) will appear there.
+
+*(Note: You need to configure your Mailtrap credentials in `src/main/resources/application.yaml`)*
+
+---
+
+## API Documentation
+
+The REST API is fully documented using OpenAPI/Swagger.
+
+* **UI Interface**: [http://localhost:8080/swagger-ui/index.html](http://localhost:8080/swagger-ui/index.html)
+    * Explore endpoints for Employees (`/api/employee/**`)
+    * Test requests directly from the browser
+
+* **OpenAPI JSON**: [http://localhost:8080/v3/api-docs](http://localhost:8080/v3/api-docs)
 
 ---
 
