@@ -9,7 +9,7 @@ public class EmployeeMapper {
     public EmployeeView convertEmployeeToEmployeeView(final Employee employee) {
         if(employee == null) return null;
 
-        final EmployeeView employeeView = new EmployeeView(
+        return new EmployeeView(
                 employee.getId(),
                 employee.getUsername(),
                 employee.getFirstName(),
@@ -17,6 +17,5 @@ public class EmployeeMapper {
                 employee.getEmail(),
                 employee.getDepartment()
         );
-        return employeeView;
     }
 }

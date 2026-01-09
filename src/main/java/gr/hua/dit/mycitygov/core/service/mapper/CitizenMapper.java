@@ -14,7 +14,7 @@ public class CitizenMapper {
     public CitizenView convertCitizenToCitizenView(final Citizen citizen){
         if (citizen == null) return null;
 
-        final CitizenView citizenView = new CitizenView(
+        return new CitizenView(
                 citizen.getId(),
                 citizen.getUsername(),
                 citizen.getFirstName(),
@@ -25,6 +25,5 @@ public class CitizenMapper {
                 citizen.getMobilePhoneNumber(),
                 citizen.getAddress()
         );
-        return citizenView;
     }
 }
