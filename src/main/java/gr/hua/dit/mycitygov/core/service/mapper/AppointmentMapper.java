@@ -17,6 +17,7 @@ public class AppointmentMapper {
         appointmentView.setId(appointment.getId());
         appointmentView.setAppointmentDate(appointment.getAppointmentDate());
         appointmentView.setStatus(appointment.getStatus().name());
+        appointmentView.setCitizen(citizenMapper.convertCitizenToCitizenView(appointment.getCitizen()));
         return appointmentView;
     }
 

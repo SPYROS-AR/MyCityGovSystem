@@ -1,8 +1,9 @@
 package gr.hua.dit.mycitygov.core.service;
 
-import gr.hua.dit.mycitygov.core.model.Appointment;
-import gr.hua.dit.mycitygov.core.model.Employee;
 import gr.hua.dit.mycitygov.core.model.Request;
+import gr.hua.dit.mycitygov.core.service.model.AppointmentView;
+import gr.hua.dit.mycitygov.core.service.model.EmployeeView;
+import gr.hua.dit.mycitygov.core.service.model.RequestView;
 
 import java.util.List;
 
@@ -14,28 +15,28 @@ public interface EmployeeService {
      * Retrieves all employees in the system
      * @return List of Employee entities
      */
-    List<Employee> getAllEmployees();
+    List<EmployeeView> getAllEmployees();
 
     /**
      * Retrieves all requests associated with the department of a specific employee
      * @param employeeId The ID of the employee.
-     * @return List of Requests.
+     * @return List of RequestViews.
      */
-    List<Request> getRequestsForEmployeeDepartment(Long employeeId);
+    List<RequestView> getRequestsForEmployeeDepartment(Long employeeId);
 
     /**
      * Retrieves requests for a specific department
      * @param departmentId The ID of the department
-     * @return List of Requests.
+     * @return List of RequestViews.
      */
-    List<Request> getRequestsForDepartment(Long departmentId);
+    List<RequestView> getRequestsForDepartment(Long departmentId);
 
     /**
      * Retrieves a single request by its ID
      * @param id The request ID
-     * @return The Request entity
+     * @return The RequestView entity
      */
-    Request getRequestById(Long id);
+    RequestView getRequestById(Long id);
 
     /**
      * Updates the status of a request directly
@@ -71,7 +72,7 @@ public interface EmployeeService {
      * @param employeeId The employee ID
      * @return List of Appointments
      */
-    List<Appointment> getAppointmentsForEmployeeDepartment(Long employeeId);
+    List<AppointmentView> getAppointmentsForEmployeeDepartment(Long employeeId);
 
     /**
      * Marks an appointment as CONFIRMED

@@ -41,7 +41,7 @@ public class Request {
 
     @ManyToOne
     @JoinColumn(name = "assigned_employee_id")
-    private User assignedEmployee;
+    private Employee assignedEmployee;
 
     // list with request history
     @OneToMany(mappedBy = "request", cascade = CascadeType.ALL)
@@ -61,7 +61,7 @@ public class Request {
                    String description,
                    Citizen citizen,
                    RequestType requestType,
-                   User assignedEmployee,
+                   Employee assignedEmployee,
                    List<RequestLog> logs,
                    Department department) {
         this.protocolNumber = protocolNumber;
@@ -84,6 +84,4 @@ public class Request {
         COMPLETED,      // Ολοκληρωμένο
         REJECTED        // Απορρίφθηκε
     }
-
-
 }

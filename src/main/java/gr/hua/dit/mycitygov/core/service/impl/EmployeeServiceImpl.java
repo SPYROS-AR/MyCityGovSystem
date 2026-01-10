@@ -10,11 +10,18 @@ import gr.hua.dit.mycitygov.core.repository.RequestRepository;
 import gr.hua.dit.mycitygov.core.repository.UserRepository;
 import gr.hua.dit.mycitygov.core.service.EmailService;
 import gr.hua.dit.mycitygov.core.service.EmployeeService;
+import gr.hua.dit.mycitygov.core.service.mapper.AppointmentMapper;
+import gr.hua.dit.mycitygov.core.service.mapper.EmployeeMapper;
+import gr.hua.dit.mycitygov.core.service.mapper.RequestMapper;
+import gr.hua.dit.mycitygov.core.service.model.AppointmentView;
+import gr.hua.dit.mycitygov.core.service.model.EmployeeView;
+import gr.hua.dit.mycitygov.core.service.model.RequestView;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * Implementation of the EmployeeService interface
@@ -23,43 +30,74 @@ import java.util.List;
 @Service
 public class EmployeeServiceImpl implements EmployeeService {
     private final EmployeeRepository employeeRepository;
-    private final UserRepository userRepository;
     private final RequestRepository requestRepository;
     private final AppointmentRepository appointmentRepository;
     private final EmailService emailService;
+
+    // mappers
+    private final RequestMapper requestMapper;
+    private final AppointmentMapper appointmentMapper;
+    private final EmployeeMapper employeeMapper;
 
     public EmployeeServiceImpl(EmployeeRepository employeeRepository,
                                UserRepository userRepository,
                                RequestRepository requestRepository,
                                AppointmentRepository appointmentRepository,
-                               EmailService emailService) {
+                               EmailService emailService,
+                               RequestMapper requestMapper,
+                               AppointmentMapper appointmentMapper,
+                               EmployeeMapper employeeMapper) {
         if (employeeRepository == null) throw new NullPointerException("employeeRepository cannot be null");
         if (userRepository == null) throw new NullPointerException("userRepository cannot be null");
         if (requestRepository == null) throw new NullPointerException("requestRepository cannot be null");
         if (appointmentRepository == null) throw new NullPointerException("appointmentRepository cannot be null");
         this.employeeRepository = employeeRepository;
-        this.userRepository = userRepository;
         this.requestRepository = requestRepository;
         this.appointmentRepository = appointmentRepository;
         this.emailService = emailService;
+        this.requestMapper = requestMapper;
+        this.appointmentMapper = appointmentMapper;
+        this.employeeMapper = employeeMapper;
     }
 
     @Override
-    public List<Employee> getAllEmployees() {
-        return employeeRepository.findAll();
+    @Transactional(readOnly = true)
+    public List<EmployeeView> getAllEmployees() {
+        List<Employee> employees = employeeRepository.findAll();
+        return employees
+                .stream()
+                .map(employeeMapper::toDto)
+                .collect(Collectors.toList());
     }
 
     @Override
-    public List<Request> getRequestsForEmployeeDepartment(Long employeeId) {
-        Employee employee = employeeRepository
-                .findById(employeeId)
-                .orElseThrow(() -> new RuntimeException("Employee with id " + employeeId + " not found"));
-        return requestRepository.findByDepartmentId(employee.getDepartment().getId());
+    @Transactional(readOnly = true)
+    public List<RequestView> getRequestsForEmployeeDepartment(Long employeeId) {
+        Employee employee = employeeRepository.findById(employeeId).orElseThrow();
+        return requestRepository.findByDepartmentId(employee.getDepartment().getId())
+                .stream()
+                .map(requestMapper::toDto)
+                .collect(Collectors.toList());
     }
 
     @Override
-    public List<Request> getRequestsForDepartment(Long departmentId) {
-        return requestRepository.findByDepartmentId(departmentId);
+    @Transactional(readOnly = true)
+    public List<RequestView> getRequestsForDepartment(Long departmentId) {
+        return requestRepository
+                .findByDepartmentId(departmentId)
+                .stream()
+                .map(requestMapper::toDto)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    @Transactional
+    public RequestView getRequestById(Long id) {
+        Request request = requestRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Request with id " + id + " not found"));
+        // fetch logs immediately to avoid LazyInitializationException in the controller/view
+        // request.getLogs().size();
+        return requestMapper.toDto(request);
     }
 
     @Override
@@ -148,19 +186,12 @@ public class EmployeeServiceImpl implements EmployeeService {
     }
 
     @Override
-    @Transactional
-    public Request getRequestById(Long id) {
-        Request request = requestRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Request with id " + id + " not found"));
-        // fetch logs immediately to avoid LazyInitializationException in the controller/view
-        request.getLogs().size();
-        return request;
-    }
-
-    @Override
-    public List<Appointment> getAppointmentsForEmployeeDepartment(Long employeeId) {
+    public List<AppointmentView> getAppointmentsForEmployeeDepartment(Long employeeId) {
         Employee employee = employeeRepository.findById(employeeId).orElseThrow();
-        return appointmentRepository.findByDepartmentId(employee.getDepartment().getId());
+        return appointmentRepository.findByDepartmentId(employee.getDepartment().getId())
+                .stream()
+                .map(appointmentMapper::toAppointmentView)
+                .collect(Collectors.toList());
     }
 
     @Override

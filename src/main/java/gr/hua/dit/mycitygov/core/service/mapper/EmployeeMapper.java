@@ -6,7 +6,7 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class EmployeeMapper {
-    public EmployeeView convertEmployeeToEmployeeView(final Employee employee) {
+    public EmployeeView toDto(final Employee employee) {
         if(employee == null) return null;
 
         return new EmployeeView(
