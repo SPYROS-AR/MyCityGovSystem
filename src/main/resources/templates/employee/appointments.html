@@ -49,10 +49,10 @@
           </button>
 
           <div th:if="${app.status.name() == 'SCHEDULED'}" class="d-flex gap-2">
-            <form th:action="@{/employee/appointment/{id}/confirm(id=${app.id})}" method="post">
+            <form th:action="@{/employee/appointment/{id}/confirm(id=${app.id})}" th:method="post">
               <button type="submit" class="btn-custom btn-primary-custom">Confirm</button>
             </form>
-            <form th:action="@{/employee/appointment/{id}/cancel(id=${app.id})}" method="post">
+            <form th:action="@{/employee/appointment/{id}/cancel(id=${app.id})}" th:method="post">
               <button type="submit" class="btn-custom btn-danger-custom">Cancel</button>
             </form>
           </div>
@@ -74,7 +74,7 @@
           <h5 class="modal-title">Reschedule Appointment</h5>
           <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
         </div>
-        <form th:action="@{/employee/appointment/{id}/reschedule(id=${app.id})}" method="post">
+        <form th:action="@{/employee/appointment/{id}/reschedule(id=${app.id})}" th:method="post">
           <div class="modal-body">
             <p>Current: <strong th:text="${#temporals.format(app.appointmentDate, 'dd/MM/yyyy HH:mm')}"></strong></p>
             <label class="form-label">New Date & Time:</label>

@@ -49,7 +49,7 @@
             </td>
             <td>
                 <div class="d-flex gap-2">
-                    <form th:if="${req.assignedEmployee == null}" th:action="@{/employee/request/{id}/assign(id=${req.id})}" method="post">
+                    <form th:if="${req.assignedEmployee == null}" th:action="@{/employee/request/{id}/assign(id=${req.id})}" th:method="post">
                         <button type="submit" class="btn-custom btn-warning-custom">Assign</button>
                     </form>
 

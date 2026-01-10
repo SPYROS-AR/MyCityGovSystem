@@ -18,6 +18,6 @@ public class AppointmentMapper {
         appointmentView.setAppointmentDate(appointment.getAppointmentDate());
         appointmentView.setStatus(appointment.getStatus().name());
         return appointmentView;
-
     }
+
 }

@@ -1,10 +1,11 @@
 package gr.hua.dit.mycitygov.web.ui;
 
 
-import gr.hua.dit.mycitygov.core.model.User;
+
 import gr.hua.dit.mycitygov.core.service.AdminService;
 import gr.hua.dit.mycitygov.core.service.model.CreateRequestTypeRequest;
 import gr.hua.dit.mycitygov.core.service.model.SystemStatistics;
+import gr.hua.dit.mycitygov.core.service.model.UserView;
 import jakarta.validation.Valid;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -35,7 +36,7 @@ public class AdminController {
 
     @GetMapping("/users")
     public String users(Model model){
-        List<User> users = adminService.getAllUsers();
+        List<UserView> users = adminService.getAllUsers();
         model.addAttribute("users", users);
         return "admin/users";
     }
@@ -46,6 +47,7 @@ public class AdminController {
     @GetMapping("/request-types")
     public String listRequestTypes(Model model) {
         model.addAttribute("requestTypes", adminService.getAllRequestTypes());
+        model.addAttribute("departments", adminService.getAllDepartments());
         return "admin/request_types";
     }
 
@@ -97,13 +99,13 @@ public class AdminController {
         return "admin/departments"; // You need to create this template if you want it to work
     }
 
-    @PostMapping("/request-types/{id}/toggle")
+    @PatchMapping("/request-types/{id}/toggle")
     public String toggleStatus(@PathVariable Long id) {
         adminService.toggleRequestTypeStatus(id);
         return "redirect:/admin/request-types";
     }
 
-    @PostMapping("/request-types/reassign")
+    @PatchMapping("/request-types/reassign")
     public String reassignDepartment(@RequestParam Long requestTypeId, @RequestParam Long departmentId) {
         adminService.reassignRequestType(requestTypeId, departmentId);
         return "redirect:/admin/request-types";

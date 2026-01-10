@@ -1,7 +1,6 @@
 package gr.hua.dit.mycitygov.core.repository;
 
 import gr.hua.dit.mycitygov.core.model.Employee;
-import gr.hua.dit.mycitygov.core.service.model.EmployeeView;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
