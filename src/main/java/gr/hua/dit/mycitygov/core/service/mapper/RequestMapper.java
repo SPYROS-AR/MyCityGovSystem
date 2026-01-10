@@ -9,7 +9,7 @@ public class RequestMapper {
     public RequestView convertRequestToRequestView(final Request request) {
         if(request == null) return null;
 
-        String assignedEmployeeName = "-";  // if employee doesn't exist
+        String assignedEmployeeName = "-";
         if (request.getAssignedEmployee() != null) {
             assignedEmployeeName = request.getAssignedEmployee().getFirstName() + " " + request.getAssignedEmployee().getLastName();
         }
@@ -21,7 +21,8 @@ public class RequestMapper {
                 request.getStatus(),
                 request.getDescription(),
                 request.getCitizen().getFirstName() + " " + request.getCitizen().getLastName(),
-                assignedEmployeeName
+                assignedEmployeeName,
+                request.getSubmittedDate()
         );
     }
 }

@@ -6,13 +6,18 @@ import gr.hua.dit.mycitygov.core.service.CitizenService;
 import gr.hua.dit.mycitygov.core.service.mapper.CitizenMapper;
 import gr.hua.dit.mycitygov.core.service.model.*;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
 
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
+/**
+ * Implementation of the {@link CitizenService} interface.
+ * Contains business logic for Citizen operations including profile, requests, and appointments.
+ */
+@Service
 public class CitizenServiceImpl implements CitizenService {
 
     private final CitizenRepository citizenRepository;
@@ -30,12 +35,6 @@ public class CitizenServiceImpl implements CitizenService {
                               RequestTypeRepository requestTypeRepository,
                               AppointmentRepository appointmentRepository,
                               DepartmentRepository departmentRepository) {
-        if(citizenRepository == null) throw new NullPointerException("citizenRepository cannot be null");
-        if(citizenMapper == null) throw new NullPointerException("citizenMapper cannot be null");
-        if(requestRepository == null) throw new NullPointerException("requestRepository cannot be null");
-        if(requestTypeRepository == null) throw new NullPointerException("requestTypeRepository cannot be null");
-        if(appointmentRepository == null) throw new NullPointerException("appointmentRepository cannot be null");
-        if(departmentRepository == null) throw new NullPointerException("departmentRepository cannot be null");
         this.passwordEncoder = passwordEncoder;
         this.citizenRepository = citizenRepository;
         this.citizenMapper = citizenMapper;
@@ -50,16 +49,12 @@ public class CitizenServiceImpl implements CitizenService {
         return citizenRepository.findAll();
     }
 
-    /**
-     * TODO: it should have CreateCitizenRequest as parameter and should return CreateCitizenResult
-     *
-     */
     @Override
     @Transactional
     public CreateCitizenResult createCitizen(final CreateCitizenRequest createCitizenRequest) {
         if(createCitizenRequest == null) throw new NullPointerException("citizen cannot be null");
 
-        // Store CreatePersonRequest fields
+        // Strip whitespace from input
         final String username = createCitizenRequest.username().strip();
         final String rawPassword = createCitizenRequest.rawPassword().strip();
         final String firstName = createCitizenRequest.firstName().strip();
@@ -70,7 +65,7 @@ public class CitizenServiceImpl implements CitizenService {
         final String address = createCitizenRequest.address().strip();
 
         // ------------------------- Database Check --------------------------------------------
-        // Check for existing records
+        // Check for existing records to ensure uniqueness
         if (this.citizenRepository.existsByEmailIgnoreCase(email))
             return CreateCitizenResult.failure("Email already exists");
 
@@ -82,12 +77,12 @@ public class CitizenServiceImpl implements CitizenService {
 
         if (this.citizenRepository.existsByUsername(username))
             return CreateCitizenResult.failure("Username already exists");
+        // -------------------------------------------------------------------------------------
 
-        // ------------------------- Database Check --------------------------------------------
         // Encode password
         String hashedPassword = passwordEncoder.encode(rawPassword);
 
-        // Create a Citizen with the data of CreateCitizenRequest and insert to the DB
+        // Create a Citizen entity and save to DB
         Citizen citizen = new Citizen();
         citizen.setUsername(username);
         citizen.setPassword(hashedPassword);
@@ -97,28 +92,27 @@ public class CitizenServiceImpl implements CitizenService {
         citizen.setNationalId(nationalId);
         citizen.setMobilePhoneNumber(mobilePhoneNumber);
         citizen.setAddress(address);
+
         citizen = citizenRepository.save(citizen);
 
         // Map Citizen to CitizenView
         CitizenView citizenView = this.citizenMapper.convertCitizenToCitizenView(citizen);
-        // TODO from createCitizenRequest DTO do validations
 
         return CreateCitizenResult.success(citizenView);
-
     }
 
     @Override
     @Transactional
     public Request saveRequest(SubmitRequestRequest dto, Long citizenId) {
-        // Retrieve the citizen
+        // 1. Retrieve the citizen
         Citizen citizen = citizenRepository.findById(citizenId)
                 .orElseThrow(() -> new RuntimeException("Citizen not found with ID: " + citizenId));
 
-        // Retrieve the request type
+        // 2. Retrieve the request type
         RequestType type = requestTypeRepository.findById(dto.requestTypeId())
                 .orElseThrow(() -> new RuntimeException("Request Type not found with ID: " + dto.requestTypeId()));
 
-        // Create and populate the Request entity
+        // 3. Create and populate the Request entity
         Request request = new Request();
         request.setCitizen(citizen);
         request.setRequestType(type);
@@ -128,36 +122,55 @@ public class CitizenServiceImpl implements CitizenService {
         request.setSubmittedDate(LocalDateTime.now());
         request.setStatus(Request.Status.SUBMITTED);
 
-        // Set a temporary protocol number
-        request.setProtocolNumber("TMP-" + UUID.randomUUID());
+        // 4. Set a temporary protocol number (required by DB constraint)
+        request.setProtocolNumber("TEMP-" + UUID.randomUUID());
 
-        // Save the request with the temporary protocol number to set its ID
+        // 5. Save the request to generate the ID
         request = requestRepository.save(request);
 
-        // Create the correct protocol number format
+        // 6. Generate the correct protocol number format: REQ-YYYY-ID
         String finalProtocolNumber = "REQ-" + request.getSubmittedDate().getYear() + "-" + request.getId();
         request.setProtocolNumber(finalProtocolNumber);
 
-        // Save the request with the correct protocol number
+        // 7. Update and save the request with the final protocol number
         return requestRepository.save(request);
     }
 
     @Override
     public List<Request> getMyRequests(Long citizenId) {
-        return List.of();
+        return requestRepository.findByCitizenId(citizenId);
     }
 
     @Override
     public List<RequestType> getAllRequestTypes() {
-        return List.of();
+        return requestTypeRepository.findAll();
     }
 
     @Override
-    public Appointment bookAppointment(BookAppointmentRequest dto, Long citizenId) { return null; }
+    @Transactional
+    public Appointment bookAppointment(BookAppointmentRequest dto, Long citizenId) {
+        Citizen citizen = citizenRepository.findById(citizenId)
+                .orElseThrow(() -> new RuntimeException("Citizen not found"));
+
+        Department department = departmentRepository.findById(dto.departmentId())
+                .orElseThrow(() -> new RuntimeException("Department not found"));
+
+        Appointment appointment = new Appointment();
+        appointment.setCitizen(citizen);
+        appointment.setDepartment(department);
+        appointment.setAppointmentDate(dto.appointmentDate());
+        appointment.setStatus(Appointment.AppointmentStatus.SCHEDULED);
+
+        return appointmentRepository.save(appointment);
+    }
 
     @Override
-    public List<Appointment> getMyAppointments(Long citizenId) { return List.of(); }
+    public List<Appointment> getMyAppointments(Long citizenId) {
+        return appointmentRepository.findByCitizenId(citizenId);
+    }
 
     @Override
-    public List<Department> getAllDepartments() { return List.of(); }
+    public List<Department> getAllDepartments() {
+        return departmentRepository.findAll();
+    }
 }

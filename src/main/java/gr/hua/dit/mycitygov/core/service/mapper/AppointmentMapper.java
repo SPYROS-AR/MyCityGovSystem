@@ -6,18 +6,16 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class AppointmentMapper {
-    private final CitizenMapper citizenMapper;
-
-    public AppointmentMapper(CitizenMapper citizenMapper) {
-        this.citizenMapper = citizenMapper;
-    }
 
     public AppointmentView toAppointmentView(Appointment appointment) {
-        AppointmentView appointmentView = new AppointmentView();
-        appointmentView.setId(appointment.getId());
-        appointmentView.setAppointmentDate(appointment.getAppointmentDate());
-        appointmentView.setStatus(appointment.getStatus().name());
-        return appointmentView;
+        if (appointment == null) return null;
 
+        return new AppointmentView(
+                appointment.getId(),
+                appointment.getDepartment().getName(), // Παίρνουμε το όνομα του τμήματος
+                appointment.getAppointmentDate(),
+                appointment.getStatus().name(),
+                appointment.getCitizen().getFirstName() + " " + appointment.getCitizen().getLastName()
+        );
     }
 }
