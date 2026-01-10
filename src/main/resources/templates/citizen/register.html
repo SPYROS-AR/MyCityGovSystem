@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <title>Citizen Registration | MyCityGov</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link th:href="@{/css/style.css}" rel="stylesheet">
+</head>
+<body class="bg-light">
+
+<div class="container mt-4 mb-5">
+  <div class="row justify-content-center">
+    <div class="col-md-8 col-lg-6">
+      <div class="card shadow-sm border-0">
+        <div class="card-header bg-white text-center py-3">
+          <h4 style="color: #009879;">Create New Account</h4>
+        </div>
+        <div class="card-body p-4">
+
+          <div th:if="${error}" class="alert alert-danger" th:text="${error}"></div>
+
+          <form th:action="@{/citizen/register}" th:object="${citizen}" method="post">
+
+            <div class="row">
+              <div class="col-md-6 mb-3">
+                <label class="form-label">Username</label>
+                <input type="text" th:field="*{username}" class="form-control" required>
+              </div>
+              <div class="col-md-6 mb-3">
+                <label class="form-label">Password</label>
+                <input type="password" th:field="*{rawPassword}" class="form-control" required>
+              </div>
+            </div>
+
+            <div class="row">
+              <div class="col-md-6 mb-3">
+                <label class="form-label">First Name</label>
+                <input type="text" th:field="*{firstName}" class="form-control" required>
+              </div>
+              <div class="col-md-6 mb-3">
+                <label class="form-label">Last Name</label>
+                <input type="text" th:field="*{lastName}" class="form-control" required>
+              </div>
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label">Email Address</label>
+              <input type="email" th:field="*{email}" class="form-control" required>
+            </div>
+
+            <div class="row">
+              <div class="col-md-6 mb-3">
+                <label class="form-label">Tax ID (AFM)</label>
+                <input type="text" th:field="*{nationalId}" class="form-control" maxlength="9" required>
+              </div>
+              <div class="col-md-6 mb-3">
+                <label class="form-label">Mobile Phone</label>
+                <input type="text" th:field="*{mobilePhoneNumber}" class="form-control" required>
+              </div>
+            </div>
+
+            <div class="mb-4">
+              <label class="form-label">Address</label>
+              <input type="text" th:field="*{address}" class="form-control" placeholder="Street, Number, City" required>
+            </div>
+
+            <button type="submit" class="btn-custom btn-primary-custom w-100">Register</button>
+          </form>
+        </div>
+        <div class="card-footer bg-white text-center py-3">
+          <span class="text-muted">Already have an account?</span>
+          <a th:href="@{/citizen/login}" class="text-decoration-none fw-bold" style="color: #009879;">Login here</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

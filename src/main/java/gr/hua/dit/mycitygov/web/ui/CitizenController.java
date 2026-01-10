@@ -5,24 +5,25 @@ import gr.hua.dit.mycitygov.core.model.Request;
 import gr.hua.dit.mycitygov.core.service.CitizenService;
 import gr.hua.dit.mycitygov.core.service.mapper.AppointmentMapper;
 import gr.hua.dit.mycitygov.core.service.mapper.RequestMapper;
-import gr.hua.dit.mycitygov.core.service.model.AppointmentView;
-import gr.hua.dit.mycitygov.core.service.model.BookAppointmentRequest;
-import gr.hua.dit.mycitygov.core.service.model.RequestView;
-import gr.hua.dit.mycitygov.core.service.model.SubmitRequestRequest;
+import gr.hua.dit.mycitygov.core.service.model.*;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.stream.Collectors;
 
+/**
+ * MVC Controller handling the Citizen's UI (HTML pages).
+ */
 @Controller
 @RequestMapping("/citizen")
 public class CitizenController {
 
     private final CitizenService citizenService;
-    private final RequestMapper requestMapper;         // Προσθήκη
-    private final AppointmentMapper appointmentMapper; // Προσθήκη
+    private final RequestMapper requestMapper;
+    private final AppointmentMapper appointmentMapper;
 
     public CitizenController(CitizenService citizenService,
                              RequestMapper requestMapper,
@@ -32,9 +33,54 @@ public class CitizenController {
         this.appointmentMapper = appointmentMapper;
     }
 
+    /**
+     * Redirects to login page if accessing root /citizen.
+     */
     @GetMapping
     public String index() {
+        return "redirect:/citizen/login";
+    }
+
+    // --- AUTHENTICATION (LOGIN & REGISTER) ---
+
+    @GetMapping("/login")
+    public String showLoginForm() {
+        return "citizen/login";
+    }
+
+    /**
+     * Mock login handler - redirects to requests since Security is disabled.
+     */
+    @PostMapping("/login")
+    public String login() {
         return "redirect:/citizen/requests/my";
+    }
+
+    @GetMapping("/register")
+    public String showRegisterForm(Model model) {
+        // Empty DTO for the form
+        model.addAttribute("citizen", new CreateCitizenRequest(
+                "", "", "", "", "", "", "", ""
+        ));
+        return "citizen/register";
+    }
+
+    @PostMapping("/register")
+    public String register(@ModelAttribute("citizen") CreateCitizenRequest request,
+                           BindingResult bindingResult,
+                           Model model) {
+        // Call service to create citizen
+        CreateCitizenResult result = citizenService.createCitizen(request);
+
+        if (!result.created()) {
+            // If error (e.g. email exists), show it on the page
+            model.addAttribute("error", result.reason());
+            model.addAttribute("citizen", request);
+            return "citizen/register";
+        }
+
+        // Success -> Redirect to login
+        return "redirect:/citizen/login?success";
     }
 
     // --- REQUESTS ---
@@ -48,7 +94,7 @@ public class CitizenController {
 
     @PostMapping("/requests")
     public String submitRequest(@ModelAttribute SubmitRequestRequest submitRequest) {
-        Long mockCitizenId = 3L;
+        Long mockCitizenId = 3L; // TODO: Replace with Security ID
         citizenService.saveRequest(submitRequest, mockCitizenId);
         return "redirect:/citizen/requests/my";
     }
@@ -57,10 +103,7 @@ public class CitizenController {
     public String showMyRequests(Model model) {
         Long mockCitizenId = 3L;
 
-        // 1. Παίρνουμε τα Entities
         List<Request> requests = citizenService.getMyRequests(mockCitizenId);
-
-        // 2. Τα μετατρέπουμε σε DTOs (RequestView) για να ταιριάζουν με το HTML
         List<RequestView> requestViews = requests.stream()
                 .map(requestMapper::convertRequestToRequestView)
                 .collect(Collectors.toList());
@@ -69,7 +112,6 @@ public class CitizenController {
         return "citizen/requests-list";
     }
 
-    // Fix for 405 error
     @GetMapping("/requests")
     public String redirectRequests() {
         return "redirect:/citizen/requests/my";
@@ -95,10 +137,7 @@ public class CitizenController {
     public String showMyAppointments(Model model) {
         Long mockCitizenId = 3L;
 
-        // 1. Παίρνουμε τα Entities
         List<Appointment> appointments = citizenService.getMyAppointments(mockCitizenId);
-
-        // 2. Τα μετατρέπουμε σε DTOs (AppointmentView)
         List<AppointmentView> appointmentViews = appointments.stream()
                 .map(appointmentMapper::toAppointmentView)
                 .collect(Collectors.toList());
@@ -107,7 +146,6 @@ public class CitizenController {
         return "citizen/appointments-list";
     }
 
-    // Fix for 405 error
     @GetMapping("/appointments")
     public String redirectAppointments() {
         return "redirect:/citizen/appointments/my";
