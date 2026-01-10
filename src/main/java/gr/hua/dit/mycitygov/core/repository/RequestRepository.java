@@ -3,10 +3,11 @@ package gr.hua.dit.mycitygov.core.repository;
 import gr.hua.dit.mycitygov.core.model.Employee;
 import gr.hua.dit.mycitygov.core.model.Request;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
 
 import java.util.List;
 import java.util.Optional;
-
+@Repository
 public interface RequestRepository extends JpaRepository<Request, Long> {
     // Return all Requests that are assigned to a specific employee
     List<Request> findByAssignedEmployeeId(Long employeeId);

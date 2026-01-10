@@ -1,4 +1,4 @@
-package gr.hua.dit.mycitygov.web.rest;
+package gr.hua.dit.mycitygov.web.ui;
 
 import gr.hua.dit.mycitygov.core.model.Request;
 import gr.hua.dit.mycitygov.core.service.EmployeeService;
