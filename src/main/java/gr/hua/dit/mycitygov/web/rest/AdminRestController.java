@@ -32,8 +32,6 @@ public class AdminRestController {
         return ResponseEntity.ok(adminService.getAllUsers());
     }
 
-    @GetMapping
-
 
     @PostMapping("/request-types/new")
     public ResponseEntity<?> createRequestType(
@@ -62,8 +60,7 @@ public class AdminRestController {
     }
 
 
-
-    @PatchMapping("/request-types/{id}/reassign")
+    @PostMapping("/request-types/{id}/reassign")
     public ResponseEntity<String> reassignRequestType(
             @PathVariable Long id,
             @RequestParam Long deptId) {
@@ -77,7 +74,7 @@ public class AdminRestController {
     }
 
 
-    @PatchMapping("/request-types/{id}/toggle")
+    @PostMapping("/request-types/{id}/toggle")
     public ResponseEntity<String> toggleRequestType(@PathVariable Long id) {
         adminService.toggleRequestTypeStatus(id);
         return ResponseEntity.ok("Status toggled");

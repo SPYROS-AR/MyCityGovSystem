@@ -3,6 +3,7 @@ package gr.hua.dit.mycitygov.web.ui;
 import gr.hua.dit.mycitygov.core.service.EmployeeService;
 import gr.hua.dit.mycitygov.core.service.model.RequestView;
 import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -14,6 +15,7 @@ import java.time.LocalDateTime;
  * Manages the dashboard, request processing (approval/rejection), and appointment management
  */
 @Controller
+@PreAuthorize("hasRole('EMPLOYEE')")
 @RequestMapping("/employee")
 public class EmployeeController {
 

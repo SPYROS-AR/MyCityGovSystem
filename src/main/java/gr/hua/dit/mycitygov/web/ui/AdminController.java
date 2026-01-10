@@ -7,6 +7,7 @@ import gr.hua.dit.mycitygov.core.service.model.CreateRequestTypeRequest;
 import gr.hua.dit.mycitygov.core.service.model.SystemStatistics;
 import gr.hua.dit.mycitygov.core.service.model.UserView;
 import jakarta.validation.Valid;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -15,6 +16,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @Controller
+@PreAuthorize("hasRole('ADMIN')")
 @RequestMapping("/admin")
 public class AdminController {
 
@@ -22,6 +24,11 @@ public class AdminController {
 
     public AdminController(AdminService adminService) {
         this.adminService = adminService;
+    }
+
+    @GetMapping // redirect straight to dashboard (from /admin)
+    public String redirectAdmin() {
+        return "redirect:/admin/dashboard";
     }
 
     /**
@@ -99,13 +106,13 @@ public class AdminController {
         return "admin/departments"; // You need to create this template if you want it to work
     }
 
-    @PatchMapping("/request-types/{id}/toggle")
+    @PostMapping("/request-types/{id}/toggle")
     public String toggleStatus(@PathVariable Long id) {
         adminService.toggleRequestTypeStatus(id);
         return "redirect:/admin/request-types";
     }
 
-    @PatchMapping("/request-types/reassign")
+    @PostMapping("/request-types/reassign")
     public String reassignDepartment(@RequestParam Long requestTypeId, @RequestParam Long departmentId) {
         adminService.reassignRequestType(requestTypeId, departmentId);
         return "redirect:/admin/request-types";

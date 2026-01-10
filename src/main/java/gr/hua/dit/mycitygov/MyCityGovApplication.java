@@ -13,7 +13,8 @@ import org.springframework.context.annotation.Bean;
 
 import java.time.LocalDateTime;
 
-@SpringBootApplication(exclude = { SecurityAutoConfiguration.class }) //TODO REMOVE
+@SpringBootApplication
+//@SpringBootApplication(exclude = { SecurityAutoConfiguration.class }) //TODO REMOVE
 public class MyCityGovApplication {
 
     public static void main(String[] args) {

@@ -3,6 +3,7 @@ package gr.hua.dit.mycitygov.core.service;
 import gr.hua.dit.mycitygov.core.model.*;
 import gr.hua.dit.mycitygov.core.repository.*;
 import org.springframework.boot.CommandLineRunner;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -19,13 +20,16 @@ public class InitService implements CommandLineRunner {
     private final RequestTypeRepository requestTypeRepository;
     private final AppointmentRepository appointmentRepository;
     private final AdminRepository adminRepository;
+    private final PasswordEncoder passwordEncoder;
 
     public InitService(DepartmentRepository departmentRepository,
                        EmployeeRepository employeeRepository,
                        CitizenRepository citizenRepository,
                        RequestRepository requestRepository,
                        RequestTypeRepository requestTypeRepository,
-                       AppointmentRepository appointmentRepository, AdminRepository adminRepository) {
+                       AppointmentRepository appointmentRepository,
+                       AdminRepository adminRepository,
+                       PasswordEncoder passwordEncoder) {
         this.departmentRepository = departmentRepository;
         this.employeeRepository = employeeRepository;
         this.citizenRepository = citizenRepository;
@@ -33,6 +37,7 @@ public class InitService implements CommandLineRunner {
         this.requestTypeRepository = requestTypeRepository;
         this.appointmentRepository = appointmentRepository;
         this.adminRepository = adminRepository;
+        this.passwordEncoder = passwordEncoder;
     }
 
     @Override
@@ -48,12 +53,23 @@ public class InitService implements CommandLineRunner {
                     return departmentRepository.save(d);
                 });
 
+        // admin
+        if (adminRepository.findByUsername("george123") == null) {
+            Admin admin = new Admin();
+            admin.setFirstName("Giorgos");
+            admin.setLastName("Georgiou");
+            admin.setPassword(passwordEncoder.encode("password"));
+            admin.setUsername("george123");
+            admin.setEmail("giorgosgeorgiou123@gmail.com");
+            adminRepository.save(admin);
+        }
+
         // Employee
         Employee empGiannis = employeeRepository.findByEmail("emp1@city.gov");
         if (empGiannis == null) {
             Employee emp = new Employee();
             emp.setUsername("emp1");
-            emp.setPassword("password");
+            emp.setPassword(passwordEncoder.encode("password"));
             emp.setFirstName("Giannis");
             emp.setLastName("Employee");
             emp.setEmail("emp1@city.gov");
@@ -65,7 +81,7 @@ public class InitService implements CommandLineRunner {
         Citizen citizenMaria = citizenRepository.findByEmail("cit@gmail.com").orElseGet(() -> {
             Citizen c = new Citizen();
             c.setUsername("citizen1");
-            c.setPassword("password");
+            c.setPassword(passwordEncoder.encode("password"));
             c.setFirstName("Maria");
             c.setLastName("Citizen");
             c.setEmail("cit@gmail.com");
@@ -78,7 +94,7 @@ public class InitService implements CommandLineRunner {
         Citizen citizenNikos = citizenRepository.findByEmail("nikos@gmail.com").orElseGet(() -> {
             Citizen c = new Citizen();
             c.setUsername("nikos1");
-            c.setPassword("password");
+            c.setPassword(passwordEncoder.encode("password"));
             c.setFirstName("Nikos");
             c.setLastName("Papadopoulos");
             c.setEmail("nikos@gmail.com");
@@ -235,15 +251,7 @@ public class InitService implements CommandLineRunner {
 
         }
 
-        if (adminRepository.findByUsername("george123") == null) {
-            Admin admin = new Admin();
-            admin.setFirstName("Giorgos");
-            admin.setLastName("Georgiou");
-            admin.setPassword("george123");
-            admin.setUsername("george123");
-            admin.setEmail("giorgosgeorgiou123@gmail.com");
-            adminRepository.save(admin);
-        }
+
 
         System.out.println("--- DATABASE INITIALIZATION FINISHED ---");
     }

@@ -29,6 +29,12 @@ public class EmployeeRestController {
         this.employeeService = employeeService;
     }
 
+
+    @GetMapping // redirect straight to dashboard (from /employee)
+    public String redirectEmployee() {
+        return "redirect:/employee/dashboard";
+    }
+
     /**
      * Retrieves all requests assigned to the current employee's department
      *

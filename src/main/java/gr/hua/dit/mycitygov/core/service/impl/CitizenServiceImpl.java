@@ -67,7 +67,7 @@ public class CitizenServiceImpl implements CitizenService {
         // ------------------------- Database Check --------------------------------------------
 
 
-        String hashedPassword = rawPassword; //TODO implemet encoding algorithm
+        String hashedPassword = passwordEncoder.encode(rawPassword);
 
         // Create a Citizen with the data of CreateCitizenRequest and insert to the DB
         Citizen citizen = new Citizen();
