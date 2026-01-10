@@ -1,16 +1,24 @@
 services:
   app:
-    build: .
+    build: ./mycitygov
     ports:
       - "8080:8080"
     depends_on:
       db:
         condition: service_healthy
+      sms-service:
+        condition: service_started
     environment:
       - SPRING_DATASOURCE_URL=jdbc:postgresql://db:5432/municipality_db
       - SPRING_DATASOURCE_USERNAME=user
       - SPRING_DATASOURCE_PASSWORD=password
       - SPRING_JPA_HIBERNATE_DDL_AUTO=update
+      - SMS_SERVICE_URL=http://sms-service:8080
+
+  sms-service:
+    build: ./CitySmsService
+    ports:
+      - "8081:8080"
 
   db:
     image: postgres:15-alpine
