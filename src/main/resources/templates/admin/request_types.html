@@ -13,14 +13,16 @@
         <a th:href="@{/admin/request-types/new}" class="btn-custom btn-primary-custom">+ New Request Type</a>
     </div>
 
-    <table class="styled-table table table-hover"> <thead>
-    <tr>
-        <th>Service Name</th>
-        <th>Category</th>
-        <th>Department</th>
-        <th>Status</th>
-        <th style="width: 50px;">Actions</th> </tr>
-    </thead>
+    <table class="styled-table table table-hover">
+        <thead>
+        <tr>
+            <th>Service Name</th>
+            <th>Category</th>
+            <th>Department</th>
+            <th>Status</th>
+            <th style="width: 50px;">Actions</th>
+        </tr>
+        </thead>
         <tbody>
         <tr th:each="type : ${requestTypes}">
             <td th:text="${type.name}"></td>
@@ -28,14 +30,16 @@
             <td th:text="${type.department.name}"></td>
             <td>
                          <span class="badge rounded-pill"
-                               th:classappend="${type.active} ? 'text-bg-success' : 'text-bg-secondary'"
-                               th:text="${type.active} ? 'Active' : 'Inactive'"></span>
+                               th:classappend="${type.active} ? 'text-bg-success' : 'text-bg-danger'"
+                               th:text="${type.active} ? 'Active' : 'Inactive'">
+                         </span>
             </td>
 
             <td>
                 <div class="dropdown">
                     <button class="btn btn-link text-dark p-0" type="button" data-bs-toggle="dropdown" aria-expanded="false">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-three-dots-vertical" viewBox="0 0 16 16">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
+                             class="bi bi-three-dots-vertical" viewBox="0 0 16 16">
                             <path d="M9.5 13a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0m0-5a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0m0-5a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0"/>
                         </svg>
                     </button>
@@ -80,7 +84,7 @@
                 </div>
                 <div class="modal-body">
                     <p>Select the new department for this service:</p>
-                    <input type="hidden" id="modalRequestTypeId" name="requestTypeId" />
+                    <input type="hidden" id="newRequestTypeId" name="requestTypeId"/>
 
                     <select name="departmentId" class="form-select" required>
                         <option th:each="dept : ${departments}"
@@ -99,7 +103,7 @@
 
 <script>
     function setRequestTypeId(id) {
-        document.getElementById('modalRequestTypeId').value = id;
+        document.getElementById('newRequestTypeId').value = id;
     }
 </script>
 

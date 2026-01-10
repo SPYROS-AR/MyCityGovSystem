@@ -1,6 +1,7 @@
 package gr.hua.dit.mycitygov.web.ui;
 
 
+import gr.hua.dit.mycitygov.core.model.User;
 import gr.hua.dit.mycitygov.core.service.AdminService;
 import gr.hua.dit.mycitygov.core.service.model.CreateRequestTypeRequest;
 import gr.hua.dit.mycitygov.core.service.model.SystemStatistics;
@@ -9,6 +10,8 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @Controller
 @RequestMapping("/admin")
@@ -28,6 +31,13 @@ public class AdminController {
         SystemStatistics stats = adminService.getSystemStatistics();
         model.addAttribute("stats", stats);
         return "admin/dashboard";
+    }
+
+    @GetMapping("/users")
+    public String users(Model model){
+        List<User> users = adminService.getAllUsers();
+        model.addAttribute("users", users);
+        return "admin/users";
     }
 
     /**

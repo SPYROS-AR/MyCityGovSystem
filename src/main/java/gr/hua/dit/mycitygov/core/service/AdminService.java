@@ -3,6 +3,7 @@ package gr.hua.dit.mycitygov.core.service;
 
 import gr.hua.dit.mycitygov.core.model.Department;
 import gr.hua.dit.mycitygov.core.model.RequestType;
+import gr.hua.dit.mycitygov.core.model.User;
 import gr.hua.dit.mycitygov.core.service.model.CreateRequestTypeRequest;
 import gr.hua.dit.mycitygov.core.service.model.SystemStatistics;
 
@@ -18,6 +19,8 @@ public interface AdminService {
     List<Department> getAllDepartments();
 
     SystemStatistics getSystemStatistics();
+
+    List<User> getAllUsers();
 
     void createRequestType(CreateRequestTypeRequest request);
 

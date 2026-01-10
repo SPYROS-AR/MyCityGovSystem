@@ -101,7 +101,7 @@ public class InitService implements CommandLineRunner {
         RequestType garbageType = requestTypeRepository.findByName("BULK_WASTE")
                 .orElseGet(() -> {
                     RequestType rt = new RequestType();
-                    rt.setName("BULK_WASTE"); // Ογκώδη Αντικείμενα
+                    rt.setName("BULK_WASTE");
                     rt.setRequestCategory(RequestType.RequestCategory.PROBLEM);
                     rt.setDepartment(cleanlinessDept);
                     return requestTypeRepository.save(rt);
@@ -117,7 +117,7 @@ public class InitService implements CommandLineRunner {
             req.setStatus(Request.Status.SUBMITTED);
             req.setDepartment(cleanlinessDept);
             req.setCitizen(citizenMaria);
-            req.setRequestType(certType); // (Τυπικά λάθος τύπος για παράπονο, αλλά οκ για το demo)
+            req.setRequestType(certType);
             requestRepository.save(req);
         }
 
@@ -233,13 +233,15 @@ public class InitService implements CommandLineRunner {
 
             System.out.println("Created Mock Appointments");
 
+        }
+
+        if (adminRepository.findByUsername("george123") == null) {
             Admin admin = new Admin();
             admin.setFirstName("Giorgos");
             admin.setLastName("Georgiou");
             admin.setPassword("george123");
-            admin.setUsername("GiorgosAdmin");
+            admin.setUsername("george123");
             admin.setEmail("giorgosgeorgiou123@gmail.com");
-
             adminRepository.save(admin);
         }
 

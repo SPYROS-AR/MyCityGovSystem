@@ -3,10 +3,8 @@ package gr.hua.dit.mycitygov.core.service.impl;
 import gr.hua.dit.mycitygov.core.model.Department;
 import gr.hua.dit.mycitygov.core.model.Request;
 import gr.hua.dit.mycitygov.core.model.RequestType;
-import gr.hua.dit.mycitygov.core.repository.CitizenRepository;
-import gr.hua.dit.mycitygov.core.repository.DepartmentRepository;
-import gr.hua.dit.mycitygov.core.repository.RequestRepository;
-import gr.hua.dit.mycitygov.core.repository.RequestTypeRepository;
+import gr.hua.dit.mycitygov.core.model.User;
+import gr.hua.dit.mycitygov.core.repository.*;
 import gr.hua.dit.mycitygov.core.service.AdminService;
 import gr.hua.dit.mycitygov.core.service.model.CreateRequestTypeRequest;
 import gr.hua.dit.mycitygov.core.service.model.SystemStatistics;
@@ -26,15 +24,17 @@ public class AdminServiceImpl implements AdminService {
     private final DepartmentRepository departmentRepository;
     private final RequestTypeRepository requestTypeRepository;
     private final CitizenRepository citizenRepository;
+    private final UserRepository userRepository;
 
     public AdminServiceImpl(RequestRepository requestRepository,
                             DepartmentRepository departmentRepository,
                             RequestTypeRepository requestTypeRepository,
-                            CitizenRepository citizenRepository) {
+                            CitizenRepository citizenRepository, UserRepository userRepository) {
         this.requestRepository = requestRepository;
         this.departmentRepository = departmentRepository;
         this.requestTypeRepository = requestTypeRepository;
         this.citizenRepository = citizenRepository;
+        this.userRepository = userRepository;
     }
     @Override
     @Transactional(readOnly = true)
@@ -45,8 +45,7 @@ public class AdminServiceImpl implements AdminService {
         // Total citizens
         long totalCitizens = citizenRepository.count();
 
-        // Φέρνουμε όλα τα αιτήματα για να κάνουμε τους υπολογισμούς (για μικρό όγκο δεδομένων)
-        // Εναλλακτικά θα μπορούσαν να γίνουν query μέθοδοι στο Repository
+
         List<Request> allRequests = requestRepository.findAll();
 
         // outstanding requests (SUBMITTED, RECEIVED, PROCESSING, PENDING_DOCS)
@@ -91,6 +90,11 @@ public class AdminServiceImpl implements AdminService {
     @Override
     public List<Department> getAllDepartments(){
         return  departmentRepository.findAll();
+    }
+
+    @Override
+    public List<User> getAllUsers(){
+        return userRepository.findAll();
     }
 
     @Override
