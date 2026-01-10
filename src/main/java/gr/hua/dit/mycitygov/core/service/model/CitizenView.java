@@ -13,7 +13,7 @@ public record CitizenView(
     String lastName,
     User.Role Role,
     String email,
-    String mationalId,
+    String nationalId,
     String mobilePhoneNumber,
     String address
     )

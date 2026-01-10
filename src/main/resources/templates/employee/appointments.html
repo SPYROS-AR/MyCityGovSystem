@@ -48,7 +48,7 @@
             Reschedule
           </button>
 
-          <div th:if="${app.status.name() == 'SCHEDULED'}" class="d-flex gap-2">
+          <div th:if="${app.status == 'SCHEDULED'}" class="d-flex gap-2">
             <form th:action="@{/employee/appointment/{id}/confirm(id=${app.id})}" method="post">
               <button type="submit" class="btn-custom btn-primary-custom">Confirm</button>
             </form>

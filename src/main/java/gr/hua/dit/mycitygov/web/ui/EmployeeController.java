@@ -1,7 +1,7 @@
 package gr.hua.dit.mycitygov.web.ui;
 
-import gr.hua.dit.mycitygov.core.model.Request;
 import gr.hua.dit.mycitygov.core.service.EmployeeService;
+import gr.hua.dit.mycitygov.core.service.model.RequestView;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -47,7 +47,7 @@ public class EmployeeController {
      */
     @GetMapping("/request/{id}")
     public String viewRequestDetails(@PathVariable("id") Long id, Model model) {
-        Request request = employeeService.getRequestById(id);
+        RequestView request = employeeService.getRequestById(id);
         model.addAttribute("request", request);
         return "employee/request_details";
     }

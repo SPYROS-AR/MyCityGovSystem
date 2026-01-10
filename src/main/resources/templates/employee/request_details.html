@@ -38,7 +38,7 @@
     <div class="col-md-6">
       <h4 style="color: #009879;">Info</h4>
       <div class="p-3 bg-light rounded">
-        <p><strong>Type:</strong> <span th:text="${request?.requestType?.name}"></span></p>
+        <p><strong>Type:</strong> <span th:text="${request?.requestType}"></span></p>
         <p><strong>Assigned:</strong> <span th:text="${request?.assignedEmployee != null ? request.assignedEmployee.lastName : '-'}"></span></p>
       </div>
     </div>
