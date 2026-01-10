@@ -36,6 +36,7 @@ public abstract class User {
 
 
     @Enumerated(EnumType.STRING)
+    @Setter(AccessLevel.PROTECTED)
     @Column(nullable = false)
     private Role role;
 
@@ -46,6 +47,7 @@ public abstract class User {
     private String email;
 
 
+    @Setter(AccessLevel.NONE)
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;
 

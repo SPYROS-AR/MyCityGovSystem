@@ -28,7 +28,7 @@ public class EmployeeController {
      * Fetches all requests assigned to the employee's department
      *
      * @param model UI Model to pass data to the view
-     * @return The "employee/home" view template (HTML page)
+     * @return The "employee/dashboard" view template (HTML page)
      */
     @GetMapping("/dashboard")
     public String dashboard(Model model) {

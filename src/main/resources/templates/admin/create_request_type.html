@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>New Request Type</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link th:href="@{/css/style.css}" rel="stylesheet">
+</head>
+<body>
+<div class="container mt-4" style="max-width: 600px;">
+    <h2>Create New Request Type</h2>
+    <p class="text-muted">Define a new public service for citizens.</p>
+
+    <form th:action="@{/admin/request-types/new}" th:object="${form}" method="post" class="bg-white p-4 shadow-sm rounded">
+
+        <div class="mb-3">
+            <label class="form-label">Service Name</label>
+            <input type="text" th:field="*{name}" class="form-control" placeholder="e.g. Birth Certificate" required />
+            <div class="text-danger small" th:if="${#fields.hasErrors('name')}" th:errors="*{name}"></div>
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Category</label>
+            <select th:field="*{requestCategory}" class="form-select">
+                <option value="CERTIFICATE">Certificate</option>
+                <option value="PROBLEM">Problem Report</option>
+                <option value="GENERAL">General Request</option>
+            </select>
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Responsible Department</label>
+            <select th:field="*{departmentId}" class="form-select">
+                <option th:each="dept : ${departments}"
+                        th:value="${dept.id}"
+                        th:text="${dept.name}"></option>
+            </select>
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">SLA (Days to Complete)</label>
+            <input type="number" th:field="*{slaDays}" class="form-control" min="1" required />
+        </div>
+
+        <div class="mt-4">
+            <button type="submit" class="btn-custom btn-primary-custom w-100 mb-2">Save Service</button>
+            <a th:href="@{/admin/request-types}" class="btn-custom btn-secondary-custom w-100 text-center">Cancel</a>
+        </div>
+    </form>
+</div>
+</body>
+</html>

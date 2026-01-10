@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Request Types</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <link th:href="@{/css/style.css}" rel="stylesheet">
+</head>
+<body>
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>Available Request Types</h2>
+        <a th:href="@{/admin/request-types/new}" class="btn-custom btn-primary-custom">+ New Request Type</a>
+    </div>
+
+    <table class="styled-table table table-hover"> <thead>
+    <tr>
+        <th>Service Name</th>
+        <th>Category</th>
+        <th>Department</th>
+        <th>Status</th>
+        <th style="width: 50px;">Actions</th> </tr>
+    </thead>
+        <tbody>
+        <tr th:each="type : ${requestTypes}">
+            <td th:text="${type.name}"></td>
+            <td th:text="${type.requestCategory}"></td>
+            <td th:text="${type.department.name}"></td>
+            <td>
+                         <span class="badge rounded-pill"
+                               th:classappend="${type.active} ? 'text-bg-success' : 'text-bg-secondary'"
+                               th:text="${type.active} ? 'Active' : 'Inactive'"></span>
+            </td>
+
+            <td>
+                <div class="dropdown">
+                    <button class="btn btn-link text-dark p-0" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-three-dots-vertical" viewBox="0 0 16 16">
+                            <path d="M9.5 13a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0m0-5a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0m0-5a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0"/>
+                        </svg>
+                    </button>
+
+                    <ul class="dropdown-menu dropdown-menu-end shadow">
+
+                        <li>
+                            <form th:action="@{/admin/request-types/{id}/toggle(id=${type.id})}" method="post">
+                                <button class="dropdown-item" type="submit">
+                                    <span th:text="${type.active} ? 'Deactivate' : 'Activate'"></span>
+                                </button>
+                            </form>
+                        </li>
+
+                        <li>
+                            <button class="dropdown-item" type="button"
+                                    data-bs-toggle="modal"
+                                    data-bs-target="#reassignModal"
+                                    th:onclick="'setRequestTypeId(' + ${type.id} + ')'">
+                                Reassign Department
+                            </button>
+                        </li>
+                    </ul>
+                </div>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+
+    <div class="mt-3">
+        <a th:href="@{/admin/dashboard}" class="btn-custom btn-secondary-custom">Back to Dashboard</a>
+    </div>
+</div>
+
+<div class="modal fade" id="reassignModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form th:action="@{/admin/request-types/reassign}" method="post">
+                <div class="modal-header">
+                    <h5 class="modal-title">Reassign Department</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p>Select the new department for this service:</p>
+                    <input type="hidden" id="modalRequestTypeId" name="requestTypeId" />
+
+                    <select name="departmentId" class="form-select" required>
+                        <option th:each="dept : ${departments}"
+                                th:value="${dept.id}"
+                                th:text="${dept.name}"></option>
+                    </select>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Save Changes</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+    function setRequestTypeId(id) {
+        document.getElementById('modalRequestTypeId').value = id;
+    }
+</script>
+
+</body>
+</html>

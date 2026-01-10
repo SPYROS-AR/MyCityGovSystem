@@ -18,19 +18,21 @@ public class InitService implements CommandLineRunner {
     private final RequestRepository requestRepository;
     private final RequestTypeRepository requestTypeRepository;
     private final AppointmentRepository appointmentRepository;
+    private final AdminRepository adminRepository;
 
     public InitService(DepartmentRepository departmentRepository,
                        EmployeeRepository employeeRepository,
                        CitizenRepository citizenRepository,
                        RequestRepository requestRepository,
                        RequestTypeRepository requestTypeRepository,
-                       AppointmentRepository appointmentRepository) {
+                       AppointmentRepository appointmentRepository, AdminRepository adminRepository) {
         this.departmentRepository = departmentRepository;
         this.employeeRepository = employeeRepository;
         this.citizenRepository = citizenRepository;
         this.requestRepository = requestRepository;
         this.requestTypeRepository = requestTypeRepository;
         this.appointmentRepository = appointmentRepository;
+        this.adminRepository = adminRepository;
     }
 
     @Override
@@ -230,6 +232,15 @@ public class InitService implements CommandLineRunner {
             appointmentRepository.save(app3);
 
             System.out.println("Created Mock Appointments");
+
+            Admin admin = new Admin();
+            admin.setFirstName("Giorgos");
+            admin.setLastName("Georgiou");
+            admin.setPassword("george123");
+            admin.setUsername("GiorgosAdmin");
+            admin.setEmail("giorgosgeorgiou123@gmail.com");
+
+            adminRepository.save(admin);
         }
 
         System.out.println("--- DATABASE INITIALIZATION FINISHED ---");

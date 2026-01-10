@@ -43,7 +43,7 @@ public class Request {
     @JoinColumn(name = "assigned_employee_id")
     private User assignedEmployee;
 
-    //list with request history
+    // list with request history
     @OneToMany(mappedBy = "request", cascade = CascadeType.ALL)
     private List<RequestLog> logs = new ArrayList<>();
 
