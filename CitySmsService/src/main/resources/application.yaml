@@ -1,0 +1,16 @@
+spring:
+  application:
+    name: City SMS Service
+  cache:
+    type: caffeine
+    caffeine:
+      spec: expireAfterWrite=10m
+
+server:
+  port: 8080
+
+springdoc:
+  api-docs:
+    path: /v3/api-docs
+  swagger-ui:
+    path: /swagger-ui.html

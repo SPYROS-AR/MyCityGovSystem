@@ -4,11 +4,11 @@ import gr.hua.dit.mycitygov.core.model.Appointment;
 import gr.hua.dit.mycitygov.core.model.Employee;
 import gr.hua.dit.mycitygov.core.model.Request;
 import gr.hua.dit.mycitygov.core.model.RequestLog;
+import gr.hua.dit.mycitygov.core.port.SmsNotificationPort;
 import gr.hua.dit.mycitygov.core.repository.AppointmentRepository;
 import gr.hua.dit.mycitygov.core.repository.EmployeeRepository;
 import gr.hua.dit.mycitygov.core.repository.RequestRepository;
 import gr.hua.dit.mycitygov.core.repository.UserRepository;
-import gr.hua.dit.mycitygov.core.service.EmailService;
 import gr.hua.dit.mycitygov.core.service.EmployeeService;
 import gr.hua.dit.mycitygov.core.service.mapper.AppointmentMapper;
 import gr.hua.dit.mycitygov.core.service.mapper.EmployeeMapper;
@@ -32,7 +32,7 @@ public class EmployeeServiceImpl implements EmployeeService {
     private final EmployeeRepository employeeRepository;
     private final RequestRepository requestRepository;
     private final AppointmentRepository appointmentRepository;
-    private final EmailService emailService;
+    private final SmsNotificationPort smsPort;
 
     // mappers
     private final RequestMapper requestMapper;
@@ -43,10 +43,10 @@ public class EmployeeServiceImpl implements EmployeeService {
                                UserRepository userRepository,
                                RequestRepository requestRepository,
                                AppointmentRepository appointmentRepository,
-                               EmailService emailService,
                                RequestMapper requestMapper,
                                AppointmentMapper appointmentMapper,
-                               EmployeeMapper employeeMapper) {
+                               EmployeeMapper employeeMapper,
+                               SmsNotificationPort smsPort) {
         if (employeeRepository == null) throw new NullPointerException("employeeRepository cannot be null");
         if (userRepository == null) throw new NullPointerException("userRepository cannot be null");
         if (requestRepository == null) throw new NullPointerException("requestRepository cannot be null");
@@ -54,10 +54,10 @@ public class EmployeeServiceImpl implements EmployeeService {
         this.employeeRepository = employeeRepository;
         this.requestRepository = requestRepository;
         this.appointmentRepository = appointmentRepository;
-        this.emailService = emailService;
         this.requestMapper = requestMapper;
         this.appointmentMapper = appointmentMapper;
         this.employeeMapper = employeeMapper;
+        this.smsPort = smsPort;
     }
 
     @Override
@@ -154,11 +154,7 @@ public class EmployeeServiceImpl implements EmployeeService {
         request.getLogs().add(log);     // add to list
         requestRepository.save(request);
 
-        emailService.sendEmail(
-                request.getCitizen().getEmail(),
-                "Request Update " + request.getProtocolNumber(),
-                "Dear Citizen,\n\nYour request has been rejected.\nReason: " + reason + "\n\nMyCityGov"
-        );
+        smsPort.sendSms(request.getCitizen().getMobilePhoneNumber(), "Your request has been rejected: " + reason);
     }
 
     @Override
@@ -185,11 +181,7 @@ public class EmployeeServiceImpl implements EmployeeService {
         request.getLogs().add(log);
         requestRepository.save(request);
 
-        emailService.sendEmail(
-                request.getCitizen().getEmail(),
-                "Request Completion " + request.getProtocolNumber(),
-                "Dear Citizen,\n\nYour request has been accepted and completed!\n\nMyCityGov"
-        );
+        smsPort.sendSms(request.getCitizen().getMobilePhoneNumber(), "Your request has been accepted and completed");
     }
 
     @Override
@@ -208,11 +200,7 @@ public class EmployeeServiceImpl implements EmployeeService {
         appointment.setStatus(Appointment.AppointmentStatus.COMPLETED);
         appointmentRepository.save(appointment);
 
-        emailService.sendEmail(
-                appointment.getCitizen().getEmail(),
-                "Appointment Confirmation",
-                "Your appointment has been confirmed for: " + appointment.getAppointmentDate()
-        );
+        smsPort.sendSms(appointment.getCitizen().getMobilePhoneNumber(), "Your appointment has been confirmed for: " +  appointment.getAppointmentDate());
     }
 
     @Override
@@ -221,12 +209,7 @@ public class EmployeeServiceImpl implements EmployeeService {
         Appointment appointment = appointmentRepository.findById(appointmentId).orElseThrow();
         appointment.setStatus(Appointment.AppointmentStatus.CANCELLED);
         appointmentRepository.save(appointment);
-
-        emailService.sendEmail(
-                appointment.getCitizen().getEmail(),
-                "Appointment Cancelled",
-                "Your Appointment has been cancelled."
-        );
+        smsPort.sendSms(appointment.getCitizen().getMobilePhoneNumber(), "Your Appointment has been cancelled");
     }
 
     @Override
@@ -242,11 +225,8 @@ public class EmployeeServiceImpl implements EmployeeService {
         appointmentRepository.save(appointment);
 
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
-        emailService.sendEmail(
-                appointment.getCitizen().getEmail(),
-                "Appointment Date Changed",
-                "Dear citizen,\n\nYour Appointment changed date.\nNew Date: " + rescheduledDateTime.format(formatter) + "\n\nMyCityGov"
-        );
+
+        smsPort.sendSms(appointment.getCitizen().getMobilePhoneNumber(), "Your Appointment changed date.\nNew Date:"+ rescheduledDateTime.format(formatter));
 
     }
 }
