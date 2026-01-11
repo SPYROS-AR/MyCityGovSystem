@@ -13,6 +13,7 @@ import java.time.LocalDateTime;
 @Transactional
 public class InitService implements CommandLineRunner {
 
+    private final ClientRepository clientRepository;
     private final DepartmentRepository departmentRepository;
     private final EmployeeRepository employeeRepository;
     private final CitizenRepository citizenRepository;
@@ -22,7 +23,9 @@ public class InitService implements CommandLineRunner {
     private final AdminRepository adminRepository;
     private final PasswordEncoder passwordEncoder;
 
-    public InitService(DepartmentRepository departmentRepository,
+    public InitService(
+                       ClientRepository clientRepository,
+                       DepartmentRepository departmentRepository,
                        EmployeeRepository employeeRepository,
                        CitizenRepository citizenRepository,
                        RequestRepository requestRepository,
@@ -30,6 +33,7 @@ public class InitService implements CommandLineRunner {
                        AppointmentRepository appointmentRepository,
                        AdminRepository adminRepository,
                        PasswordEncoder passwordEncoder) {
+        this.clientRepository = clientRepository;
         this.departmentRepository = departmentRepository;
         this.employeeRepository = employeeRepository;
         this.citizenRepository = citizenRepository;
@@ -43,6 +47,9 @@ public class InitService implements CommandLineRunner {
     @Override
     public void run(String... args) {
         System.out.println("--- STARTING DATABASE INITIALIZATION ---");
+
+        // Client
+        clientRepository.save(new Client("my_app", passwordEncoder.encode("secret123"), "CLIENT_READ"));
 
         // Department
         Department cleanlinessDept = departmentRepository.findByName("Cleanliness")
