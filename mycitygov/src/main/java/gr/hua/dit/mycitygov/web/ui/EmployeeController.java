@@ -7,6 +7,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.security.Principal;
 import java.time.LocalDateTime;
@@ -127,8 +128,10 @@ public class EmployeeController {
      * @return Redirects back to the appointments list
      */
     @PostMapping("/appointment/{id}/confirm")
-    public String confirmAppointment(@PathVariable("id") Long id) {
+    public String confirmAppointment(@PathVariable("id") Long id,
+                                     RedirectAttributes redirectAttributes) {
         employeeService.confirmAppointment(id);
+        redirectAttributes.addFlashAttribute("successMessage", "Appointment confirmed successfully.");
         return "redirect:/employee/appointments";
     }
 
@@ -139,8 +142,10 @@ public class EmployeeController {
      * @return Redirects back to the appointments list
      */
     @PostMapping("/appointment/{id}/cancel")
-    public String cancelAppointment(@PathVariable("id") Long id) {
+    public String cancelAppointment(@PathVariable("id") Long id,
+                                    RedirectAttributes redirectAttributes) {
         employeeService.cancelAppointment(id);
+        redirectAttributes.addFlashAttribute("successMessage", "Appointment cancelled.");
         return "redirect:/employee/appointments";
     }
 
@@ -154,8 +159,16 @@ public class EmployeeController {
      */
     @PostMapping("/appointment/{id}/reschedule")
     public String rescheduleAppointment(@PathVariable("id") Long id,
-                                        @RequestParam("rescheduledDate") @DateTimeFormat(pattern = "yyyy-MM-dd'T'HH:mm") LocalDateTime rescheduledDate) {
-        employeeService.rescheduleAppointment(id, rescheduledDate);
+                                        @RequestParam("rescheduledDate") @DateTimeFormat(pattern = "yyyy-MM-dd'T'HH:mm") LocalDateTime rescheduledDate,
+                                        RedirectAttributes redirectAttributes) {
+
+        try {
+            employeeService.rescheduleAppointment(id, rescheduledDate);
+            redirectAttributes.addFlashAttribute("successMessage", "Appointment rescheduled successfully.");
+        } catch (RuntimeException e) {
+            // Catch the validation errors from the Service and send them to the view
+            redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
+        }
         return "redirect:/employee/appointments";
     }
 }
