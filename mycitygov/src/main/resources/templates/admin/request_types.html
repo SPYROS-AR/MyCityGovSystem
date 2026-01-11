@@ -43,6 +43,7 @@
             <th>Service Name</th>
             <th>Category</th>
             <th>Department</th>
+            <th>SLA Days</th>
             <th>Status</th>
             <th style="width: 50px;">Actions</th>
         </tr>
@@ -52,6 +53,7 @@
             <td th:text="${type.name}"></td>
             <td th:text="${type.category}"></td>
             <td th:text="${type.departmentName}"></td>
+            <td th:text="${type.slaDays}"></td>
             <td>
                          <span class="badge rounded-pill"
                                th:classappend="${type.active} ? 'text-bg-success' : 'text-bg-danger'"
@@ -125,11 +127,5 @@
     </div>
 </div>
 
-<script>
-    function setRequestTypeId(id) {
-        document.getElementById('newRequestTypeId').value = id;
-    }
-</script>
 
-</body>
-</html>
+

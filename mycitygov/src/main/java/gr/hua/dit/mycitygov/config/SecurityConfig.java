@@ -87,7 +87,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         // allow everyone to access these paths
                         .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll()
-                        .requestMatchers("/", "/login", "/register", "/css/**", "/js/**", "/images/**").permitAll()
+                        .requestMatchers("/", "/login", "/citizen/register", "/css/**", "/js/**", "/images/**").permitAll()
                         // require special privileges
                         .requestMatchers("/admin/**").hasRole("ADMIN")
                         .requestMatchers("/employee/**").hasRole("EMPLOYEE")

@@ -2,6 +2,7 @@ package gr.hua.dit.mycitygov.core.service;
 
 import gr.hua.dit.mycitygov.core.model.*;
 import gr.hua.dit.mycitygov.core.repository.*;
+import org.hibernate.id.IntegralDataTypeHolder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.CommandLineRunner;
@@ -83,8 +84,8 @@ public class InitService implements CommandLineRunner {
             Citizen emily = citizens.get(0);
 
             // RequestType Entity
-            RequestType wasteType = initRequestType("WASTE_COLLECTION", RequestType.RequestCategory.PROBLEM, cleanliness);
-            initRequestType("ROAD_REPAIR", RequestType.RequestCategory.PROBLEM, technical);
+            RequestType wasteType = initRequestType("WASTE_COLLECTION", RequestType.RequestCategory.PROBLEM, cleanliness, 1);
+            initRequestType("ROAD_REPAIR", RequestType.RequestCategory.PROBLEM, technical, 3);
 
             // Request & 9. RequestLog Entities
             initRequests(cleanliness, emily, wasteType, emp1);
@@ -172,12 +173,13 @@ public class InitService implements CommandLineRunner {
         return List.of(c1);
     }
 
-    private RequestType initRequestType(String name, RequestType.RequestCategory category, Department dept) {
+    private RequestType initRequestType(String name, RequestType.RequestCategory category, Department dept, Integer slaDays) {
         return requestTypeRepository.findByName(name).orElseGet(() -> {
             RequestType rt = new RequestType();
             rt.setName(name);
             rt.setRequestCategory(category);
             rt.setDepartment(dept);
+            rt.setSlaDays(slaDays);
             logger.info("RequestType '{}' created.", name);
             return requestTypeRepository.save(rt);
         });
@@ -194,6 +196,7 @@ public class InitService implements CommandLineRunner {
             req.setCitizen(citizen);
             req.setRequestType(type);
             req.setAssignedEmployee(employee);
+            req.setSubmittedDate(LocalDateTime.now().minusDays(5));
 
             // Initialize RequestLog Entity
             RequestLog log = new RequestLog();
