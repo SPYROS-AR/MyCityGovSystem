@@ -6,11 +6,6 @@ import org.springdoc.core.models.GroupedOpenApi;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-/**
- * OpenAPI configuration.
- *
- * @author Dimitris Gkoulis
- */
 @Configuration
 public class OpenApiConfig {
 
@@ -18,17 +13,17 @@ public class OpenApiConfig {
     public OpenAPI api() {
         return new OpenAPI()
                 .info(new Info()
-                        .title("NOC Services")
+                        .title("City SMS Service API")
                         .version("v1")
-                        .description("Stateless REST API for lookups and notifications"));
+                        .description("Microservice for sending SMS notifications"));
     }
 
     @Bean
     public GroupedOpenApi apiGroup() {
         return GroupedOpenApi.builder()
                 .group("api")
-                .packagesToScan("gr.hua.dit.noc.web.rest")
-                .pathsToMatch("/api//**")
+                .packagesToScan("gr.hua.dit.citySmsService.web.rest")
+                .pathsToMatch("/api/v1/**")
                 .build();
     }
 }
