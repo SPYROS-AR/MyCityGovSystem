@@ -243,7 +243,7 @@ public class CitizenServiceImpl implements CitizenService {
         Department department = departmentRepository.findById(dto.departmentId())
                 .orElseThrow(() -> new RuntimeException("Department not found"));
 
-        LocalDateTime requestedDate = dto.appointmentDate();
+        LocalDateTime requestedDate = dto.appointmentDate().withSecond(0).withNano(0);
 
         if (requestedDate.getMinute() != 0 && requestedDate.getMinute() != 30) {
             throw new RuntimeException("Invalid time slot. Please choose XX:00 or XX:30.");
