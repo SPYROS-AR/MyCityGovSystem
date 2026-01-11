@@ -2,18 +2,28 @@ package gr.hua.dit.mycitygov.core.service;
 
 import gr.hua.dit.mycitygov.core.model.*;
 import gr.hua.dit.mycitygov.core.repository.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.DayOfWeek;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.util.List;
+import java.util.Optional;
 
 @Service
 @Transactional
 public class InitService implements CommandLineRunner {
 
+    private static final Logger logger = LoggerFactory.getLogger(InitService.class);
+
+    private final ClientRepository clientRepository;
     private final DepartmentRepository departmentRepository;
+    private final DepartmentScheduleRepository departmentScheduleRepository;
     private final EmployeeRepository employeeRepository;
     private final CitizenRepository citizenRepository;
     private final RequestRepository requestRepository;
@@ -22,7 +32,9 @@ public class InitService implements CommandLineRunner {
     private final AdminRepository adminRepository;
     private final PasswordEncoder passwordEncoder;
 
-    public InitService(DepartmentRepository departmentRepository,
+    public InitService(ClientRepository clientRepository,
+                       DepartmentRepository departmentRepository,
+                       DepartmentScheduleRepository departmentScheduleRepository,
                        EmployeeRepository employeeRepository,
                        CitizenRepository citizenRepository,
                        RequestRepository requestRepository,
@@ -30,7 +42,9 @@ public class InitService implements CommandLineRunner {
                        AppointmentRepository appointmentRepository,
                        AdminRepository adminRepository,
                        PasswordEncoder passwordEncoder) {
+        this.clientRepository = clientRepository;
         this.departmentRepository = departmentRepository;
+        this.departmentScheduleRepository = departmentScheduleRepository;
         this.employeeRepository = employeeRepository;
         this.citizenRepository = citizenRepository;
         this.requestRepository = requestRepository;
@@ -42,217 +56,169 @@ public class InitService implements CommandLineRunner {
 
     @Override
     public void run(String... args) {
-        System.out.println("--- STARTING DATABASE INITIALIZATION ---");
+        logger.info("--- STARTING DATABASE INITIALIZATION ---");
 
-        // Department
-        Department cleanlinessDept = departmentRepository.findByName("Cleanliness")
+        try {
+            // 1. Client Entity
+            initClients();
+
+            // 2. Admin Entity (Single Object)
+            initAdmin();
+
+            // 3. Department Entity
+            Department cleanliness = initDepartment("Cleanliness", "Waste management and recycling services");
+            Department technical = initDepartment("Technical Services", "Infrastructure and urban planning");
+            Department social = initDepartment("Social Services", "Social welfare and community support");
+
+            // 4. DepartmentSchedule Entity
+            initSchedules(List.of(cleanliness, technical, social));
+
+            // 5. Employee Entity (3 realistic employees)
+            Employee emp1 = initEmployee("emp1", "Robert", "Miller", "r.miller@mycity.gov", cleanliness);
+            initEmployee("emp2", "Sarah", "Jenkins", "s.jenkins@mycity.gov", technical);
+            initEmployee("emp3", "David", "Wilson", "d.wilson@mycity.gov", social);
+
+            // 6. Citizen Entity
+            List<Citizen> citizens = initCitizens();
+            Citizen emily = citizens.get(0);
+
+            // 7. RequestType Entity
+            RequestType wasteType = initRequestType("WASTE_COLLECTION", RequestType.RequestCategory.PROBLEM, cleanliness);
+            initRequestType("ROAD_REPAIR", RequestType.RequestCategory.PROBLEM, technical);
+
+            // 8. Request & 9. RequestLog Entities
+            initRequests(cleanliness, emily, wasteType, emp1);
+
+            // 10. Appointment Entity
+            initAppointments(cleanliness, emily);
+
+            logger.info("--- DATABASE INITIALIZATION FINISHED SUCCESSFULLY ---");
+        } catch (Exception e) {
+            logger.error("Error during database initialization: ", e);
+        }
+    }
+
+    private void initClients() {
+        if (clientRepository.findByName("my_app").isEmpty()) {
+            clientRepository.save(new Client("my_app", passwordEncoder.encode("secret123"), "CLIENT_READ"));
+            logger.info("Entity 'Client' initialized.");
+        }
+    }
+
+    private void initAdmin() {
+        if (adminRepository.count() == 0) {
+            Admin admin = new Admin();
+            admin.setFirstName("John");
+            admin.setLastName("Admin");
+            admin.setUsername("admin");
+            admin.setPassword(passwordEncoder.encode("admin123"));
+            admin.setEmail("admin@mycity.gov");
+            adminRepository.save(admin);
+            logger.info("Entity 'Admin' initialized.");
+        }
+    }
+
+    private Department initDepartment(String name, String description) {
+        return departmentRepository.findByName(name)
                 .orElseGet(() -> {
                     Department d = new Department();
-                    d.setName("Cleanliness");
-                    d.setDescription("Υπηρεσίες Καθαριότητας και Ανακύκλωσης");
+                    d.setName(name);
+                    d.setDescription(description);
+                    logger.info("Department '{}' created.", name);
                     return departmentRepository.save(d);
                 });
+    }
 
-        // admin
-        if (adminRepository.findByUsername("george123") == null) {
-            Admin admin = new Admin();
-            admin.setFirstName("Giorgos");
-            admin.setLastName("Georgiou");
-            admin.setPassword(passwordEncoder.encode("password"));
-            admin.setUsername("george123");
-            admin.setEmail("giorgosgeorgiou123@gmail.com");
-            adminRepository.save(admin);
+    private void initSchedules(List<Department> departments) {
+        for (Department dept : departments) {
+            if (departmentScheduleRepository.findByDepartmentId(dept.getId()).isEmpty()) {
+                for (DayOfWeek day : List.of(DayOfWeek.MONDAY, DayOfWeek.TUESDAY, DayOfWeek.WEDNESDAY, DayOfWeek.THURSDAY, DayOfWeek.FRIDAY)) {
+                    departmentScheduleRepository.save(new DepartmentSchedule(dept, day, LocalTime.of(8, 0), LocalTime.of(15, 0)));
+                }
+                logger.info("Entity 'DepartmentSchedule' initialized for {}.", dept.getName());
+            }
         }
+    }
 
-        // Employee
-        Employee empGiannis = employeeRepository.findByEmail("emp1@city.gov");
-        if (empGiannis == null) {
-            Employee emp = new Employee();
-            emp.setUsername("emp1");
+    private Employee initEmployee(String username, String first, String last, String email, Department dept) {
+        Employee emp = employeeRepository.findByUsername(username).orElse(null);
+        if (emp == null) {
+            emp = new Employee();
+            emp.setUsername(username);
             emp.setPassword(passwordEncoder.encode("password"));
-            emp.setFirstName("Giannis");
-            emp.setLastName("Employee");
-            emp.setEmail("emp1@city.gov");
-            emp.setDepartment(cleanlinessDept);
-            empGiannis = employeeRepository.save(emp);
+            emp.setFirstName(first);
+            emp.setLastName(last);
+            emp.setEmail(email);
+            emp.setDepartment(dept);
+            emp = employeeRepository.save(emp);
+            logger.info("Employee '{}' created.", username);
         }
+        return emp;
+    }
 
-        // Citizen
-        Citizen citizenMaria = citizenRepository.findByEmail("cit@gmail.com").orElseGet(() -> {
+    private List<Citizen> initCitizens() {
+        Citizen c1 = citizenRepository.findByEmail("emily.t@gmail.com").orElseGet(() -> {
             Citizen c = new Citizen();
             c.setUsername("citizen1");
             c.setPassword(passwordEncoder.encode("password"));
-            c.setFirstName("Maria");
-            c.setLastName("Citizen");
-            c.setEmail("cit@gmail.com");
-            c.setNationalId("123456789");
-            c.setMobilePhoneNumber("6900123456");
-            c.setAddress("Athens, Greece");
+            c.setFirstName("Emily");
+            c.setLastName("Thompson");
+            c.setEmail("emily.t@gmail.com");
+            c.setNationalId("ID123456");
+            c.setMobilePhoneNumber("5550101");
+            c.setAddress("10 Broadway Ave, City Center");
             return citizenRepository.save(c);
         });
+        return List.of(c1);
+    }
 
-        Citizen citizenNikos = citizenRepository.findByEmail("nikos@gmail.com").orElseGet(() -> {
-            Citizen c = new Citizen();
-            c.setUsername("nikos1");
-            c.setPassword(passwordEncoder.encode("password"));
-            c.setFirstName("Nikos");
-            c.setLastName("Papadopoulos");
-            c.setEmail("nikos@gmail.com");
-            c.setNationalId("987654321");
-            c.setMobilePhoneNumber("6900987654");
-            c.setAddress("Thessaloniki, Greece");
-            return citizenRepository.save(c);
+    private RequestType initRequestType(String name, RequestType.RequestCategory category, Department dept) {
+        return requestTypeRepository.findByName(name).orElseGet(() -> {
+            RequestType rt = new RequestType();
+            rt.setName(name);
+            rt.setRequestCategory(category);
+            rt.setDepartment(dept);
+            logger.info("RequestType '{}' created.", name);
+            return requestTypeRepository.save(rt);
         });
+    }
 
-        // Request Type
-        RequestType certType = requestTypeRepository.findByName("CERTIFICATE")
-                .orElseGet(() -> {
-                    RequestType rt = new RequestType();
-                    rt.setName("CERTIFICATE");
-                    rt.setRequestCategory(RequestType.RequestCategory.CERTIFICATE);
-                    rt.setDepartment(cleanlinessDept);
-                    return requestTypeRepository.save(rt);
-                });
-
-        RequestType garbageType = requestTypeRepository.findByName("BULK_WASTE")
-                .orElseGet(() -> {
-                    RequestType rt = new RequestType();
-                    rt.setName("BULK_WASTE");
-                    rt.setRequestCategory(RequestType.RequestCategory.PROBLEM);
-                    rt.setDepartment(cleanlinessDept);
-                    return requestTypeRepository.save(rt);
-                });
-
-        // Requests
-        // SUBMITTED
+    private void initRequests(Department dept, Citizen citizen, RequestType type, Employee employee) {
         if (requestRepository.findByProtocolNumber("REQ-2025-001").isEmpty()) {
             Request req = new Request();
             req.setProtocolNumber("REQ-2025-001");
             req.setSubmittedDate(LocalDateTime.now().minusHours(2));
-            req.setDescription("Υπάρχουν σκουπίδια στην πλατεία Ελευθερίας.");
-            req.setStatus(Request.Status.SUBMITTED);
-            req.setDepartment(cleanlinessDept);
-            req.setCitizen(citizenMaria);
-            req.setRequestType(certType);
-            requestRepository.save(req);
-        }
-
-        // PROCESSING
-        if (requestRepository.findByProtocolNumber("REQ-2025-002").isEmpty()) {
-            Request req = new Request();
-            req.setProtocolNumber("REQ-2025-002");
-            req.setSubmittedDate(LocalDateTime.now().minusDays(1));
-            req.setDescription("Παρακαλώ να μαζέψετε έναν παλιό καναπέ από την οδό Ερμού 12.");
+            req.setDescription("Pothole reported at Main Street.");
             req.setStatus(Request.Status.PROCESSING);
-            req.setDepartment(cleanlinessDept);
-            req.setCitizen(citizenNikos);
-            req.setRequestType(garbageType);
-            req.setAssignedEmployee(empGiannis);
+            req.setDepartment(dept);
+            req.setCitizen(citizen);
+            req.setRequestType(type);
+            req.setAssignedEmployee(employee);
 
-            // Log
-            RequestLog log = new RequestLog();
-            log.setActionDate(LocalDateTime.now().minusHours(5));
-            log.setComment("Ανατέθηκε στον υπάλληλο Giannis Employee");
-            log.setOldStatus(Request.Status.SUBMITTED);
-            log.setNewStatus(Request.Status.PROCESSING);
-            log.setEmployee(empGiannis);
-            log.setRequest(req);
-            req.getLogs().add(log);
-
-            requestRepository.save(req);
-        }
-
-        // COMPLETED
-        if (requestRepository.findByProtocolNumber("REQ-2025-003").isEmpty()) {
-            Request req = new Request();
-            req.setProtocolNumber("REQ-2025-003");
-            req.setSubmittedDate(LocalDateTime.now().minusDays(5));
-            req.setDescription("Καθαρισμός κάδου ανακύκλωσης.");
-            req.setStatus(Request.Status.COMPLETED);
-            req.setDepartment(cleanlinessDept);
-            req.setCitizen(citizenMaria);
-            req.setRequestType(certType);
-            req.setAssignedEmployee(empGiannis);
-
-            // Log 1: Assigned
-            RequestLog log1 = new RequestLog();
-            log1.setActionDate(LocalDateTime.now().minusDays(4));
-            log1.setComment("Ανάθεση αιτήματος");
-            log1.setOldStatus(Request.Status.SUBMITTED);
-            log1.setNewStatus(Request.Status.PROCESSING);
-            log1.setEmployee(empGiannis);
-            log1.setRequest(req);
-            req.getLogs().add(log1);
-
-            // Log 2: COMPLETED
-            RequestLog log2 = new RequestLog();
-            log2.setActionDate(LocalDateTime.now().minusDays(1));
-            log2.setComment("Ο κάδος καθαρίστηκε επιτυχώς.");
-            log2.setOldStatus(Request.Status.PROCESSING);
-            log2.setNewStatus(Request.Status.COMPLETED);
-            log2.setEmployee(empGiannis);
-            log2.setRequest(req);
-            req.getLogs().add(log2);
-
-            requestRepository.save(req);
-        }
-
-        // REJECTED
-        if (requestRepository.findByProtocolNumber("REQ-2025-004").isEmpty()) {
-            Request req = new Request();
-            req.setProtocolNumber("REQ-2025-004");
-            req.setSubmittedDate(LocalDateTime.now().minusDays(2));
-            req.setDescription("Να κόψετε το δέντρο του γείτονα.");
-            req.setStatus(Request.Status.REJECTED);
-            req.setDepartment(cleanlinessDept);
-            req.setCitizen(citizenNikos);
-            req.setRequestType(garbageType);
-            req.setAssignedEmployee(empGiannis);
-
+            // Initialize RequestLog Entity
             RequestLog log = new RequestLog();
             log.setActionDate(LocalDateTime.now());
-            log.setComment("Απορρίφθηκε: Δεν είναι αρμοδιότητα του Δήμου (Ιδιωτικός χώρος).");
-            log.setOldStatus(Request.Status.PROCESSING);
-            log.setNewStatus(Request.Status.REJECTED);
-            log.setEmployee(empGiannis);
+            log.setComment("Request assigned to employee for review.");
+            log.setOldStatus(Request.Status.SUBMITTED);
+            log.setNewStatus(Request.Status.PROCESSING);
+            log.setEmployee(employee);
             log.setRequest(req);
             req.getLogs().add(log);
 
             requestRepository.save(req);
+            logger.info("Entities 'Request' and 'RequestLog' initialized.");
         }
+    }
 
-        // Appointments
+    private void initAppointments(Department dept, Citizen citizen) {
         if (appointmentRepository.count() == 0) {
-            // SCHEDULED
-            Appointment app1 = new Appointment();
-            app1.setCitizen(citizenMaria);
-            app1.setDepartment(cleanlinessDept);
-            app1.setAppointmentDate(LocalDateTime.now().plusDays(2).withHour(10).withMinute(0));
-            app1.setStatus(Appointment.AppointmentStatus.SCHEDULED);
-            appointmentRepository.save(app1);
-
-            // COMPLETED
-            Appointment app2 = new Appointment();
-            app2.setCitizen(citizenNikos);
-            app2.setDepartment(cleanlinessDept);
-            app2.setAppointmentDate(LocalDateTime.now().plusDays(5).withHour(12).withMinute(30));
-            app2.setStatus(Appointment.AppointmentStatus.COMPLETED);
-            appointmentRepository.save(app2);
-
-            // CANCELLED
-            Appointment app3 = new Appointment();
-            app3.setCitizen(citizenMaria);
-            app3.setDepartment(cleanlinessDept);
-            app3.setAppointmentDate(LocalDateTime.now().plusDays(1).withHour(0).withMinute(0)); // Dummy date
-            app3.setStatus(Appointment.AppointmentStatus.CANCELLED);
-            appointmentRepository.save(app3);
-
-            System.out.println("Created Mock Appointments");
-
+            Appointment app = new Appointment();
+            app.setCitizen(citizen);
+            app.setDepartment(dept);
+            app.setAppointmentDate(LocalDateTime.now().plusDays(2).withHour(10).withMinute(0));
+            app.setStatus(Appointment.AppointmentStatus.SCHEDULED);
+            appointmentRepository.save(app);
+            logger.info("Entity 'Appointment' initialized.");
         }
-
-
-
-        System.out.println("--- DATABASE INITIALIZATION FINISHED ---");
     }
 }

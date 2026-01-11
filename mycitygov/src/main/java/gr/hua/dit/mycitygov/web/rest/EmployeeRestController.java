@@ -5,6 +5,7 @@ import gr.hua.dit.mycitygov.core.service.model.AppointmentView;
 import gr.hua.dit.mycitygov.core.service.model.RequestView;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.security.Principal;
@@ -22,6 +23,7 @@ import java.util.List;
  */
 @RestController
 @RequestMapping("/api/employee")
+@PreAuthorize("hasRole('EMPLOYEE')")
 public class EmployeeRestController {
 
     private final EmployeeService employeeService;
