@@ -59,37 +59,37 @@ public class InitService implements CommandLineRunner {
         logger.info("--- STARTING DATABASE INITIALIZATION ---");
 
         try {
-            // 1. Client Entity
+            // Client Entity
             initClients();
 
-            // 2. Admin Entity (Single Object)
+            // Admin Entity (Single Object)
             initAdmin();
 
-            // 3. Department Entity
+            // Department Entity
             Department cleanliness = initDepartment("Cleanliness", "Waste management and recycling services");
             Department technical = initDepartment("Technical Services", "Infrastructure and urban planning");
             Department social = initDepartment("Social Services", "Social welfare and community support");
 
-            // 4. DepartmentSchedule Entity
+            // DepartmentSchedule Entity
             initSchedules(List.of(cleanliness, technical, social));
 
-            // 5. Employee Entity (3 realistic employees)
+            // Employee Entity (3 realistic employees)
             Employee emp1 = initEmployee("emp1", "Robert", "Miller", "r.miller@mycity.gov", cleanliness);
             initEmployee("emp2", "Sarah", "Jenkins", "s.jenkins@mycity.gov", technical);
             initEmployee("emp3", "David", "Wilson", "d.wilson@mycity.gov", social);
 
-            // 6. Citizen Entity
+            // Citizen Entity
             List<Citizen> citizens = initCitizens();
             Citizen emily = citizens.get(0);
 
-            // 7. RequestType Entity
+            // RequestType Entity
             RequestType wasteType = initRequestType("WASTE_COLLECTION", RequestType.RequestCategory.PROBLEM, cleanliness);
             initRequestType("ROAD_REPAIR", RequestType.RequestCategory.PROBLEM, technical);
 
-            // 8. Request & 9. RequestLog Entities
+            // Request & 9. RequestLog Entities
             initRequests(cleanliness, emily, wasteType, emp1);
 
-            // 10. Appointment Entity
+            // Appointment Entity
             initAppointments(cleanliness, emily);
 
             logger.info("--- DATABASE INITIALIZATION FINISHED SUCCESSFULLY ---");
