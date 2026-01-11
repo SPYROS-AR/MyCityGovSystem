@@ -11,6 +11,8 @@ COPY mvnw pom.xml ./
 # Copy source code
 COPY src ./src
 
+RUN tr -d '\r' < mvnw > mvnw_unix && mv mvnw_unix mvnw && chmod +x mvnw
+
 # Build the app
 RUN ./mvnw package -DskipTests
 
