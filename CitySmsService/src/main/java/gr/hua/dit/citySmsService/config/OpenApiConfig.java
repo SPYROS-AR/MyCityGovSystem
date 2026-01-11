@@ -28,7 +28,7 @@ public class OpenApiConfig {
         return GroupedOpenApi.builder()
                 .group("api")
                 .packagesToScan("gr.hua.dit.noc.web.rest")
-                .pathsToMatch("/api/v1/**")
+                .pathsToMatch("/api//**")
                 .build();
     }
 }
