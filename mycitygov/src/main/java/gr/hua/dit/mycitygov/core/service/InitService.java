@@ -13,6 +13,7 @@ import java.time.DayOfWeek;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @Transactional
@@ -140,7 +141,7 @@ public class InitService implements CommandLineRunner {
     }
 
     private Employee initEmployee(String username, String first, String last, String email, Department dept) {
-        Employee emp = employeeRepository.findByUsername(username);
+        Employee emp = employeeRepository.findByUsername(username).orElse(null);
         if (emp == null) {
             emp = new Employee();
             emp.setUsername(username);
@@ -149,7 +150,7 @@ public class InitService implements CommandLineRunner {
             emp.setLastName(last);
             emp.setEmail(email);
             emp.setDepartment(dept);
-            employeeRepository.save(emp);
+            emp = employeeRepository.save(emp);
             logger.info("Employee '{}' created.", username);
         }
         return emp;
