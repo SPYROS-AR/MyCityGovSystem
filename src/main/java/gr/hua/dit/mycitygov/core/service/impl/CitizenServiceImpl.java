@@ -131,7 +131,7 @@ public class CitizenServiceImpl implements CitizenService {
         citizen = citizenRepository.save(citizen);
 
         // Map Citizen to CitizenView
-        CitizenView citizenView = this.citizenMapper.convertCitizenToCitizenView(citizen);
+        CitizenView citizenView = this.citizenMapper.toDto(citizen);
 
         return CreateCitizenResult.success(citizenView);
     }

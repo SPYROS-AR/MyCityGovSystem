@@ -4,6 +4,7 @@ import gr.hua.dit.mycitygov.core.model.Request;
 import gr.hua.dit.mycitygov.core.service.model.AppointmentView;
 import gr.hua.dit.mycitygov.core.service.model.EmployeeView;
 import gr.hua.dit.mycitygov.core.service.model.RequestView;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -36,6 +37,7 @@ public interface EmployeeService {
      * @param id The request ID
      * @return The RequestView entity
      */
+    @Transactional(readOnly = true)
     RequestView getRequestById(Long id);
 
     /**

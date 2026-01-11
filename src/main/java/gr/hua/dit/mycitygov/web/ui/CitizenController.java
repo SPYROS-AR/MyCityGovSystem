@@ -41,20 +41,6 @@ public class CitizenController {
         return "redirect:/citizen/login";
     }
 
-    // --- AUTHENTICATION (LOGIN & REGISTER) ---
-
-    @GetMapping("/login")
-    public String showLoginForm() {
-        return "citizen/login";
-    }
-
-    /**
-     * Mock login handler - redirects to requests since Security is disabled.
-     */
-    @PostMapping("/login")
-    public String login() {
-        return "redirect:/citizen/requests/my";
-    }
 
     @GetMapping("/register")
     public String showRegisterForm(Model model) {
@@ -105,7 +91,7 @@ public class CitizenController {
 
         List<Request> requests = citizenService.getMyRequests(mockCitizenId);
         List<RequestView> requestViews = requests.stream()
-                .map(requestMapper::convertRequestToRequestView)
+                .map(requestMapper::toDto)
                 .collect(Collectors.toList());
 
         model.addAttribute("requests", requestViews);

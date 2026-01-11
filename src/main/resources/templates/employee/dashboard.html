@@ -54,7 +54,7 @@
         <tr th:each="req : ${requests}">
             <td th:text="${req.protocolNumber}"></td>
             <td th:text="${#temporals.format(req.submittedDate, 'dd/MM/yyyy')}"></td>
-            <td th:text="${req.requestType}"></td>
+            <td th:text="${req.requestTypeName}"></td>
             <td th:text="${req.citizen.lastName + ' ' + req.citizen.firstName}"></td>
             <td>
                 <span class="status-badge"

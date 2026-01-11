@@ -31,12 +31,13 @@ public class RequestMapper {
         return new RequestView(
                 request.getId(),
                 request.getProtocolNumber(),
-                requestTypeName,
+                request.getRequestType().getName(),
                 request.getStatus().name(),
                 request.getDescription(),
-                request.getCitizen().getFirstName() + " " + request.getCitizen().getLastName(),
-                assignedEmployeeName,
-                request.getSubmittedDate()
+                request.getSubmittedDate(),
+                citizenMapper.toDto(request.getCitizen()),
+                employeeMapper.toDto(request.getAssignedEmployee()),
+                request.getLogs()
         );
     }
 }

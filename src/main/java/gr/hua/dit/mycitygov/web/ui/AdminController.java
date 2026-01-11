@@ -2,8 +2,11 @@ package gr.hua.dit.mycitygov.web.ui;
 
 
 
+import gr.hua.dit.mycitygov.core.model.Department;
+import gr.hua.dit.mycitygov.core.model.DepartmentSchedule;
 import gr.hua.dit.mycitygov.core.service.AdminService;
 import gr.hua.dit.mycitygov.core.service.model.CreateRequestTypeRequest;
+import gr.hua.dit.mycitygov.core.service.model.DepartmentScheduleView;
 import gr.hua.dit.mycitygov.core.service.model.SystemStatistics;
 import gr.hua.dit.mycitygov.core.service.model.UserView;
 import jakarta.validation.Valid;
@@ -12,7 +15,10 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import java.time.DayOfWeek;
+import java.time.LocalTime;
 import java.util.List;
 
 @Controller
@@ -25,6 +31,8 @@ public class AdminController {
     public AdminController(AdminService adminService) {
         this.adminService = adminService;
     }
+
+    // GENERAL
 
     @GetMapping // redirect straight to dashboard (from /admin)
     public String redirectAdmin() {
@@ -47,6 +55,9 @@ public class AdminController {
         model.addAttribute("users", users);
         return "admin/users";
     }
+
+
+    // --- REQUEST TYPES MANAGEMENT ---
 
     /**
      * List all request types.
@@ -97,15 +108,6 @@ public class AdminController {
         return "redirect:/admin/request-types";
     }
 
-    /**
-     * List all departments (Optional - requested by the dashboard link).
-     */
-    @GetMapping("/departments")
-    public String listDepartments(Model model) {
-        model.addAttribute("departments", adminService.getAllDepartments());
-        return "admin/departments"; // You need to create this template if you want it to work
-    }
-
     @PostMapping("/request-types/{id}/toggle")
     public String toggleStatus(@PathVariable Long id) {
         adminService.toggleRequestTypeStatus(id);
@@ -116,5 +118,67 @@ public class AdminController {
     public String reassignDepartment(@RequestParam Long requestTypeId, @RequestParam Long departmentId) {
         adminService.reassignRequestType(requestTypeId, departmentId);
         return "redirect:/admin/request-types";
+    }
+
+
+
+    // --- DEPARTMENT MANAGEMENT ---
+
+    /**
+     * List all departments (Optional - requested by the dashboard link).
+     */
+    @GetMapping("/departments")
+    public String listDepartments(Model model) {
+        model.addAttribute("departments", adminService.getAllDepartments());
+        return "admin/departments"; // You need to create this template if you want it to work
+    }
+
+    // 1. Σελίδα Πληροφοριών & Επεξεργασίας (Info + Schedule)
+    @GetMapping("/departments/{id}/info")
+    public String departmentInfo(@PathVariable Long id, Model model) {
+        // Get department
+        Department department = adminService.getDepartmentById(id);
+        // get its schedule
+        List<DepartmentScheduleView> schedule = adminService.getDepartmentSchedule(id);
+
+        model.addAttribute("department", department);
+        model.addAttribute("schedule", schedule);
+
+        // dropdown
+        model.addAttribute("days", java.time.DayOfWeek.values());
+
+        return "admin/department-info"; // Το νέο template
+    }
+
+    // Update basic info ( name, description)
+    @PostMapping("/departments/{id}/update")
+    public String updateDepartmentInfo(@PathVariable Long id,
+                                       @RequestParam("name") String name,
+                                       @RequestParam("description") String description) {
+        adminService.updateDepartmentInfo(id, name, description);
+        return "redirect:/admin/departments/" + id + "/info?success";
+    }
+
+    // Update schedule for specific department
+    @PostMapping("/departments/{id}/schedule")
+    public String updateSchedule(
+            @PathVariable Long id,
+            @RequestParam DayOfWeek day,
+            @RequestParam LocalTime start,
+            @RequestParam LocalTime end,
+            RedirectAttributes redirectAttributes) { // <--- Required for flash messages
+
+        try {
+            adminService.updateDepartmentSchedule(id, day, start, end);
+            redirectAttributes.addFlashAttribute("successMessage", "Schedule updated successfully!");
+        } catch (IllegalArgumentException e) {
+            // We catch the error message from the Service and pass it to the UI
+            redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
+
+            // Redirect back to the edit page so the user can fix the input
+            return "redirect:/admin/departments/" + id + "/info";
+        }
+
+        return "redirect:/admin/departments/" + id + "/info";
     }
 }

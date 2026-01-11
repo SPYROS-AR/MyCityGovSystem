@@ -41,12 +41,20 @@
         <tr>
             <th>ID</th>
             <th>Name</th>
-        </tr>
+            <th>Description</th> <th>Actions</th>     </tr>
         </thead>
         <tbody>
         <tr th:each="dept : ${departments}">
             <td th:text="${dept.id}"></td>
             <td th:text="${dept.name}"></td>
+            <td th:text="${dept.description}"></td>
+            <td>
+                <a th:href="@{'/admin/departments/' + ${dept.id} + '/info'}"
+                   class="btn-custom btn-primary-custom"
+                   style="padding: 5px 10px; font-size: 0.9em;">
+                    Edit / Info
+                </a>
+            </td>
         </tr>
         </tbody>
     </table>

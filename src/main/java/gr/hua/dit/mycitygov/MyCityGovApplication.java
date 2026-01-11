@@ -40,13 +40,4 @@ public class MyCityGovApplication {
         SpringApplication.run(MyCityGovApplication.class, args);
     }
 
-    /**
-     * Επειδή το SecurityAutoConfiguration είναι excluded, πρέπει να φτιάξουμε
-     * εμείς το Bean του PasswordEncoder, αλλιώς το CitizenService δεν μπορεί να ξεκινήσει.
-     */
-    @Bean
-    public PasswordEncoder passwordEncoder() {
-        // Χρησιμοποιούμε τον NoOpPasswordEncoder που δεν κάνει κρυπτογράφηση (μόνο για development)
-        return NoOpPasswordEncoder.getInstance();
-    }
 }

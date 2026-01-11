@@ -39,7 +39,7 @@ public class CitizenRestController {
         List<Request> requests = citizenService.getMyRequests(currentCitizenId);
 
         List<RequestView> requestViews = requests.stream()
-                .map(requestMapper::convertRequestToRequestView)
+                .map(requestMapper::toDto)
                 .collect(Collectors.toList());
         return ResponseEntity.ok(requestViews);
     }
@@ -48,7 +48,7 @@ public class CitizenRestController {
     public ResponseEntity<RequestView> createRequest(@RequestBody SubmitRequestRequest submitRequest) {
         Long currentCitizenId = 3L;
         Request savedRequest = citizenService.saveRequest(submitRequest, currentCitizenId);
-        return ResponseEntity.ok(requestMapper.convertRequestToRequestView(savedRequest));
+        return ResponseEntity.ok(requestMapper.toDto(savedRequest));
     }
 
     // --- APPOINTMENTS ---

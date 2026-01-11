@@ -1,12 +1,10 @@
 package gr.hua.dit.mycitygov.core.service.impl;
 
-import gr.hua.dit.mycitygov.core.model.Department;
-import gr.hua.dit.mycitygov.core.model.Request;
-import gr.hua.dit.mycitygov.core.model.RequestType;
-import gr.hua.dit.mycitygov.core.model.User;
+import gr.hua.dit.mycitygov.core.model.*;
 import gr.hua.dit.mycitygov.core.repository.*;
 import gr.hua.dit.mycitygov.core.service.AdminService;
 import gr.hua.dit.mycitygov.core.service.mapper.DepartmentMapper;
+import gr.hua.dit.mycitygov.core.service.mapper.DepartmentScheduleMapper;
 import gr.hua.dit.mycitygov.core.service.mapper.RequestTypeMapper;
 import gr.hua.dit.mycitygov.core.service.mapper.UserMapper;
 import gr.hua.dit.mycitygov.core.service.model.*;
@@ -26,6 +24,8 @@ public class AdminServiceImpl implements AdminService {
     private final RequestTypeMapper requestTypeMapper;
     private final DepartmentRepository departmentRepository;
     private final DepartmentMapper departmentMapper;
+    private final DepartmentScheduleRepository scheduleRepository;
+    private final DepartmentScheduleMapper scheduleMapper;
     private final RequestTypeRepository requestTypeRepository;
     private final CitizenRepository citizenRepository;
     private final UserRepository userRepository;
@@ -35,6 +35,8 @@ public class AdminServiceImpl implements AdminService {
                             RequestTypeMapper requestTypeMapper,
                             DepartmentRepository departmentRepository,
                             DepartmentMapper departmentMapper,
+                            DepartmentScheduleRepository scheduleRepository,
+                            DepartmentScheduleMapper scheduleMapper,
                             RequestTypeRepository requestTypeRepository,
                             CitizenRepository citizenRepository, UserRepository userRepository,
                             UserMapper userMapper) {
@@ -42,6 +44,8 @@ public class AdminServiceImpl implements AdminService {
         this.requestTypeMapper = requestTypeMapper;
         this.departmentRepository = departmentRepository;
         this.departmentMapper = departmentMapper;
+        this.scheduleRepository = scheduleRepository;
+        this.scheduleMapper = scheduleMapper;
         this.requestTypeRepository = requestTypeRepository;
         this.citizenRepository = citizenRepository;
         this.userRepository = userRepository;
@@ -120,6 +124,51 @@ public class AdminServiceImpl implements AdminService {
                 .collect(Collectors.toList());
 
     }
+
+    @Override
+    @Transactional(readOnly = true)
+    public Department getDepartmentById(Long id) {
+        return departmentRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Department not found"));
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<DepartmentScheduleView> getDepartmentSchedule(Long departmentId) {
+        return scheduleRepository.findByDepartmentId(departmentId)
+                .stream()
+                .map(scheduleMapper::toDto)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    @Transactional
+    public void updateDepartmentSchedule(Long departmentId, java.time.DayOfWeek day, java.time.LocalTime start, java.time.LocalTime end) {
+        if (start.isAfter(end)) {
+            throw new IllegalArgumentException("Start time (" + start + ") must be before end time (" + end + ")");
+        }
+        Department dept = departmentRepository.findById(departmentId)
+                .orElseThrow(() -> new RuntimeException("Department not found"));
+
+        DepartmentSchedule schedule = scheduleRepository.findByDepartmentIdAndDayOfWeek(departmentId, day)
+                .orElse(new DepartmentSchedule(dept, day, start, end));
+
+        schedule.setStartTime(start);
+        schedule.setEndTime(end);
+
+        scheduleRepository.save(schedule);
+    }
+
+
+    @Override
+    @Transactional
+    public void updateDepartmentInfo(Long id, String name, String description) {
+        Department dept = getDepartmentById(id);
+        dept.setName(name);
+        dept.setDescription(description);
+        departmentRepository.save(dept);
+    }
+
 
     @Override
     @Transactional

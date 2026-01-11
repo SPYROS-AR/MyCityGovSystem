@@ -5,12 +5,10 @@ import gr.hua.dit.mycitygov.core.model.RequestLog;
 import java.time.LocalDateTime;
 import java.util.List;
 
-import java.time.LocalDateTime;
-
 public record RequestView(
         Long id,
         String protocolNumber,
-        String requestType,
+        String requestTypeName,
         String status,
         String description,
         LocalDateTime submittedDate,

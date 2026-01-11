@@ -54,7 +54,7 @@ public class SecurityConfig {
     @Order(2)
     public SecurityFilterChain uiChain(final HttpSecurity http) throws Exception {
         http
-                .securityMatcher("/**") // Ισχύει για όλα τα υπόλοιπα
+                .securityMatcher("/**")
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/", "/login", "/register", "/css/**", "/js/**", "/images/**").permitAll()
                         .requestMatchers("/admin/**").hasRole("ADMIN")

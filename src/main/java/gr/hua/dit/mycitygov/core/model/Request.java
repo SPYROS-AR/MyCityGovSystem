@@ -77,11 +77,11 @@ public class Request {
     }
 
     public enum Status {
-        SUBMITTED,      // Υποβλήθηκε
-        RECEIVED,       // Σε παραλαβή
-        PROCESSING,     // Σε επεξεργασία
-        PENDING_DOCS,   // Αναμονή στοιχείων
-        COMPLETED,      // Ολοκληρωμένο
-        REJECTED        // Απορρίφθηκε
+        SUBMITTED,
+        RECEIVED,
+        PROCESSING,
+        PENDING_DOCS,
+        COMPLETED,
+        REJECTED
     }
 }

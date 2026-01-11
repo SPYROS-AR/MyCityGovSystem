@@ -11,7 +11,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class CitizenMapper {
 
-    public CitizenView convertCitizenToCitizenView(final Citizen citizen){
+    public CitizenView toDto(final Citizen citizen){
         if (citizen == null) return null;
 
         return new CitizenView(

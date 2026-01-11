@@ -1,6 +1,8 @@
 package gr.hua.dit.mycitygov.core.service;
 
 
+import gr.hua.dit.mycitygov.core.model.Department;
+import gr.hua.dit.mycitygov.core.model.DepartmentSchedule;
 import gr.hua.dit.mycitygov.core.model.RequestType;
 import gr.hua.dit.mycitygov.core.service.model.*;
 
@@ -18,6 +20,14 @@ public interface AdminService {
     SystemStatistics getSystemStatistics();
 
     List<UserView> getAllUsers();
+
+    Department getDepartmentById(Long id);
+
+    List<DepartmentScheduleView> getDepartmentSchedule(Long departmentId);
+
+    void updateDepartmentSchedule(Long departmentId, java.time.DayOfWeek day, java.time.LocalTime start, java.time.LocalTime end);
+
+    void updateDepartmentInfo(Long id, String name, String description);
 
     void createRequestType(CreateRequestTypeRequest request);
 

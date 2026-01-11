@@ -96,7 +96,7 @@ public class EmployeeServiceImpl implements EmployeeService {
         Request request = requestRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Request with id " + id + " not found"));
         // fetch logs immediately to avoid LazyInitializationException in the controller/view
-        // request.getLogs().size();
+         request.getLogs().size();
         return requestMapper.toDto(request);
     }
 
