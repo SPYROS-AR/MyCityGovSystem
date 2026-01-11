@@ -4,12 +4,15 @@ import gr.hua.dit.mycitygov.core.model.*;
 import gr.hua.dit.mycitygov.core.repository.*;
 import gr.hua.dit.mycitygov.core.service.CitizenService;
 import gr.hua.dit.mycitygov.core.service.mapper.CitizenMapper;
+import gr.hua.dit.mycitygov.core.service.mapper.DepartmentScheduleMapper;
 import gr.hua.dit.mycitygov.core.service.model.*;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.DayOfWeek;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.List;
 import java.util.UUID;
 
@@ -33,6 +36,8 @@ public class CitizenServiceImpl implements CitizenService {
     private final RequestTypeRepository requestTypeRepository;
     private final AppointmentRepository appointmentRepository;
     private final DepartmentRepository departmentRepository;
+    private final DepartmentScheduleRepository departmentScheduleRepository;
+    private final DepartmentScheduleMapper departmentScheduleMapper;
 
     /**
      * Constructor for dependency injection.
@@ -51,7 +56,7 @@ public class CitizenServiceImpl implements CitizenService {
                               RequestRepository requestRepository,
                               RequestTypeRepository requestTypeRepository,
                               AppointmentRepository appointmentRepository,
-                              DepartmentRepository departmentRepository) {
+                              DepartmentRepository departmentRepository, DepartmentScheduleRepository departmentScheduleRepository, DepartmentScheduleMapper departmentScheduleMapper) {
         this.passwordEncoder = passwordEncoder;
         this.citizenRepository = citizenRepository;
         this.citizenMapper = citizenMapper;
@@ -59,6 +64,8 @@ public class CitizenServiceImpl implements CitizenService {
         this.requestTypeRepository = requestTypeRepository;
         this.appointmentRepository = appointmentRepository;
         this.departmentRepository = departmentRepository;
+        this.departmentScheduleRepository = departmentScheduleRepository;
+        this.departmentScheduleMapper = departmentScheduleMapper;
     }
 
     /**
@@ -137,6 +144,19 @@ public class CitizenServiceImpl implements CitizenService {
     }
 
     /**
+     * Retrieves a Citizen entity based on the provided username
+     *
+     * @param username the username of the citizen to be retrieved
+     * @return the Citizen entity
+     * @throws RuntimeException if no citizen is found with the given username
+     */
+    @Override
+    public Citizen getCitizenByUsername(String username) {
+        return citizenRepository.findByUsername(username)
+                .orElseThrow(() -> new RuntimeException("Citizen not found: " + username));
+    }
+
+    /**
      * Submits and saves a new request for a specific citizen.
      * <p>
      * This method handles the generation of a unique protocol number using a two-step save process:
@@ -205,13 +225,14 @@ public class CitizenServiceImpl implements CitizenService {
     public List<RequestType> getAllRequestTypes() { return requestTypeRepository.findAll(); }
 
     /**
-     * Books a new appointment for a citizen with a specific department.
-     * Sets the initial status of the appointment to {@code SCHEDULED}.
+     * Books an appointment for a citizen with a specified department and appointment date
+     * Validates the department schedule and ensures the requested appointment time falls within the department's working hours.
      *
-     * @param dto       The DTO containing the department ID and the desired date/time.
-     * @param citizenId The ID of the citizen booking the appointment.
-     * @return The saved {@link Appointment} entity.
-     * @throws RuntimeException if the Citizen or Department is not found.
+     * @param dto the request object containing the appointment details such as department ID and appointment date
+     * @param citizenId the unique identifier of the citizen booking the appointment
+     * @return the saved {@link Appointment} object containing the details of the scheduled appointment
+     * @throws RuntimeException if the citizen is not found, the department is not found, the department is closed on the requested day,
+     *         or the requested time falls outside the department's working hours
      */
     @Override
     @Transactional
@@ -222,10 +243,39 @@ public class CitizenServiceImpl implements CitizenService {
         Department department = departmentRepository.findById(dto.departmentId())
                 .orElseThrow(() -> new RuntimeException("Department not found"));
 
+        LocalDateTime requestedDate = dto.appointmentDate();
+
+        if (requestedDate.getMinute() != 0 && requestedDate.getMinute() != 30) {
+            throw new RuntimeException("Invalid time slot. Please choose XX:00 or XX:30.");
+        }
+
+        DayOfWeek requestedDay = requestedDate.getDayOfWeek();
+        LocalTime requestedTime = requestedDate.toLocalTime();
+
+        DepartmentSchedule scheduleEntity = departmentScheduleRepository
+                .findByDepartmentIdAndDayOfWeek(dto.departmentId(), requestedDay)
+                .orElseThrow(() -> new RuntimeException("The department is closed on " + requestedDay));
+
+        DepartmentScheduleView scheduleView = departmentScheduleMapper.toDto(scheduleEntity);
+
+        if (requestedTime.isBefore(scheduleView.startTime()) || !requestedTime.isBefore(scheduleView.endTime())) {
+            throw new RuntimeException("Selected time is outside working hours.");
+        }
+
+        boolean slotTaken = appointmentRepository.existsByDepartmentIdAndAppointmentDateAndStatusIn(
+                dto.departmentId(),
+                requestedDate,
+                List.of(Appointment.AppointmentStatus.SCHEDULED, Appointment.AppointmentStatus.COMPLETED)
+        );
+
+        if (slotTaken) {
+            throw new RuntimeException("This appointment slot is already fully booked. Please choose another time.");
+        }
+
         Appointment appointment = new Appointment();
         appointment.setCitizen(citizen);
         appointment.setDepartment(department);
-        appointment.setAppointmentDate(dto.appointmentDate());
+        appointment.setAppointmentDate(requestedDate);
         appointment.setStatus(Appointment.AppointmentStatus.SCHEDULED);
 
         return appointmentRepository.save(appointment);
