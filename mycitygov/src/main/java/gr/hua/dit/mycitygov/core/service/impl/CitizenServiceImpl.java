@@ -1,6 +1,7 @@
 package gr.hua.dit.mycitygov.core.service.impl;
 
 import gr.hua.dit.mycitygov.core.model.*;
+import gr.hua.dit.mycitygov.core.port.SmsNotificationPort;
 import gr.hua.dit.mycitygov.core.repository.*;
 import gr.hua.dit.mycitygov.core.service.CitizenService;
 import gr.hua.dit.mycitygov.core.service.mapper.CitizenMapper;
@@ -9,7 +10,9 @@ import gr.hua.dit.mycitygov.core.service.model.*;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.time.DayOfWeek;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -38,6 +41,7 @@ public class CitizenServiceImpl implements CitizenService {
     private final DepartmentRepository departmentRepository;
     private final DepartmentScheduleRepository departmentScheduleRepository;
     private final DepartmentScheduleMapper departmentScheduleMapper;
+    private final SmsNotificationPort smsPort;
 
     /**
      * Constructor for dependency injection.
@@ -56,7 +60,7 @@ public class CitizenServiceImpl implements CitizenService {
                               RequestRepository requestRepository,
                               RequestTypeRepository requestTypeRepository,
                               AppointmentRepository appointmentRepository,
-                              DepartmentRepository departmentRepository, DepartmentScheduleRepository departmentScheduleRepository, DepartmentScheduleMapper departmentScheduleMapper) {
+                              DepartmentRepository departmentRepository, DepartmentScheduleRepository departmentScheduleRepository, DepartmentScheduleMapper departmentScheduleMapper, SmsNotificationPort smsPort) {
         this.passwordEncoder = passwordEncoder;
         this.citizenRepository = citizenRepository;
         this.citizenMapper = citizenMapper;
@@ -66,6 +70,7 @@ public class CitizenServiceImpl implements CitizenService {
         this.departmentRepository = departmentRepository;
         this.departmentScheduleRepository = departmentScheduleRepository;
         this.departmentScheduleMapper = departmentScheduleMapper;
+        this.smsPort = smsPort;
     }
 
     /**
@@ -140,6 +145,9 @@ public class CitizenServiceImpl implements CitizenService {
         // Map Citizen to CitizenView
         CitizenView citizenView = this.citizenMapper.toDto(citizen);
 
+        smsPort.sendSms(citizen.getMobilePhoneNumber(),
+                "Welcome to MyCityGov, " + citizen.getFirstName() + "! Your account has been successfully created.");
+
         return CreateCitizenResult.success(citizenView);
     }
 
@@ -203,6 +211,28 @@ public class CitizenServiceImpl implements CitizenService {
                 request.getSubmittedDate().getYear() + "-" +
                 String.format("%03d", request.getId());
         request.setProtocolNumber(finalProtocolNumber);
+
+        // --- FILE ATTACHMENT LOGIC ---
+        MultipartFile file = dto.attachment();
+        if (file != null && !file.isEmpty()) {
+            try {
+                RequestDocument doc = new RequestDocument();
+                doc.setFileName(file.getOriginalFilename());
+                doc.setContentType(file.getContentType());
+                doc.setData(file.getBytes());
+                doc.setRequest(request);
+
+                request.getDocuments().add(doc); // Add to relationship
+            } catch (IOException e) {
+                throw new RuntimeException("Failed to upload file", e);
+            }
+        }
+
+        Request savedRequest = requestRepository.save(request);
+
+        // --- SMS NOTIFICATION: NEW REQUEST ---
+        smsPort.sendSms(citizen.getMobilePhoneNumber(),
+                "MyCityGov: Hello " + citizen.getFirstName() + ", your request has been submitted successfully. Protocol: " + finalProtocolNumber);
 
         // Update and save the request with the final protocol number
         return requestRepository.save(request);
@@ -279,6 +309,11 @@ public class CitizenServiceImpl implements CitizenService {
         appointment.setDepartment(department);
         appointment.setAppointmentDate(requestedDate);
         appointment.setStatus(Appointment.AppointmentStatus.SCHEDULED);
+
+        // --- SMS NOTIFICATION: APPOINTMENT ---
+        String dateStr = requestedDate.toLocalDate().toString() + " at " + requestedDate.toLocalTime();
+        smsPort.sendSms(citizen.getMobilePhoneNumber(),
+                "MyCityGov: Hello " + citizen.getFirstName() + ", appointment booked with " + department.getName() + " on " + dateStr);
 
         return appointmentRepository.save(appointment);
     }
