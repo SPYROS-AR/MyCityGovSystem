@@ -35,6 +35,22 @@ public interface EmployeeService {
     List<RequestView> getRequestsForDepartment(Long departmentId);
 
     /**
+     * Retrieves all employees from a department
+     * @param departmentId the department id
+     * @return List of Employees
+     */
+    List<EmployeeView> getEmployeesByDepartment(Long departmentId);
+
+    /**
+     * Updates the status of a request and adds comment in the log
+     * @param requestId the id of the request
+     * @param employeeId the id of the employee
+     * @param newStatus the new request status
+     * @param comment the comment to be added
+     */
+    void updateRequestProgress(Long requestId, Long employeeId, Request.Status newStatus, String comment);
+
+    /**
      * Retrieves a single request by its ID
      * @param id The request ID
      * @return The RequestView entity

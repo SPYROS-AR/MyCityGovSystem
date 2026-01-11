@@ -10,7 +10,7 @@
 
 <nav class="navbar-custom">
     <div class="container d-flex justify-content-between">
-        <span>MyCityGov</span>
+        <a th:href="@{/}" style="color: white; font-size: 1.2em;">MyCityGov</a>
 
         <div sec:authorize="isAuthenticated()">
             <span>
@@ -20,7 +20,7 @@
             <span class="badge bg-light text-dark ms-2" sec:authentication="principal.role"></span>
 
             <form th:action="@{/logout}" method="post" class="d-inline ms-3">
-                <button type="submit" class="btn btn-sm btn-outline-light">
+                <button type="submit" class="btn btn-sm btn-outline-light" style="border-radius: 20px;">
                     Logout
                 </button>
             </form>
@@ -32,72 +32,213 @@
     </div>
 </nav>
 
-<div class="container mt-4">
-    <div class="d-flex justify-content-between align-items-center mb-4 border-bottom pb-3">
+<div class="container mt-5">
+
+    <div th:if="${successMessage}" class="alert alert-success alert-dismissible fade show" role="alert" style="border-radius: 15px;">
+        <span th:text="${successMessage}"></span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+
+    <div th:if="${errorMessage}" class="alert alert-danger alert-dismissible fade show" role="alert" style="border-radius: 15px;">
+        <span th:text="${errorMessage}"></span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+
+    <div class="d-flex justify-content-between align-items-start mb-5">
         <div>
-            <h2 class="mb-1">Request <span th:text="${request?.protocolNumber}" style="color: #009879;"></span></h2>
-            <span class="text-muted small">Submitted: <span
-                    th:text="${#temporals.format(request?.submittedDate, 'dd/MM/yyyy')}"></span></span>
+            <h2 style="color: #333; margin-bottom: 5px;">Request Details</h2>
+            <h4 style="color: #009879;" th:text="${request?.protocolNumber}"></h4>
+            <div class="text-muted">
+                Submitted on <span th:text="${#temporals.format(request?.submittedDate, 'dd/MM/yyyy HH:mm')}"></span>
+            </div>
         </div>
-        <div>
-            <a th:href="@{/employee/dashboard}" class="btn-custom btn-primary-custom">Back to Dashboard</a> <br> <br>
-            <span class="status-badge" th:classappend="'status-' + ${request?.status}"
+        <div class="text-end">
+            <a th:href="@{/employee/dashboard}" class="btn-custom btn-primary-custom mb-3">
+                &larr; Back to Dashboard
+            </a>
+            <br>
+            <span class="status-badge"
+                  th:classappend="'status-' + ${request?.status}"
+                  style="font-size: 1em; padding: 10px 20px;"
                   th:text="${request?.status}"></span>
         </div>
     </div>
 
     <div class="row mb-5">
-        <div class="col-md-6">
-            <h4 style="color: #009879;">Citizen</h4>
-            <div class="p-3 bg-light rounded">
-                <p><strong>Name:</strong> <span
-                        th:text="${request?.citizen?.firstName} + ' ' + ${request?.citizen?.lastName}"></span></p>
-                <p><strong>Email:</strong> <span th:text="${request?.citizen?.email}"></span></p>
-                <p><strong>Phone:</strong> <span th:text="${request?.citizen?.mobilePhoneNumber}"></span></p>
+        <div class="col-md-6 mb-3">
+            <div class="info-box">
+                <h5 class="section-title">Citizen Information</h5>
+                <p class="mb-2"><strong>Name:</strong> <span th:text="${request?.citizen?.firstName} + ' ' + ${request?.citizen?.lastName}"></span></p>
+                <p class="mb-2"><strong>Email:</strong> <span th:text="${request?.citizen?.email}"></span></p>
+                <p class="mb-0"><strong>Phone:</strong> <span th:text="${request?.citizen?.mobilePhoneNumber}"></span></p>
             </div>
         </div>
-        <div class="col-md-6">
-            <h4 style="color: #009879;">Info</h4>
-            <div class="p-3 bg-light rounded">
-                <p><strong>Type:</strong> <span th:text="${request?.requestTypeName}"></span></p>
-                <p><strong>Assigned:</strong> <span
-                        th:text="${request?.assignedEmployee != null ? request.assignedEmployee.lastName : '-'}"></span>
+        <div class="col-md-6 mb-3">
+            <div class="info-box">
+                <h5 class="section-title">Request Context</h5>
+                <p class="mb-2"><strong>Type:</strong> <span th:text="${request?.requestTypeName}"></span></p>
+                <p class="mb-2"><strong>Department:</strong> <span th:text="${request?.department?.name}"></span></p>
+                <p class="mb-0"><strong>Assigned To:</strong>
+                    <span class="badge bg-info text-dark"
+                          th:if="${request?.assignedEmployee != null}"
+                          th:text="${request.assignedEmployee.firstName + ' ' + request.assignedEmployee.lastName}"></span>
+                    <span class="text-muted" th:if="${request?.assignedEmployee == null}">- Not Assigned -</span>
                 </p>
             </div>
         </div>
     </div>
 
     <div class="mb-5">
-        <h4 style="color: #009879;">Description</h4>
-        <div class="p-3 bg-light rounded" th:text="${request?.description}"></div>
+        <h5 class="section-title">Description</h5>
+        <div class="info-box" th:text="${request?.description}" style="min-height: 100px;"></div>
+    </div>
+
+    <div class="card-custom">
+        <div class="card-header-custom">
+            Actions Management
+        </div>
+        <div class="card-body p-4">
+
+            <div th:if="${request.status == 'COMPLETED' or request.status == 'REJECTED'}" class="alert alert-secondary text-center mb-0">
+                <h5 class="alert-heading">Request Closed</h5>
+                <p class="mb-0">This request has been processed and cannot be modified further.</p>
+            </div>
+
+            <div th:if="${request.status != 'COMPLETED' and request.status != 'REJECTED'}">
+
+                <div class="row mb-4 pb-4 border-bottom">
+                    <div class="col-md-4">
+                        <h6 style="color: #009879; font-weight: bold;">Assign Request</h6>
+                        <small class="text-muted">Transfer this request to another colleague or take it yourself.</small>
+                    </div>
+                    <div class="col-md-8">
+                        <form th:action="@{/employee/request/{id}/assign(id=${request.id})}" method="post" class="row g-2">
+                            <div class="col-sm-8">
+                                <select name="assigneeId" id="assigneeId" class="form-select" style="border-radius: 20px;">
+                                    <option value="" selected>-- Assign to Me --</option>
+                                    <option th:each="emp : ${colleagues}"
+                                            th:value="${emp.id}"
+                                            th:text="${emp.firstName + ' ' + emp.lastName}">
+                                    </option>
+                                </select>
+                            </div>
+                            <div class="col-sm-4">
+                                <button type="submit" class="btn-custom btn-warning-custom w-100">Assign</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <div class="row mb-4 pb-4 border-bottom">
+                    <div class="col-md-4">
+                        <h6 style="color: #17a2b8; font-weight: bold;">Update Progress</h6>
+                        <small class="text-muted">Change status (e.g., Pending Docs) without closing the request.</small>
+                    </div>
+                    <div class="col-md-8">
+                        <form th:action="@{/employee/request/{id}/update-progress(id=${request.id})}" method="post">
+                            <div class="mb-3">
+                                <select name="status" id="status" class="form-select" required style="border-radius: 20px;">
+                                    <option th:each="s : ${statuses}"
+                                            th:value="${s}"
+                                            th:text="${s}"
+                                            th:selected="${s == request.status}">
+                                    </option>
+                                </select>
+                            </div>
+                            <div class="mb-3">
+                                <textarea name="comment" class="form-control" rows="2" placeholder="Add an observation..." style="border-radius: 15px;"></textarea>
+                            </div>
+                            <div class="text-end">
+                                <button type="submit" class="btn-custom btn-primary-custom" style="background-color: #17a2b8;">Save Progress</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-4">
+                        <h6 style="color: #28a745; font-weight: bold;">Final Decision</h6>
+                        <small class="text-muted">Complete or Reject the request definitively.</small>
+                    </div>
+                    <div class="col-md-8 d-flex gap-3">
+                        <form th:action="@{/employee/request/{id}/approve(id=${request.id})}" method="post" class="flex-grow-1"
+                              onsubmit="return confirm('Are you sure you want to approve and complete this request?');">
+                            <button type="submit" class="btn-custom btn-success-custom w-100 h-100 py-2 fw-bold">Approve & Complete</button>
+                        </form>
+
+                        <button type="button" class="btn-custom btn-danger-custom flex-grow-1 py-2 fw-bold" data-bs-toggle="modal" data-bs-target="#rejectModal">
+                            Reject
+                        </button>
+                    </div>
+                </div>
+
+            </div>
+        </div>
     </div>
 
     <div class="mb-5">
-        <h4 style="color: #009879;">History</h4>
+        <h5 class="section-title">History Log</h5>
         <table class="styled-table">
             <thead>
             <tr>
                 <th>Date</th>
                 <th>User</th>
-                <th>Action</th>
+                <th>Comment</th>
+                <th>Status Change</th>
             </tr>
             </thead>
             <tbody>
             <tr th:each="log : ${request?.logs}">
                 <td th:text="${#temporals.format(log?.actionDate, 'dd/MM/yyyy HH:mm')}"></td>
                 <td>
-                    <span th:if="${log?.employee != null}" th:text="${log.employee.lastName}"></span>
-                    <span th:if="${log?.employee == null}">System</span>
+                    <strong th:if="${log?.employee != null}" th:text="${log.employee.firstName + ' ' + log.employee.lastName}"></strong>
+                    <span class="badge bg-secondary" th:if="${log?.employee == null}">System</span>
                 </td>
                 <td th:text="${log?.comment}"></td>
+                <td>
+                    <span th:if="${log.oldStatus != log.newStatus}">
+                        <span class="badge bg-light text-dark border" th:text="${log.oldStatus}"></span>
+                        <span style="color: #009879; font-weight: bold;">&rarr;</span>
+                        <span class="badge"
+                              th:classappend="'status-' + ${log.newStatus}"
+                              th:text="${log.newStatus}"></span>
+                    </span>
+                    <span th:if="${log.oldStatus == log.newStatus}" class="text-muted">-</span>
+                </td>
             </tr>
             <tr th:if="${#lists.isEmpty(request?.logs)}">
-                <td colspan="3">No history available.</td>
+                <td colspan="4" class="text-center text-muted py-3">No history recorded yet.</td>
             </tr>
             </tbody>
         </table>
     </div>
 </div>
+
+<div class="modal fade" id="rejectModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content" style="border-radius: 15px; overflow: hidden; border: none;">
+            <form th:action="@{/employee/request/{id}/reject(id=${request.id})}" method="post">
+                <div class="modal-header" style="background-color: #d32f2f; color: white;">
+                    <h5 class="modal-title">Reject Request</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body p-4">
+                    <p class="mb-3">You are about to reject this request. This action is irreversible.</p>
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Reason for rejection:</label>
+                        <textarea name="reason" class="form-control" rows="3" required placeholder="Please provide a reason..." style="border-radius: 10px;"></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer bg-light">
+                    <button type="button" class="btn-custom btn-secondary-custom" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn-custom btn-danger-custom">Confirm Rejection</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
 </body>
 </html>
