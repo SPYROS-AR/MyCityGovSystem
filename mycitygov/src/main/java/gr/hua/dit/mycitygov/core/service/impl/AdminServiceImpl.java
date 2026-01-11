@@ -17,6 +17,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+
 @Service
 public class AdminServiceImpl implements AdminService {
 
@@ -93,8 +94,7 @@ public class AdminServiceImpl implements AdminService {
                 .count();
 
 
-        SystemStatistics statistics = new SystemStatistics(totalRequests, pendingRequests, completedRequests, totalCitizens, requestsByDepartment, overdueRequests);
-        return statistics;
+        return new SystemStatistics(totalRequests, pendingRequests, completedRequests, totalCitizens, requestsByDepartment, overdueRequests);
     }
 
     @Override
@@ -104,7 +104,7 @@ public class AdminServiceImpl implements AdminService {
         List<RequestType> allRequestTypes = requestTypeRepository.findAll(Sort.by(Sort.Direction.ASC, "id"));
         return allRequestTypes
                 .stream()
-                .map(requestTypeMapper::toDto) // Μετατροπή
+                .map(requestTypeMapper::toDto)
                 .collect(Collectors.toList());
     }
 
@@ -141,6 +141,7 @@ public class AdminServiceImpl implements AdminService {
                 .collect(Collectors.toList());
     }
 
+    // -- LOGIC FOR DEPARTMENT SCHEDULE --
     @Override
     @Transactional
     public void createDepartment(String name, String description) {
@@ -159,8 +160,17 @@ public class AdminServiceImpl implements AdminService {
     @Override
     @Transactional
     public void updateDepartmentSchedule(Long departmentId, java.time.DayOfWeek day, java.time.LocalTime start, java.time.LocalTime end) {
+
+
+        // Delete the schedule for that day if both the opening and closing time are set to 00:00
+        if (start.equals(java.time.LocalTime.MIDNIGHT) && end.equals(java.time.LocalTime.MIDNIGHT)) {
+
+            scheduleRepository.findByDepartmentIdAndDayOfWeek(departmentId, day)
+                    .ifPresent(scheduleRepository::delete); // Delete if it exists
+            return;
+        }
         if (start.isAfter(end)) {
-            throw new IllegalArgumentException("Start time (" + start + ") must be before end time (" + end + ")");
+            throw new IllegalArgumentException("Opening time (" + start + ") must be before closing time (" + end + ")");
         }
         Department dept = departmentRepository.findById(departmentId)
                 .orElseThrow(() -> new RuntimeException("Department not found"));
@@ -184,6 +194,8 @@ public class AdminServiceImpl implements AdminService {
         departmentRepository.save(dept);
     }
 
+
+    // -- LOGIC FOR REQUESTS --
 
     @Override
     @Transactional

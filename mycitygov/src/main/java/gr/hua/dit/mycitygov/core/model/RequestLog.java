@@ -19,7 +19,7 @@ public class RequestLog {
 
     private LocalDateTime actionDate;
 
-    // Χρησιμοποιούμε το Request.Status
+
     @Enumerated(EnumType.STRING)
     private Request.Status oldStatus;
 

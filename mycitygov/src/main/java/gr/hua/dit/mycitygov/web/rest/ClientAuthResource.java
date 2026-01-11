@@ -25,14 +25,14 @@ public class ClientAuthResource {
 
     @PostMapping("/client-tokens")
     public ClientTokenResponse clientToken(@RequestBody @Valid ClientTokenRequest request) {
-        // 1. Αυθεντικοποίηση του Client
+        // Authenticate Client
         ClientDetails client = clientDetailsService.authenticate(request.clientId(), request.clientSecret())
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid credentials"));
 
-        // 2. Έκδοση του Token με πρόθεμα "client:"
+
         String token = jwtService.issue("client:" + client.id(), client.roles());
 
-        // 3. Επιστροφή της απάντησης (π.χ. διάρκεια 1 ώρα = 3600 δευτ.)
+
         return new ClientTokenResponse(token, "Bearer", 3600);
     }
 }

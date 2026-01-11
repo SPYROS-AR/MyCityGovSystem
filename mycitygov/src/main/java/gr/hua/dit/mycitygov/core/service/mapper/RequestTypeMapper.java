@@ -12,7 +12,7 @@ public class RequestTypeMapper {
                 requestType.getId(),
                 requestType.getName(),
                 requestType.getRequestCategory().toString(), // Enum -> String
-                requestType.getDepartment() != null ? requestType.getDepartment().getName() : "N/A", // Παίρνουμε μόνο το όνομα!
+                requestType.getDepartment() != null ? requestType.getDepartment().getName() : "N/A",
                 requestType.getSlaDays(),
                 requestType.isActive()
         );

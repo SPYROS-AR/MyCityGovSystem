@@ -19,6 +19,12 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
+/**
+ * Main security configuration class for the MyCityGov application.
+ * Implements a dual-layer security architecture:
+ * 1. Stateless (JWT-based) security for REST API endpoints (/api/**).
+ * 2. Stateful (Session/Cookie-based) security for the Web UI (Thymeleaf templates).
+ */
 @Configuration
 @EnableWebSecurity
 @EnableMethodSecurity
@@ -27,27 +33,33 @@ public class SecurityConfig {
     private final AuthenticationSuccessHandler successHandler;
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
 
-    // Σιγουρέψου ότι ο Constructor είναι έτσι:
+
     public SecurityConfig(AuthenticationSuccessHandler successHandler,
                           JwtAuthenticationFilter jwtAuthenticationFilter) {
         this.successHandler = successHandler;
         this.jwtAuthenticationFilter = jwtAuthenticationFilter;
     }
-    // --------------------------------------------------------
+
+
     // For REST API (JWT / Stateless)
-    // --------------------------------------------------------
+    /**
+     * Configures the security filter chain for the REST API.
+     * Sets session policy to STATELESS and integrates the {@link JwtAuthenticationFilter}.
+     * @param http The {@link HttpSecurity} object to configure.
+     * @return The configured {@link SecurityFilterChain} for API requests.
+     */
     @Bean
     @Order(1)
     public SecurityFilterChain apiChain(final HttpSecurity http) throws Exception {
         http
-                .securityMatcher("/api/**") // Εφαρμογή μόνο για το API
+                .securityMatcher("/api/**")
                 .csrf(AbstractHttpConfigurer::disable)
                 .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/auth/**").permitAll() // Ελεύθερο το login
+                        .requestMatchers("/api/auth/**").permitAll()
                         .anyRequest().authenticated()
                 )
-                // ΑΥΤΟ ΕΙΝΑΙ ΤΟ ΚΛΕΙΔΙ: Επιστρέφει 401 αντί για Redirect
+
                 .exceptionHandling(ex -> ex
                         .authenticationEntryPoint((request, response, authException) -> {
                             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
@@ -60,16 +72,23 @@ public class SecurityConfig {
         return http.build();
     }
 
-    // --------------------------------------------------------
     // For Web ui (Cookies / Thymeleaf)
-    // --------------------------------------------------------
+    /**
+     * Configures the security filter chain for the Web UI.
+     * Handles form-based login, logout, and role-based access for HTML views.
+     * @param http The {@link HttpSecurity} object to configure.
+     * @return The configured {@link SecurityFilterChain} for UI requests.
+     */
     @Bean
     @Order(2)
     public SecurityFilterChain uiChain(final HttpSecurity http) throws Exception {
         http
                 .securityMatcher("/**")
                 .authorizeHttpRequests(auth -> auth
+                        // allow everyone to access these paths
+                        .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll()
                         .requestMatchers("/", "/login", "/register", "/css/**", "/js/**", "/images/**").permitAll()
+                        // require special privileges
                         .requestMatchers("/admin/**").hasRole("ADMIN")
                         .requestMatchers("/employee/**").hasRole("EMPLOYEE")
                         .requestMatchers("/citizen/**").hasRole("CITIZEN")

@@ -19,6 +19,19 @@ import java.time.DayOfWeek;
 import java.time.LocalTime;
 import java.util.List;
 
+/**
+ * Controller class responsible for handling administrative operations in the web UI.
+ * <p>
+ * This controller manages routes under the "/admin" path and provides functionality for:
+ * <ul>
+ * <li>Viewing the system dashboard and statistics.</li>
+ * <li>Managing users (Citizens, Employees, Admins).</li>
+ * <li>Managing Request Types (Services) including creation, toggling status, and reassignment.</li>
+ * <li>Managing Departments, including creation, editing details, and setting weekly schedules.</li>
+ * </ul>
+ * </p>
+ * Access is restricted to users with the 'ADMIN' role.
+ */
 @Controller
 @PreAuthorize("hasRole('ADMIN')")
 @RequestMapping("/admin")
@@ -32,13 +45,21 @@ public class AdminController {
 
     // GENERAL
 
+    /**
+     * Redirects the root admin path ("/admin") directly to the dashboard.
+     *
+     * @return A redirect string to "/admin/dashboard".
+     */
     @GetMapping // redirect straight to dashboard (from /admin)
     public String redirectAdmin() {
         return "redirect:/admin/dashboard";
     }
 
     /**
-     * Dashboard page with system statistics.
+     * Displays the Admin Dashboard page containing system-wide statistics.
+     *
+     * @param model The UI Model used to pass statistics data to the view.
+     * @return The "admin/dashboard" view template.
      */
     @GetMapping("/dashboard")
     public String dashboard(Model model) {
@@ -47,6 +68,12 @@ public class AdminController {
         return "admin/dashboard";
     }
 
+    /**
+     * Displays a list of all registered users in the system.
+     *
+     * @param model The UI Model used to pass the list of users to the view.
+     * @return The "admin/users" view template.
+     */
     @GetMapping("/users")
     public String users(Model model) {
         List<UserView> users = adminService.getAllUsers();
@@ -58,7 +85,10 @@ public class AdminController {
     // --- REQUEST TYPES MANAGEMENT ---
 
     /**
-     * List all request types.
+     * Displays a list of all available request types (services) and allows management actions.
+     *
+     * @param model The UI Model used to pass request types and departments to the view.
+     * @return The "admin/request_types" view template.
      */
     @GetMapping("/request-types")
     public String listRequestTypes(Model model) {
@@ -68,7 +98,10 @@ public class AdminController {
     }
 
     /**
-     * Show form to create a new request type.
+     * Displays the form for creating a new Request Type.
+     *
+     * @param model The UI Model used to initialize the form object and load departments for the dropdown.
+     * @return The "admin/create_request_type" view template.
      */
     @GetMapping("/request-types/new")
     public String showCreateRequestTypeForm(Model model) {
@@ -83,7 +116,16 @@ public class AdminController {
     }
 
     /**
-     * Handle the submission of the new request type form.
+     * Handles the submission of the "Create Request Type" form.
+     * <p>
+     * Validates the input and, if successful, creates the new request type.
+     * If validation fails, returns the user to the form with error messages.
+     * </p>
+     *
+     * @param request       The DTO containing the form data.
+     * @param bindingResult Captures validation errors.
+     * @param model         The UI Model to reload data in case of errors.
+     * @return A redirect to the list page on success, or the form view on error.
      */
     @PostMapping("/request-types/new")
     public String createRequestType(
@@ -105,12 +147,25 @@ public class AdminController {
         return "redirect:/admin/request-types";
     }
 
+    /**
+     * Toggles the active status of a specific Request Type.
+     *
+     * @param id The ID of the request type to toggle.
+     * @return A redirect back to the request types list.
+     */
     @PostMapping("/request-types/{id}/toggle")
     public String toggleStatus(@PathVariable Long id) {
         adminService.toggleRequestTypeStatus(id);
         return "redirect:/admin/request-types";
     }
 
+    /**
+     * Reassigns a Request Type to a different Department.
+     *
+     * @param requestTypeId The ID of the request type to move.
+     * @param departmentId  The ID of the new target department.
+     * @return A redirect back to the request types list.
+     */
     @PostMapping("/request-types/reassign")
     public String reassignDepartment(@RequestParam Long requestTypeId, @RequestParam Long departmentId) {
         adminService.reassignRequestType(requestTypeId, departmentId);
@@ -121,7 +176,10 @@ public class AdminController {
     // --- DEPARTMENT MANAGEMENT ---
 
     /**
-     * List all departments (Optional - requested by the dashboard link).
+     * Displays a list of all departments.
+     *
+     * @param model The UI Model used to pass the list of departments to the view.
+     * @return The "admin/departments" view template.
      */
     @GetMapping("/departments")
     public String listDepartments(Model model) {
@@ -129,6 +187,14 @@ public class AdminController {
         return "admin/departments"; // You need to create this template if you want it to work
     }
 
+    /**
+     * Creates a new Department.
+     *
+     * @param name               The name of the new department.
+     * @param description        The description of the new department.
+     * @param redirectAttributes Used to pass success or error messages to the redirected page.
+     * @return A redirect back to the departments list.
+     */
     @PostMapping("/departments")
     public String createDepartment(@RequestParam("name") String name,
                                    @RequestParam("description") String description,
@@ -143,12 +209,21 @@ public class AdminController {
         return "redirect:/admin/departments";
     }
 
-    // Information and edit page
+    /**
+     * Displays detailed information and schedule for a specific department.
+     * <p>
+     * This page allows editing basic info and managing the weekly opening hours.
+     * </p>
+     *
+     * @param id    The ID of the department.
+     * @param model The UI Model used to pass department details, schedule, and days of week.
+     * @return The "admin/department-info" view template.
+     */
     @GetMapping("/departments/{id}/info")
     public String departmentInfo(@PathVariable Long id, Model model) {
         // Get department
         Department department = adminService.getDepartmentById(id);
-        // get its schedule
+        // get departmnet schedule
         List<DepartmentScheduleView> schedule = adminService.getDepartmentSchedule(id);
 
         model.addAttribute("department", department);
@@ -157,10 +232,17 @@ public class AdminController {
         // dropdown
         model.addAttribute("days", java.time.DayOfWeek.values());
 
-        return "admin/department-info"; // Το νέο template
+        return "admin/department-info";
     }
 
-    // Update basic info (name, description)
+    /**
+     * Updates the basic information (name and description) of a department.
+     *
+     * @param id          The ID of the department to update.
+     * @param name        The new name.
+     * @param description The new description.
+     * @return A redirect back to the department info page.
+     */
     @PostMapping("/departments/{id}/update")
     public String updateDepartmentInfo(@PathVariable Long id,
                                        @RequestParam("name") String name,
@@ -169,7 +251,20 @@ public class AdminController {
         return "redirect:/admin/departments/" + id + "/info?success";
     }
 
-    // Update schedule for specific department
+    /**
+     * Updates or creates a schedule entry for a specific day for a department.
+     * <p>
+     * If the service throws an error (e.g. start time after end time), the error message
+     * is captured and displayed to the user via Flash Attributes.
+     * </p>
+     *
+     * @param id                 The ID of the department.
+     * @param day                The day of the week to set hours for.
+     * @param start              The opening time.
+     * @param end                The closing time.
+     * @param redirectAttributes Used to pass success or error messages.
+     * @return A redirect back to the department info page.
+     */
     @PostMapping("/departments/{id}/schedule")
     public String updateSchedule(@PathVariable Long id,
                                 @RequestParam DayOfWeek day,
