@@ -23,20 +23,10 @@ public class RequestMapper {
     public RequestView toDto(final Request request) {
         if(request == null) return null;
 
-        String requestTypeName = (request.getRequestType() != null)
-                ? request.getRequestType().getName()
-                : null;
-
-        CitizenView citizenView = (request.getCitizen() != null)
-                ? citizenMapper.convertCitizenToCitizenView(request.getCitizen())
-                : null;
-
-        EmployeeView employeeView = (request.getAssignedEmployee() != null)
-                ? employeeMapper.toDto(request.getAssignedEmployee())
-                : null;
-        List<RequestLog> logs = (request.getLogs() != null)
-                ? new ArrayList<>(request.getLogs())
-                : new ArrayList<>();
+        String assignedEmployeeName = "-";
+        if (request.getAssignedEmployee() != null) {
+            assignedEmployeeName = request.getAssignedEmployee().getFirstName() + " " + request.getAssignedEmployee().getLastName();
+        }
 
         return new RequestView(
                 request.getId(),
@@ -44,10 +34,9 @@ public class RequestMapper {
                 requestTypeName,
                 request.getStatus().name(),
                 request.getDescription(),
-                request.getSubmittedDate(),
-                citizenView,
-                employeeView,
-                logs
+                request.getCitizen().getFirstName() + " " + request.getCitizen().getLastName(),
+                assignedEmployeeName,
+                request.getSubmittedDate()
         );
     }
 }
