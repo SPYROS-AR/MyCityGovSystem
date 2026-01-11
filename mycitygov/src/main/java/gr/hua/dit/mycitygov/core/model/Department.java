@@ -19,7 +19,7 @@ public class Department {
     @Column(nullable = false, unique = true)
     private String name;
 
-    @Column(columnDefinition = "TEXT") // Για να επιτρέπει μεγάλο κείμενο
+    @Column(columnDefinition = "TEXT")
     private String description;
 
     public Department() {

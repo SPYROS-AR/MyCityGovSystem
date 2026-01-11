@@ -41,6 +41,13 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         response.getWriter().write("{\"error\": \"invalid_token\"}");
     }
 
+    /**
+     * Determines which requests should not be filtered by this JWT logic.
+     * Only paths starting with "/api" are processed, excluding the login endpoint.
+     * @param request The current HTTP request.
+     * @return true if the filter should be skipped, false otherwise.
+     */
+
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request) throws ServletException {
         final String path = request.getServletPath();

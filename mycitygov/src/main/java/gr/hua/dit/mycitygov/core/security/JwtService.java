@@ -45,6 +45,12 @@ public class JwtService {
         this.ttlMinutes = ttlMinutes;
     }
 
+    /**
+     * Issues a new signed JWT for a specific subject.
+     * @param subject The unique identifier (username) of the authenticated user.
+     * @param roles A collection of roles assigned to the user (e.g., ADMIN, CITIZEN).
+     * @return A compact, URL-safe JWT string.
+     */
     public String issue(final String subject, final Collection<String> roles) {
         final Instant now = Instant.now();
         return Jwts.builder()
@@ -58,6 +64,12 @@ public class JwtService {
                 .compact();
     }
 
+    /**
+     * Parses and validates a JWT string.
+     * @param token The JWT string to be parsed.
+     * @return The {@link Claims} contained within the token if valid.
+     * @throws io.jsonwebtoken.JwtException if the token is expired, has an invalid signature, or is malformed.
+     */
     public Claims parse(final String token) {
         return Jwts.parser()
                 .requireAudience(this.audience)

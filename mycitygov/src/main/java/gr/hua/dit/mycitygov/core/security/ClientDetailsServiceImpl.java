@@ -14,18 +14,18 @@ import java.util.stream.Collectors;
 public class ClientDetailsServiceImpl implements ClientDetailsService {
 
     private final ClientRepository clientRepository;
-    private final PasswordEncoder passwordEncoder; // 2. Προσθήκη field
+    private final PasswordEncoder passwordEncoder;
 
     public ClientDetailsServiceImpl(ClientRepository clientRepository, PasswordEncoder passwordEncoder) {
         this.clientRepository = clientRepository;
-        this.passwordEncoder = passwordEncoder; // Injection μέσω constructor
+        this.passwordEncoder = passwordEncoder;
     }
 
     @Override
     public Optional<ClientDetails> authenticate(final String id, final String secret) {
-        // Αναζήτηση client
+        // Search for client
         return this.clientRepository.findByName(id)
-                // 3. Χρήση της matches() αντί για Objects.equals()
+                //
                 .filter(client -> passwordEncoder.matches(secret, client.getSecret()))
                 .map(client -> new ClientDetails(
                         client.getName(),

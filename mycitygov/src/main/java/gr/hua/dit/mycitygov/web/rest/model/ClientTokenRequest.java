@@ -1,5 +1,6 @@
 package gr.hua.dit.mycitygov.web.rest.model;
 
+import gr.hua.dit.mycitygov.web.rest.ClientAuthResource;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 

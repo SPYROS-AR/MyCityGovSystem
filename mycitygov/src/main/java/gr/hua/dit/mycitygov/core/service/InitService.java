@@ -215,7 +215,8 @@ public class InitService implements CommandLineRunner {
             Appointment app = new Appointment();
             app.setCitizen(citizen);
             app.setDepartment(dept);
-            app.setAppointmentDate(LocalDateTime.now().plusDays(2).withHour(10).withMinute(0).withSecond(0).withNano(0));
+            app.setAppointmentDate(LocalDateTime.now().plusDays(2)
+                    .withHour(10).withMinute(0).withSecond(0).withNano(0));
             app.setStatus(Appointment.AppointmentStatus.SCHEDULED);
             appointmentRepository.save(app);
             logger.info("Entity 'Appointment' initialized.");
