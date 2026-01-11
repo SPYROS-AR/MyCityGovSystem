@@ -31,17 +31,16 @@ public class InitService implements CommandLineRunner {
     private final AdminRepository adminRepository;
     private final PasswordEncoder passwordEncoder;
 
-    public InitService(
-            ClientRepository clientRepository,
-            DepartmentRepository departmentRepository,
-            DepartmentScheduleRepository departmentScheduleRepository,
-            EmployeeRepository employeeRepository,
-            CitizenRepository citizenRepository,
-            RequestRepository requestRepository,
-            RequestTypeRepository requestTypeRepository,
-            AppointmentRepository appointmentRepository,
-            AdminRepository adminRepository,
-            PasswordEncoder passwordEncoder) {
+    public InitService(ClientRepository clientRepository,
+                       DepartmentRepository departmentRepository,
+                       DepartmentScheduleRepository departmentScheduleRepository,
+                       EmployeeRepository employeeRepository,
+                       CitizenRepository citizenRepository,
+                       RequestRepository requestRepository,
+                       RequestTypeRepository requestTypeRepository,
+                       AppointmentRepository appointmentRepository,
+                       AdminRepository adminRepository,
+                       PasswordEncoder passwordEncoder) {
         this.clientRepository = clientRepository;
         this.departmentRepository = departmentRepository;
         this.departmentScheduleRepository = departmentScheduleRepository;
@@ -58,39 +57,54 @@ public class InitService implements CommandLineRunner {
     public void run(String... args) {
         logger.info("--- STARTING DATABASE INITIALIZATION ---");
 
-        // 1. Initialize API Clients
-        initClients();
+        try {
+            // 1. Client Entity
+            initClients();
 
-        // 2. Initialize exactly one Admin
-        initAdmin();
+            // 2. Admin Entity (Single Object)
+            initAdmin();
 
-        // 3. Initialize Departments
-        Department cleanliness = initDepartment("Cleanliness", "Waste management and recycling services");
-        Department technical = initDepartment("Technical Services", "Infrastructure and urban planning");
-        Department social = initDepartment("Social Services", "Social welfare and community support");
+            // 3. Department Entity
+            Department cleanliness = initDepartment("Cleanliness", "Waste management and recycling services");
+            Department technical = initDepartment("Technical Services", "Infrastructure and urban planning");
+            Department social = initDepartment("Social Services", "Social welfare and community support");
 
-        // 4. Initialize Department Schedules (Mon-Fri 08:00 - 15:00)
-        initSchedules(List.of(cleanliness, technical, social));
+            // 4. DepartmentSchedule Entity
+            initSchedules(List.of(cleanliness, technical, social));
 
-        // 5. Initialize at least 3 Employees
-        initEmployees(cleanliness, technical, social);
+            // 5. Employee Entity (3 realistic employees)
+            Employee emp1 = initEmployee("emp1", "Robert", "Miller", "r.miller@mycity.gov", cleanliness);
+            initEmployee("emp2", "Sarah", "Jenkins", "s.jenkins@mycity.gov", technical);
+            initEmployee("emp3", "David", "Wilson", "d.wilson@mycity.gov", social);
 
-        // Initialize Citizens and other data
-        initCitizens();
-        initRequestTypes(cleanliness, technical, social);
+            // 6. Citizen Entity
+            List<Citizen> citizens = initCitizens();
+            Citizen emily = citizens.get(0);
 
-        logger.info("--- DATABASE INITIALIZATION FINISHED ---");
+            // 7. RequestType Entity
+            RequestType wasteType = initRequestType("WASTE_COLLECTION", RequestType.RequestCategory.PROBLEM, cleanliness);
+            initRequestType("ROAD_REPAIR", RequestType.RequestCategory.PROBLEM, technical);
+
+            // 8. Request & 9. RequestLog Entities
+            initRequests(cleanliness, emily, wasteType, emp1);
+
+            // 10. Appointment Entity
+            initAppointments(cleanliness, emily);
+
+            logger.info("--- DATABASE INITIALIZATION FINISHED SUCCESSFULLY ---");
+        } catch (Exception e) {
+            logger.error("Error during database initialization: ", e);
+        }
     }
 
     private void initClients() {
         if (clientRepository.findByName("my_app").isEmpty()) {
             clientRepository.save(new Client("my_app", passwordEncoder.encode("secret123"), "CLIENT_READ"));
-            logger.info("Created Client: my_app");
+            logger.info("Entity 'Client' initialized.");
         }
     }
 
     private void initAdmin() {
-        // Ensure only one admin exists
         if (adminRepository.count() == 0) {
             Admin admin = new Admin();
             admin.setFirstName("John");
@@ -99,7 +113,7 @@ public class InitService implements CommandLineRunner {
             admin.setPassword(passwordEncoder.encode("admin123"));
             admin.setEmail("admin@mycity.gov");
             adminRepository.save(admin);
-            logger.info("Created single Admin: admin");
+            logger.info("Entity 'Admin' initialized.");
         }
     }
 
@@ -109,7 +123,7 @@ public class InitService implements CommandLineRunner {
                     Department d = new Department();
                     d.setName(name);
                     d.setDescription(description);
-                    logger.info("Created Department: {}", name);
+                    logger.info("Department '{}' created.", name);
                     return departmentRepository.save(d);
                 });
     }
@@ -117,40 +131,28 @@ public class InitService implements CommandLineRunner {
     private void initSchedules(List<Department> departments) {
         for (Department dept : departments) {
             if (departmentScheduleRepository.findByDepartmentId(dept.getId()).isEmpty()) {
-                // Working hours: Monday to Friday, 08:00 to 15:00
                 for (DayOfWeek day : List.of(DayOfWeek.MONDAY, DayOfWeek.TUESDAY, DayOfWeek.WEDNESDAY, DayOfWeek.THURSDAY, DayOfWeek.FRIDAY)) {
                     departmentScheduleRepository.save(new DepartmentSchedule(dept, day, LocalTime.of(8, 0), LocalTime.of(15, 0)));
                 }
-                logger.info("Created schedules for Department: {}", dept.getName());
+                logger.info("Entity 'DepartmentSchedule' initialized for {}.", dept.getName());
             }
         }
     }
 
-    private void initEmployees(Department cleanliness, Department technical, Department social) {
-        // Employee 1
-        if (employeeRepository.findByUsername("emp1").isEmpty()) {
-            createEmployee("emp1", "Robert", "Miller", "r.miller@mycity.gov", cleanliness);
+    private Employee initEmployee(String username, String first, String last, String email, Department dept) {
+        Employee emp = employeeRepository.findByUsername(username);
+        if (emp == null) {
+            emp = new Employee();
+            emp.setUsername(username);
+            emp.setPassword(passwordEncoder.encode("password"));
+            emp.setFirstName(first);
+            emp.setLastName(last);
+            emp.setEmail(email);
+            emp.setDepartment(dept);
+            employeeRepository.save(emp);
+            logger.info("Employee '{}' created.", username);
         }
-        // Employee 2
-        if (employeeRepository.findByUsername("emp2").isEmpty()) {
-            createEmployee("emp2", "Sarah", "Jenkins", "s.jenkins@mycity.gov", technical);
-        }
-        // Employee 3
-        if (employeeRepository.findByUsername("emp3").isEmpty()) {
-            createEmployee("emp3", "David", "Wilson", "d.wilson@mycity.gov", social);
-        }
-    }
-
-    private void createEmployee(String username, String first, String last, String email, Department dept) {
-        Employee emp = new Employee();
-        emp.setUsername(username);
-        emp.setPassword(passwordEncoder.encode("password"));
-        emp.setFirstName(first);
-        emp.setLastName(last);
-        emp.setEmail(email);
-        emp.setDepartment(dept);
-        employeeRepository.save(emp);
-        logger.info("Created Employee: {}", username);
+        return emp;
     }
 
     private List<Citizen> initCitizens() {
@@ -166,37 +168,56 @@ public class InitService implements CommandLineRunner {
             c.setAddress("10 Broadway Ave, City Center");
             return citizenRepository.save(c);
         });
-
-        Citizen c2 = citizenRepository.findByEmail("mark.d@gmail.com").orElseGet(() -> {
-            Citizen c = new Citizen();
-            c.setUsername("citizen2");
-            c.setPassword(passwordEncoder.encode("password"));
-            c.setFirstName("Mark");
-            c.setLastName("Davis");
-            c.setEmail("mark.d@gmail.com");
-            c.setNationalId("ID987654");
-            c.setMobilePhoneNumber("5550202");
-            c.setAddress("42 Sunset Blvd, Residential Area");
-            return citizenRepository.save(c);
-        });
-        return List.of(c1, c2);
+        return List.of(c1);
     }
 
-    private void initRequestTypes(Department cleanliness, Department technical, Department social) {
-        // Certificates and Problems for various departments
-        createRequestType("WASTE_COLLECTION", RequestType.RequestCategory.PROBLEM, cleanliness);
-        createRequestType("ROAD_REPAIR", RequestType.RequestCategory.PROBLEM, technical);
-        createRequestType("SOCIAL_SUPPORT", RequestType.RequestCategory.CERTIFICATE, social);
-    }
-
-    private void createRequestType(String name, RequestType.RequestCategory category, Department dept) {
-        if (requestTypeRepository.findByName(name).isEmpty()) {
+    private RequestType initRequestType(String name, RequestType.RequestCategory category, Department dept) {
+        return requestTypeRepository.findByName(name).orElseGet(() -> {
             RequestType rt = new RequestType();
             rt.setName(name);
             rt.setRequestCategory(category);
             rt.setDepartment(dept);
-            requestTypeRepository.save(rt);
-            logger.info("Created Request Type: {}", name);
+            logger.info("RequestType '{}' created.", name);
+            return requestTypeRepository.save(rt);
+        });
+    }
+
+    private void initRequests(Department dept, Citizen citizen, RequestType type, Employee employee) {
+        if (requestRepository.findByProtocolNumber("REQ-2025-001").isEmpty()) {
+            Request req = new Request();
+            req.setProtocolNumber("REQ-2025-001");
+            req.setSubmittedDate(LocalDateTime.now().minusHours(2));
+            req.setDescription("Pothole reported at Main Street.");
+            req.setStatus(Request.Status.PROCESSING);
+            req.setDepartment(dept);
+            req.setCitizen(citizen);
+            req.setRequestType(type);
+            req.setAssignedEmployee(employee);
+
+            // Initialize RequestLog Entity
+            RequestLog log = new RequestLog();
+            log.setActionDate(LocalDateTime.now());
+            log.setComment("Request assigned to employee for review.");
+            log.setOldStatus(Request.Status.SUBMITTED);
+            log.setNewStatus(Request.Status.PROCESSING);
+            log.setEmployee(employee);
+            log.setRequest(req);
+            req.getLogs().add(log);
+
+            requestRepository.save(req);
+            logger.info("Entities 'Request' and 'RequestLog' initialized.");
+        }
+    }
+
+    private void initAppointments(Department dept, Citizen citizen) {
+        if (appointmentRepository.count() == 0) {
+            Appointment app = new Appointment();
+            app.setCitizen(citizen);
+            app.setDepartment(dept);
+            app.setAppointmentDate(LocalDateTime.now().plusDays(2).withHour(10).withMinute(0));
+            app.setStatus(Appointment.AppointmentStatus.SCHEDULED);
+            appointmentRepository.save(app);
+            logger.info("Entity 'Appointment' initialized.");
         }
     }
 }
