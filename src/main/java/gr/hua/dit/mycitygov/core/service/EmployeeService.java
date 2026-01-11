@@ -20,8 +20,6 @@ public interface EmployeeService {
      */
     List<EmployeeView> getAllEmployees();
 
-    Optional<EmployeeView> getEmployeeByUsername(String username);
-
     /**
      * Retrieves all requests associated with the department of a specific employee
      * @param employeeId The ID of the employee.
