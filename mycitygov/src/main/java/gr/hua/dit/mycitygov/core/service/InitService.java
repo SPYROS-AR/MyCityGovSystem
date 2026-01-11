@@ -13,6 +13,7 @@ import java.time.DayOfWeek;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @Transactional
@@ -76,17 +77,6 @@ public class InitService implements CommandLineRunner {
             Employee emp1 = initEmployee("emp1", "Robert", "Miller", "r.miller@mycity.gov", cleanliness);
             initEmployee("emp2", "Sarah", "Jenkins", "s.jenkins@mycity.gov", technical);
             initEmployee("emp3", "David", "Wilson", "d.wilson@mycity.gov", social);
-
-            Employee emp2 = initEmployee("emp1", "Robert", "Miller", "r.miller@mycity.gov", cleanliness);
-            initEmployee("emp4", "Alice", "Cooper", "a.cooper@mycity.gov", cleanliness);
-
-            // Technical Dept Employees
-            initEmployee("emp2", "Sarah", "Jenkins", "s.jenkins@mycity.gov", technical);
-            initEmployee("emp5", "Bob", "Marley", "b.marley@mycity.gov", technical); // Συνάδελφος του emp2
-
-            // Social Dept Employees
-            initEmployee("emp3", "David", "Wilson", "d.wilson@mycity.gov", social);
-            initEmployee("emp6", "Charlie", "Chaplin", "c.chaplin@mycity.gov", social); // Συνάδελφος του emp3
 
             // 6. Citizen Entity
             List<Citizen> citizens = initCitizens();

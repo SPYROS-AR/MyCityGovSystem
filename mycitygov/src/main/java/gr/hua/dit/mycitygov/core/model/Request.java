@@ -1,6 +1,6 @@
 package gr.hua.dit.mycitygov.core.model;
 
-
+import gr.hua.dit.mycitygov.core.service.InitService;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -22,7 +22,11 @@ public class Request {
     @Column(unique = true, nullable = false)
     private String protocolNumber;
 
+
     private LocalDateTime submittedDate;
+
+    // due Date is fixed
+    @Setter(AccessLevel.NONE)
     private LocalDateTime dueDate;
 
     @Enumerated(EnumType.STRING)
@@ -50,6 +54,14 @@ public class Request {
     @ManyToOne
     @JoinColumn(name = "department_id", nullable = false)
     private Department department;
+
+    @PrePersist
+    protected void onCreate() {
+        if (submittedDate == null) { /** only check for null when using mock requests in {@link InitService} */
+            submittedDate = LocalDateTime.now();
+        }
+        dueDate = submittedDate.plusDays(requestType.getSlaDays());
+    }
 
     public Request() {
     }

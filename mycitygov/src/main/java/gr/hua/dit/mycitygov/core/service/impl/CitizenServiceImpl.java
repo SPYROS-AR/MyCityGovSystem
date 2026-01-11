@@ -199,7 +199,9 @@ public class CitizenServiceImpl implements CitizenService {
         request = requestRepository.save(request);
 
         // Generate the correct protocol number format: REQ-YYYY-ID
-        String finalProtocolNumber = "REQ-" + request.getSubmittedDate().getYear() + "-" + request.getId();
+        String finalProtocolNumber = "REQ-" +
+                request.getSubmittedDate().getYear() + "-" +
+                String.format("%03d", request.getId());
         request.setProtocolNumber(finalProtocolNumber);
 
         // Update and save the request with the final protocol number
@@ -243,7 +245,7 @@ public class CitizenServiceImpl implements CitizenService {
         Department department = departmentRepository.findById(dto.departmentId())
                 .orElseThrow(() -> new RuntimeException("Department not found"));
 
-        LocalDateTime requestedDate = dto.appointmentDate();
+        LocalDateTime requestedDate = dto.appointmentDate().withSecond(0).withNano(0);
 
         if (requestedDate.getMinute() != 0 && requestedDate.getMinute() != 30) {
             throw new RuntimeException("Invalid time slot. Please choose XX:00 or XX:30.");
