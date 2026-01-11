@@ -10,11 +10,8 @@ import gr.hua.dit.mycitygov.core.service.model.BookAppointmentRequest;
 import gr.hua.dit.mycitygov.core.service.model.RequestView;
 import gr.hua.dit.mycitygov.core.service.model.SubmitRequestRequest;
 import org.springframework.http.ResponseEntity;
-<<<<<<< HEAD
 import org.springframework.security.core.Authentication;
-=======
 import org.springframework.security.access.prepost.PreAuthorize;
->>>>>>> f67f8ad8fbdafd7359f62a4509f2f5293437490e
 import org.springframework.web.bind.annotation.*;
 
 import java.security.Principal;

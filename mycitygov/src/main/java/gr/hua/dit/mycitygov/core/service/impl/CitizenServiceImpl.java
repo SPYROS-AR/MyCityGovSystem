@@ -243,27 +243,39 @@ public class CitizenServiceImpl implements CitizenService {
         Department department = departmentRepository.findById(dto.departmentId())
                 .orElseThrow(() -> new RuntimeException("Department not found"));
 
-        DayOfWeek requestedDay = dto.appointmentDate().getDayOfWeek();
-        LocalTime requestedTime = dto.appointmentDate().toLocalTime();
+        LocalDateTime requestedDate = dto.appointmentDate();
 
-        // Fetch Schedule entity
+        if (requestedDate.getMinute() != 0 && requestedDate.getMinute() != 30) {
+            throw new RuntimeException("Invalid time slot. Please choose XX:00 or XX:30.");
+        }
+
+        DayOfWeek requestedDay = requestedDate.getDayOfWeek();
+        LocalTime requestedTime = requestedDate.toLocalTime();
+
         DepartmentSchedule scheduleEntity = departmentScheduleRepository
                 .findByDepartmentIdAndDayOfWeek(dto.departmentId(), requestedDay)
                 .orElseThrow(() -> new RuntimeException("The department is closed on " + requestedDay));
 
-        // Map to view DTO
         DepartmentScheduleView scheduleView = departmentScheduleMapper.toDto(scheduleEntity);
 
-        // Validate time
-        if (requestedTime.isBefore(scheduleView.startTime()) || requestedTime.isAfter(scheduleView.endTime())) {
-            throw new RuntimeException("Selected time " + requestedTime + " is outside working hours (" +
-                    scheduleView.startTime() + " - " + scheduleView.endTime() + ")");
+        if (requestedTime.isBefore(scheduleView.startTime()) || !requestedTime.isBefore(scheduleView.endTime())) {
+            throw new RuntimeException("Selected time is outside working hours.");
+        }
+
+        boolean slotTaken = appointmentRepository.existsByDepartmentIdAndAppointmentDateAndStatusIn(
+                dto.departmentId(),
+                requestedDate,
+                List.of(Appointment.AppointmentStatus.SCHEDULED, Appointment.AppointmentStatus.COMPLETED)
+        );
+
+        if (slotTaken) {
+            throw new RuntimeException("This appointment slot is already fully booked. Please choose another time.");
         }
 
         Appointment appointment = new Appointment();
         appointment.setCitizen(citizen);
         appointment.setDepartment(department);
-        appointment.setAppointmentDate(dto.appointmentDate());
+        appointment.setAppointmentDate(requestedDate);
         appointment.setStatus(Appointment.AppointmentStatus.SCHEDULED);
 
         return appointmentRepository.save(appointment);
