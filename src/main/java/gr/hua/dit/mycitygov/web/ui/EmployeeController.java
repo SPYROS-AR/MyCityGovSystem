@@ -34,8 +34,10 @@ public class EmployeeController {
      * @return The "employee/dashboard" view template (HTML page)
      */
     @GetMapping("/dashboard")
-    public String dashboard(Model model) {
-        model.addAttribute("requests", employeeService.getRequestsForEmployeeDepartment(currentEmployeeId));
+    public String dashboard(Model model, Principal principal) {
+        String username = principal.getName();  // username to search in the db
+        Long empId = employeeService.getEmployeeByUsername(username).getId();    // get employee dto
+        model.addAttribute("requests", employeeService.getRequestsForEmployeeDepartment(empId));
         return "employee/dashboard";
     }
 
@@ -63,8 +65,8 @@ public class EmployeeController {
      */
     @PostMapping("/request/{id}/assign")
     public String assignRequest(@PathVariable("id") Long requestId, Principal principal) {
-
-        employeeService.assignRequestToEmployee(requestId, principalId);
+        Long currentEmployeeId = employeeService.getEmployeeByUsername(principal.getName()).getId();
+        employeeService.assignRequestToEmployee(requestId, currentEmployeeId);
         return "redirect:/employee/dashboard";
     }
 
@@ -76,8 +78,9 @@ public class EmployeeController {
      * @return Redirects back to the dashboard
      */
     @PostMapping("/request/{id}/approve")
-    public String approveRequest(@PathVariable("id") Long requestId) {
-        employeeService.approveRequest(requestId, id);
+    public String approveRequest(@PathVariable("id") Long requestId, Principal principal) {
+        Long currentEmployeeId = employeeService.getEmployeeByUsername(principal.getName()).getId();
+        employeeService.approveRequest(requestId, currentEmployeeId);
         return "redirect:/employee/dashboard";
     }
 
@@ -91,7 +94,9 @@ public class EmployeeController {
      */
     @PostMapping("/request/{id}/reject")
     public String rejectRequest(@PathVariable("id") Long requestId,
-                                @RequestParam(required = false) String reason) {
+                                @RequestParam(required = false) String reason,
+                                Principal principal) {
+        Long currentEmployeeId = employeeService.getEmployeeByUsername(principal.getName()).getId();
 
         // default rejection message
         if (reason == null || reason.trim().isEmpty()) {
@@ -109,7 +114,8 @@ public class EmployeeController {
      * @return The "employee/appointments" view template
      */
     @GetMapping("/appointments")
-    public String appointments(Model model) {
+    public String appointments(Model model, Principal principal) {
+        Long currentEmployeeId = employeeService.getEmployeeByUsername(principal.getName()).getId();
         model.addAttribute("appointments", employeeService.getAppointmentsForEmployeeDepartment(currentEmployeeId));
         return "employee/appointments";
     }

@@ -7,15 +7,20 @@ import org.springframework.stereotype.Component;
 @Component
 public class AppointmentMapper {
 
+    private final CitizenMapper citizenMapper;
+
+    public AppointmentMapper(CitizenMapper citizenMapper) {
+        this.citizenMapper = citizenMapper;
+    }
+
     public AppointmentView toAppointmentView(Appointment appointment) {
         if (appointment == null) return null;
 
         return new AppointmentView(
                 appointment.getId(),
-                appointment.getDepartment().getName(), // Παίρνουμε το όνομα του τμήματος
+                appointment.getDepartment().getName(),
                 appointment.getAppointmentDate(),
                 appointment.getStatus().name(),
-                appointment.getCitizen().getFirstName() + " " + appointment.getCitizen().getLastName()
-        );
+                citizenMapper.toDto(appointment.getCitizen()));
     }
 }

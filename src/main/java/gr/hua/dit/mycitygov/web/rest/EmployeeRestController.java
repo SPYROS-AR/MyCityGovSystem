@@ -7,6 +7,7 @@ import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.security.Principal;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -41,7 +42,8 @@ public class EmployeeRestController {
      * @return A list of {@link RequestView} DTOs representing the requests
      */
     @GetMapping("/requests")
-    public ResponseEntity<List<RequestView>> getDepartmentRequests() {
+    public ResponseEntity<List<RequestView>> getDepartmentRequests(Principal principal) {
+        Long currentEmployeeId = employeeService.getEmployeeByUsername(principal.getName()).getId();
         List<RequestView> requests = employeeService.getRequestsForEmployeeDepartment(currentEmployeeId);
         return ResponseEntity.ok(requests);
     }
@@ -65,7 +67,8 @@ public class EmployeeRestController {
      * @return The updated {@link RequestView}
      */
     @PostMapping("/request/{id}/assign")
-    public ResponseEntity<RequestView> assignRequest(@PathVariable Long id) {
+    public ResponseEntity<RequestView> assignRequest(@PathVariable Long id, Principal principal) {
+        Long currentEmployeeId = employeeService.getEmployeeByUsername(principal.getName()).getId();
         employeeService.assignRequestToEmployee(id, currentEmployeeId);
         return ResponseEntity.ok(employeeService.getRequestById(id));
     }
@@ -77,7 +80,8 @@ public class EmployeeRestController {
      * @return The updated {@link RequestView}
      */
     @PostMapping("/request/{id}/approve")
-    public ResponseEntity<RequestView> approveRequest(@PathVariable Long id) {
+    public ResponseEntity<RequestView> approveRequest(@PathVariable Long id,  Principal principal) {
+        Long currentEmployeeId = employeeService.getEmployeeByUsername(principal.getName()).getId();
         employeeService.approveRequest(id, currentEmployeeId);
         return ResponseEntity.ok(employeeService.getRequestById(id));
     }
@@ -90,7 +94,10 @@ public class EmployeeRestController {
      * @return The updated {@link RequestView}
      */
     @PostMapping("/request/{id}/reject")
-    public ResponseEntity<RequestView> rejectRequest(@PathVariable Long id, @RequestBody String reason) {
+    public ResponseEntity<RequestView> rejectRequest(@PathVariable Long id,
+                                                     @RequestBody String reason,
+                                                     Principal principal) {
+        Long currentEmployeeId = employeeService.getEmployeeByUsername(principal.getName()).getId();
         employeeService.rejectRequest(id, currentEmployeeId, reason);
         return ResponseEntity.ok(employeeService.getRequestById(id));
     }
@@ -101,7 +108,8 @@ public class EmployeeRestController {
      * @return A list of {@link AppointmentView} DTOs
      */
     @GetMapping("/appointments")
-    public ResponseEntity<List<AppointmentView>> getAppointments() {
+    public ResponseEntity<List<AppointmentView>> getAppointments(Principal principal) {
+        Long currentEmployeeId = employeeService.getEmployeeByUsername(principal.getName()).getId();
         List<AppointmentView> appointmentViews = employeeService.getAppointmentsForEmployeeDepartment(currentEmployeeId);
         return ResponseEntity.ok(appointmentViews);
     }

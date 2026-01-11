@@ -5,7 +5,7 @@ import java.time.LocalDateTime;
 public record AppointmentView(
         Long id,
         String departmentName,
-        LocalDateTime date,
+        LocalDateTime appointmentDate,
         String status,
-        String citizenName
+        CitizenView citizen
 ) {}

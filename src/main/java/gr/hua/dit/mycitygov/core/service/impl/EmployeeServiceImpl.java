@@ -62,6 +62,13 @@ public class EmployeeServiceImpl implements EmployeeService {
 
     @Override
     @Transactional(readOnly = true)
+    public Employee getEmployeeByUsername(String username) {
+        return employeeRepository.findByUsername(username)
+                .orElseThrow(() -> new RuntimeException("Employee with username " + username + " not found"));
+    }
+
+    @Override
+    @Transactional(readOnly = true)
     public List<EmployeeView> getAllEmployees() {
         List<Employee> employees = employeeRepository.findAll();
         return employees
