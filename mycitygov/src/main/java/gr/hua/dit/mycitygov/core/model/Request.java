@@ -63,6 +63,9 @@ public class Request {
         dueDate = submittedDate.plusDays(requestType.getSlaDays());
     }
 
+    @OneToMany(mappedBy = "request", cascade = CascadeType.ALL)
+    private List<RequestDocument> documents = new ArrayList<>();
+
     public Request() {
     }
 
