@@ -10,8 +10,10 @@ import gr.hua.dit.mycitygov.core.service.model.BookAppointmentRequest;
 import gr.hua.dit.mycitygov.core.service.model.RequestView;
 import gr.hua.dit.mycitygov.core.service.model.SubmitRequestRequest;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
+import java.security.Principal;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -31,12 +33,16 @@ public class CitizenRestController {
         this.appointmentMapper = appointmentMapper;
     }
 
+    private Long getCurrentUserId(Authentication authentication) {
+        return citizenService.getCitizenByUsername(authentication.getName()).getId();
+    }
+
     // --- REQUESTS ---
 
     @GetMapping("/requests")
-    public ResponseEntity<List<RequestView>> getMyRequests() {
-        Long currentCitizenId = 3L;
-        List<Request> requests = citizenService.getMyRequests(currentCitizenId);
+    public ResponseEntity<List<RequestView>> getMyRequests(Principal principal) {
+        Long citizenId = citizenService.getCitizenByUsername(principal.getName()).getId();
+        List<Request> requests = citizenService.getMyRequests(citizenId);
 
         List<RequestView> requestViews = requests.stream()
                 .map(requestMapper::toDto)
@@ -45,18 +51,19 @@ public class CitizenRestController {
     }
 
     @PostMapping("/requests")
-    public ResponseEntity<RequestView> createRequest(@RequestBody SubmitRequestRequest submitRequest) {
-        Long currentCitizenId = 3L;
-        Request savedRequest = citizenService.saveRequest(submitRequest, currentCitizenId);
+    public ResponseEntity<RequestView> createRequest(@RequestBody SubmitRequestRequest submitRequest, Principal principal) {
+        Long citizenId = citizenService.getCitizenByUsername(principal.getName()).getId();
+        Request savedRequest = citizenService.saveRequest(submitRequest, citizenId);
+
         return ResponseEntity.ok(requestMapper.toDto(savedRequest));
     }
 
     // --- APPOINTMENTS ---
 
     @GetMapping("/appointments")
-    public ResponseEntity<List<AppointmentView>> getMyAppointments() {
-        Long currentCitizenId = 3L;
-        List<Appointment> appointments = citizenService.getMyAppointments(currentCitizenId);
+    public ResponseEntity<List<AppointmentView>> getMyAppointments(Principal principal) {
+        Long citizenId = citizenService.getCitizenByUsername(principal.getName()).getId();
+        List<Appointment> appointments = citizenService.getMyAppointments(citizenId);
 
         List<AppointmentView> appointmentViews = appointments.stream()
                 .map(appointmentMapper::toAppointmentView)
@@ -66,9 +73,13 @@ public class CitizenRestController {
     }
 
     @PostMapping("/appointments")
-    public ResponseEntity<AppointmentView> bookAppointment(@RequestBody BookAppointmentRequest bookRequest) {
-        Long currentCitizenId = 3L;
-        Appointment savedAppointment = citizenService.bookAppointment(bookRequest, currentCitizenId);
-        return ResponseEntity.ok(appointmentMapper.toAppointmentView(savedAppointment));
+    public ResponseEntity<?> bookAppointment(@RequestBody BookAppointmentRequest bookRequest, Principal principal) {
+        Long citizenId = citizenService.getCitizenByUsername(principal.getName()).getId();
+        try {
+            Appointment savedAppointment = citizenService.bookAppointment(bookRequest, citizenId);
+            return ResponseEntity.ok(appointmentMapper.toAppointmentView(savedAppointment));
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
     }
 }

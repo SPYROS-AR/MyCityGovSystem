@@ -2,15 +2,18 @@ package gr.hua.dit.mycitygov.web.ui;
 
 import gr.hua.dit.mycitygov.core.model.Appointment;
 import gr.hua.dit.mycitygov.core.model.Request;
+import gr.hua.dit.mycitygov.core.security.ApplicationUserDetails;
 import gr.hua.dit.mycitygov.core.service.CitizenService;
 import gr.hua.dit.mycitygov.core.service.mapper.AppointmentMapper;
 import gr.hua.dit.mycitygov.core.service.mapper.RequestMapper;
 import gr.hua.dit.mycitygov.core.service.model.*;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
+import java.security.Principal;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -33,6 +36,11 @@ public class CitizenController {
         this.appointmentMapper = appointmentMapper;
     }
 
+    private Long getCurrentUserId(Authentication authentication) {
+        ApplicationUserDetails userDetails = (ApplicationUserDetails) authentication.getPrincipal();
+        return userDetails.personId();
+    }
+
     /**
      * Redirects to login page if accessing root /citizen.
      */
@@ -41,6 +49,12 @@ public class CitizenController {
         return "redirect:/citizen/login";
     }
 
+    /**
+     * Shows the login form.
+     * @return The "citizen/login" view template.
+     */
+    @GetMapping("/login")
+    public String showLoginForm() { return "citizen/login"; }
 
     @GetMapping("/register")
     public String showRegisterForm(Model model) {
@@ -79,17 +93,23 @@ public class CitizenController {
     }
 
     @PostMapping("/requests")
-    public String submitRequest(@ModelAttribute SubmitRequestRequest submitRequest) {
-        Long mockCitizenId = 3L; // TODO: Replace with Security ID
-        citizenService.saveRequest(submitRequest, mockCitizenId);
+    public String submitRequest(@ModelAttribute SubmitRequestRequest submitRequest, Principal principal) {
+        Long citizenId = citizenService.getCitizenByUsername(principal.getName()).getId();
+        citizenService.saveRequest(submitRequest, citizenId);
         return "redirect:/citizen/requests/my";
     }
 
     @GetMapping("/requests/my")
-    public String showMyRequests(Model model) {
-        Long mockCitizenId = 3L;
+    public String showMyRequests(Model model, Principal principal) {
+        var citizen = citizenService.getCitizenByUsername(principal.getName());
 
-        List<Request> requests = citizenService.getMyRequests(mockCitizenId);
+        if (citizen == null) {
+            throw new RuntimeException("Logged in user is not found in Citizen database!");
+        }
+
+        Long citizenId = citizen.getId();
+
+        List<Request> requests = citizenService.getMyRequests(citizenId);
         List<RequestView> requestViews = requests.stream()
                 .map(requestMapper::toDto)
                 .collect(Collectors.toList());
@@ -99,9 +119,7 @@ public class CitizenController {
     }
 
     @GetMapping("/requests")
-    public String redirectRequests() {
-        return "redirect:/citizen/requests/my";
-    }
+    public String redirectRequests() { return "redirect:/citizen/requests/my"; }
 
     // --- APPOINTMENTS ---
 
@@ -113,17 +131,25 @@ public class CitizenController {
     }
 
     @PostMapping("/appointments")
-    public String bookAppointment(@ModelAttribute BookAppointmentRequest bookAppointment) {
-        Long mockCitizenId = 3L;
-        citizenService.bookAppointment(bookAppointment, mockCitizenId);
-        return "redirect:/citizen/appointments/my";
+    public String bookAppointment(@ModelAttribute BookAppointmentRequest bookAppointment, Model model, Principal principal) {
+        Long citizenId = citizenService.getCitizenByUsername(principal.getName()).getId();
+
+        try {
+            citizenService.bookAppointment(bookAppointment, citizenId);
+            return "redirect:/citizen/appointments/my";
+        } catch (RuntimeException e) {
+            // Show error if appointment is outside working hours
+            model.addAttribute("error", e.getMessage());
+            model.addAttribute("departments", citizenService.getAllDepartments());
+            return "citizen/appointment-new";
+        }
     }
 
     @GetMapping("/appointments/my")
-    public String showMyAppointments(Model model) {
-        Long mockCitizenId = 3L;
+    public String showMyAppointments(Model model, Principal principal) {
+        Long citizenId = citizenService.getCitizenByUsername(principal.getName()).getId();
 
-        List<Appointment> appointments = citizenService.getMyAppointments(mockCitizenId);
+        List<Appointment> appointments = citizenService.getMyAppointments(citizenId);
         List<AppointmentView> appointmentViews = appointments.stream()
                 .map(appointmentMapper::toAppointmentView)
                 .collect(Collectors.toList());
@@ -133,14 +159,10 @@ public class CitizenController {
     }
 
     @GetMapping("/appointments")
-    public String redirectAppointments() {
-        return "redirect:/citizen/appointments/my";
-    }
+    public String redirectAppointments() { return "redirect:/citizen/appointments/my"; }
 
     // --- PROFILE ---
 
     @GetMapping("/profile")
-    public String showProfile() {
-        return "citizen/profile";
-    }
+    public String showProfile() { return "citizen/profile"; }
 }

@@ -25,6 +25,13 @@ public interface CitizenService {
      */
     CreateCitizenResult createCitizen(CreateCitizenRequest request);
 
+    /**
+     * Retrieves a Citizen entity by the provided username
+     * @param username The username of the Citizen
+     * @return The Citizen entity
+     */
+    Citizen getCitizenByUsername(String username);
+
     // --- Request Management Methods ---
 
     /**
