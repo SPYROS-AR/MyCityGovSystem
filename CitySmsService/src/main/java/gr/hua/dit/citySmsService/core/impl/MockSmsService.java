@@ -37,7 +37,7 @@ public class MockSmsService implements SmsService {
 
         // --------------------------------------------------
 
-        return new SendSmsResult(false);
+        return new SendSmsResult("OK");
     }
 
 
