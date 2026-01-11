@@ -1,14 +1,8 @@
 package gr.hua.dit.mycitygov.core.service.impl;
 
-import gr.hua.dit.mycitygov.core.model.Appointment;
-import gr.hua.dit.mycitygov.core.model.Employee;
-import gr.hua.dit.mycitygov.core.model.Request;
-import gr.hua.dit.mycitygov.core.model.RequestLog;
+import gr.hua.dit.mycitygov.core.model.*;
 import gr.hua.dit.mycitygov.core.port.SmsNotificationPort;
-import gr.hua.dit.mycitygov.core.repository.AppointmentRepository;
-import gr.hua.dit.mycitygov.core.repository.EmployeeRepository;
-import gr.hua.dit.mycitygov.core.repository.RequestRepository;
-import gr.hua.dit.mycitygov.core.repository.UserRepository;
+import gr.hua.dit.mycitygov.core.repository.*;
 import gr.hua.dit.mycitygov.core.service.EmployeeService;
 import gr.hua.dit.mycitygov.core.service.mapper.AppointmentMapper;
 import gr.hua.dit.mycitygov.core.service.mapper.EmployeeMapper;
@@ -18,7 +12,10 @@ import gr.hua.dit.mycitygov.core.service.model.EmployeeView;
 import gr.hua.dit.mycitygov.core.service.model.RequestView;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.time.DayOfWeek;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -33,6 +30,7 @@ public class EmployeeServiceImpl implements EmployeeService {
     private final RequestRepository requestRepository;
     private final AppointmentRepository appointmentRepository;
     private final SmsNotificationPort smsPort;
+    private final DepartmentScheduleRepository departmentScheduleRepository;
 
     // mappers
     private final RequestMapper requestMapper;
@@ -46,11 +44,18 @@ public class EmployeeServiceImpl implements EmployeeService {
                                RequestMapper requestMapper,
                                AppointmentMapper appointmentMapper,
                                EmployeeMapper employeeMapper,
-                               SmsNotificationPort smsPort) {
+                               SmsNotificationPort smsPort,
+                               DepartmentScheduleRepository departmentScheduleRepository) {
         if (employeeRepository == null) throw new NullPointerException("employeeRepository cannot be null");
         if (userRepository == null) throw new NullPointerException("userRepository cannot be null");
         if (requestRepository == null) throw new NullPointerException("requestRepository cannot be null");
         if (appointmentRepository == null) throw new NullPointerException("appointmentRepository cannot be null");
+        if (requestMapper == null) throw new NullPointerException("requestMapper cannot be null");
+        if (appointmentMapper == null) throw new NullPointerException("appointmentMapper cannot be null");
+        if (employeeMapper == null) throw new NullPointerException("employeeMapper cannot be null");
+        if (smsPort == null) throw new NullPointerException("smsPort cannot be null");
+        if (departmentScheduleRepository == null) throw new NullPointerException("departmentScheduleRepository cannot be null");
+
         this.employeeRepository = employeeRepository;
         this.requestRepository = requestRepository;
         this.appointmentRepository = appointmentRepository;
@@ -58,6 +63,7 @@ public class EmployeeServiceImpl implements EmployeeService {
         this.appointmentMapper = appointmentMapper;
         this.employeeMapper = employeeMapper;
         this.smsPort = smsPort;
+        this.departmentScheduleRepository = departmentScheduleRepository;
     }
 
     @Override
@@ -231,14 +237,40 @@ public class EmployeeServiceImpl implements EmployeeService {
         Appointment appointment = appointmentRepository
                 .findById(appointmentId)
                 .orElseThrow(() -> new RuntimeException("Appointment with id " + appointmentId + " not found"));
+
+        // Date Validation
+        if (rescheduledDateTime.getMinute() != 0 && rescheduledDateTime.getMinute() != 30) {
+            throw new RuntimeException("Invalid time slot. Please choose XX:00 or XX:30.");
+        }
+
+        // Department Working Days
+        DayOfWeek requestedDay = rescheduledDateTime.getDayOfWeek();
+        DepartmentSchedule schedule = departmentScheduleRepository
+                .findByDepartmentIdAndDayOfWeek(appointment.getDepartment().getId(), requestedDay)
+                .orElseThrow(() -> new RuntimeException("The department is closed on " + requestedDay));
+
+        LocalTime requestedTime = rescheduledDateTime.toLocalTime();
+        if (requestedTime.isBefore(schedule.getStartTime()) || !requestedTime.isBefore(schedule.getEndTime())) {
+            throw new RuntimeException("Selected time is outside working hours.");
+        }
+
+        boolean slotTaken = appointmentRepository.existsByDepartmentIdAndAppointmentDateAndStatusIn(
+                appointment.getDepartment().getId(),
+                rescheduledDateTime,
+                List.of(Appointment.AppointmentStatus.SCHEDULED, Appointment.AppointmentStatus.COMPLETED)
+        );
+
+        if (slotTaken) {
+            throw new RuntimeException("This appointment slot is already fully booked. Please choose another time.");
+        }
+
+
         appointment.setAppointmentDate(rescheduledDateTime);
-        // reset status to SCHEDULED if it was rejected before
-        appointment.setStatus(Appointment.AppointmentStatus.SCHEDULED);
+        appointment.setStatus(Appointment.AppointmentStatus.SCHEDULED); // reset status to SCHEDULED if it was rejected before
 
         appointmentRepository.save(appointment);
 
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
-
         smsPort.sendSms(appointment.getCitizen().getMobilePhoneNumber(), "Your Appointment changed date.\nNew Date:"+ rescheduledDateTime.format(formatter));
 
     }
