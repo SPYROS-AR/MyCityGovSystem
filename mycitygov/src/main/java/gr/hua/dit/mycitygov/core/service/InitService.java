@@ -2,7 +2,6 @@ package gr.hua.dit.mycitygov.core.service;
 
 import gr.hua.dit.mycitygov.core.model.*;
 import gr.hua.dit.mycitygov.core.repository.*;
-import org.hibernate.id.IntegralDataTypeHolder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.CommandLineRunner;
@@ -60,37 +59,37 @@ public class InitService implements CommandLineRunner {
         logger.info("--- STARTING DATABASE INITIALIZATION ---");
 
         try {
-            // Client Entity
+            // 1. Client Entity
             initClients();
 
-            // Admin Entity (Single Object)
+            // 2. Admin Entity (Single Object)
             initAdmin();
 
-            // Department Entity
+            // 3. Department Entity
             Department cleanliness = initDepartment("Cleanliness", "Waste management and recycling services");
             Department technical = initDepartment("Technical Services", "Infrastructure and urban planning");
             Department social = initDepartment("Social Services", "Social welfare and community support");
 
-            // DepartmentSchedule Entity
+            // 4. DepartmentSchedule Entity
             initSchedules(List.of(cleanliness, technical, social));
 
-            // Employee Entity (3 realistic employees)
+            // 5. Employee Entity (3 realistic employees)
             Employee emp1 = initEmployee("emp1", "Robert", "Miller", "r.miller@mycity.gov", cleanliness);
             initEmployee("emp2", "Sarah", "Jenkins", "s.jenkins@mycity.gov", technical);
             initEmployee("emp3", "David", "Wilson", "d.wilson@mycity.gov", social);
 
-            // Citizen Entity
+            // 6. Citizen Entity
             List<Citizen> citizens = initCitizens();
             Citizen emily = citizens.get(0);
 
-            // RequestType Entity
-            RequestType wasteType = initRequestType("WASTE_COLLECTION", RequestType.RequestCategory.PROBLEM, cleanliness, 1);
-            initRequestType("ROAD_REPAIR", RequestType.RequestCategory.PROBLEM, technical, 3);
+            // 7. RequestType Entity
+            RequestType wasteType = initRequestType("WASTE_COLLECTION", RequestType.RequestCategory.PROBLEM, cleanliness);
+            initRequestType("ROAD_REPAIR", RequestType.RequestCategory.PROBLEM, technical);
 
-            // Request & 9. RequestLog Entities
+            // 8. Request & 9. RequestLog Entities
             initRequests(cleanliness, emily, wasteType, emp1);
 
-            // Appointment Entity
+            // 10. Appointment Entity
             initAppointments(cleanliness, emily);
 
             logger.info("--- DATABASE INITIALIZATION FINISHED SUCCESSFULLY ---");
@@ -173,13 +172,12 @@ public class InitService implements CommandLineRunner {
         return List.of(c1);
     }
 
-    private RequestType initRequestType(String name, RequestType.RequestCategory category, Department dept, Integer slaDays) {
+    private RequestType initRequestType(String name, RequestType.RequestCategory category, Department dept) {
         return requestTypeRepository.findByName(name).orElseGet(() -> {
             RequestType rt = new RequestType();
             rt.setName(name);
             rt.setRequestCategory(category);
             rt.setDepartment(dept);
-            rt.setSlaDays(slaDays);
             logger.info("RequestType '{}' created.", name);
             return requestTypeRepository.save(rt);
         });
@@ -196,7 +194,6 @@ public class InitService implements CommandLineRunner {
             req.setCitizen(citizen);
             req.setRequestType(type);
             req.setAssignedEmployee(employee);
-            req.setSubmittedDate(LocalDateTime.now().minusDays(5));
 
             // Initialize RequestLog Entity
             RequestLog log = new RequestLog();

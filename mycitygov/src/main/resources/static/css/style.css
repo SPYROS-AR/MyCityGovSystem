@@ -80,6 +80,8 @@ h2, h4, h5 {
 .status-CONFIRMED { background-color: #28a745; color: white; }
 .status-CANCELLED { background-color: #dc3545; color: white; }
 .status-SCHEDULED { background-color: #ffc107; color: black; }
+.status-PENDING_DOCS { background-color: #fd7e14; color: white; }
+.status-RECEIVED { background-color: #6c757d; color: white; }
 
 .btn-custom {
     padding: 6px 12px;
@@ -102,4 +104,37 @@ h2, h4, h5 {
     margin: auto;
     padding: 10px;
     border-radius: 10px;
+}
+
+.card-custom {
+    border: none;
+    border-radius: 15px;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.15);
+    overflow: hidden;
+    margin-bottom: 30px;
+}
+.card-header-custom {
+    background-color: #009879;
+    color: white;
+    padding: 15px;
+    font-weight: bold;
+}
+.info-box {
+    background-color: white;
+    border-radius: 15px;
+    padding: 20px;
+    box-shadow: 0 0 10px rgba(0,0,0,0.05);
+    height: 100%;
+}
+.section-title {
+    color: #009879;
+    border-bottom: 2px solid #009879;
+    padding-bottom: 10px;
+    margin-bottom: 20px;
+    font-weight: bold;
+}
+
+.btn-success-custom {
+    background-color: #28a745;
+    color: white;
 }
