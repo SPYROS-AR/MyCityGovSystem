@@ -13,7 +13,6 @@ import java.time.DayOfWeek;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
-import java.util.Optional;
 
 @Service
 @Transactional
@@ -73,18 +72,26 @@ public class InitService implements CommandLineRunner {
             // 4. DepartmentSchedule Entity
             initSchedules(List.of(cleanliness, technical, social));
 
-            // 5. Employee Entity (3 realistic employees)
+            // 5. Employee Entity (More employees added for assignment testing)
+            // Cleanliness Dept
             Employee emp1 = initEmployee("emp1", "Robert", "Miller", "r.miller@mycity.gov", cleanliness);
+            initEmployee("emp4", "Alice", "Cooper", "a.cooper@mycity.gov", cleanliness); // Συνάδελφος του emp1
+
+            // Technical Dept
             initEmployee("emp2", "Sarah", "Jenkins", "s.jenkins@mycity.gov", technical);
+            initEmployee("emp5", "Bob", "Marley", "b.marley@mycity.gov", technical); // Συνάδελφος του emp2
+
+            // Social Dept
             initEmployee("emp3", "David", "Wilson", "d.wilson@mycity.gov", social);
+            initEmployee("emp6", "Charlie", "Chaplin", "c.chaplin@mycity.gov", social); // Συνάδελφος του emp3
 
             // 6. Citizen Entity
             List<Citizen> citizens = initCitizens();
             Citizen emily = citizens.get(0);
 
-            // 7. RequestType Entity
-            RequestType wasteType = initRequestType("WASTE_COLLECTION", RequestType.RequestCategory.PROBLEM, cleanliness);
-            initRequestType("ROAD_REPAIR", RequestType.RequestCategory.PROBLEM, technical);
+            // 7. RequestType Entity (ΠΡΟΣΟΧΗ: Προστέθηκαν οι ημέρες SLA στο τέλος)
+            RequestType wasteType = initRequestType("WASTE_COLLECTION", RequestType.RequestCategory.PROBLEM, cleanliness, 5);
+            initRequestType("ROAD_REPAIR", RequestType.RequestCategory.PROBLEM, technical, 10);
 
             // 8. Request & 9. RequestLog Entities
             initRequests(cleanliness, emily, wasteType, emp1);
@@ -172,12 +179,14 @@ public class InitService implements CommandLineRunner {
         return List.of(c1);
     }
 
-    private RequestType initRequestType(String name, RequestType.RequestCategory category, Department dept) {
+    private RequestType initRequestType(String name, RequestType.RequestCategory category, Department dept, Integer sla) {
         return requestTypeRepository.findByName(name).orElseGet(() -> {
             RequestType rt = new RequestType();
             rt.setName(name);
             rt.setRequestCategory(category);
             rt.setDepartment(dept);
+            rt.setSlaDays(sla);
+            rt.setActive(true);
             logger.info("RequestType '{}' created.", name);
             return requestTypeRepository.save(rt);
         });
