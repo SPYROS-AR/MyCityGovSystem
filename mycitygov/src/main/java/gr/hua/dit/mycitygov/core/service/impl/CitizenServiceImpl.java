@@ -199,7 +199,9 @@ public class CitizenServiceImpl implements CitizenService {
         request = requestRepository.save(request);
 
         // Generate the correct protocol number format: REQ-YYYY-ID
-        String finalProtocolNumber = "REQ-" + request.getSubmittedDate().getYear() + "-" + request.getId();
+        String finalProtocolNumber = "REQ-" +
+                request.getSubmittedDate().getYear() + "-" +
+                String.format("%03d", request.getId());
         request.setProtocolNumber(finalProtocolNumber);
 
         // Update and save the request with the final protocol number

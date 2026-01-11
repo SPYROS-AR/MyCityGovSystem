@@ -5,6 +5,7 @@ import gr.hua.dit.mycitygov.core.model.Request;
 import gr.hua.dit.mycitygov.core.security.ApplicationUserDetails;
 import gr.hua.dit.mycitygov.core.service.CitizenService;
 import gr.hua.dit.mycitygov.core.service.mapper.AppointmentMapper;
+import gr.hua.dit.mycitygov.core.service.mapper.CitizenMapper;
 import gr.hua.dit.mycitygov.core.service.mapper.RequestMapper;
 import gr.hua.dit.mycitygov.core.service.model.*;
 import org.springframework.security.core.Authentication;
@@ -27,13 +28,15 @@ public class CitizenController {
     private final CitizenService citizenService;
     private final RequestMapper requestMapper;
     private final AppointmentMapper appointmentMapper;
+    private final CitizenMapper citizenMapper;
 
     public CitizenController(CitizenService citizenService,
                              RequestMapper requestMapper,
-                             AppointmentMapper appointmentMapper) {
+                             AppointmentMapper appointmentMapper, CitizenMapper citizenMapper) {
         this.citizenService = citizenService;
         this.requestMapper = requestMapper;
         this.appointmentMapper = appointmentMapper;
+        this.citizenMapper = citizenMapper;
     }
 
     private Long getCurrentUserId(Authentication authentication) {
@@ -164,5 +167,13 @@ public class CitizenController {
     // --- PROFILE ---
 
     @GetMapping("/profile")
-    public String showProfile() { return "citizen/profile"; }
+    public String showProfile(Model model, Principal principal) {
+        var citizenEntity = citizenService.getCitizenByUsername(principal.getName());
+
+        CitizenView citizenView = citizenMapper.toDto(citizenEntity);
+
+        model.addAttribute("citizen", citizenView);
+
+        return "citizen/profile";
+    }
 }
