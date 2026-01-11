@@ -25,7 +25,7 @@ public class Appointment {
 
     @ManyToOne
     @JoinColumn(name = "citizen_id", nullable = false)
-    private User citizen;
+    private Citizen citizen;
 
     @ManyToOne
     @JoinColumn(name = "department_id", nullable = false)
@@ -38,7 +38,10 @@ public class Appointment {
         this.department = department;
     }
 
-    public Appointment(LocalDateTime appointmentDate, AppointmentStatus status, User citizen, Department department) {
+    public Appointment(LocalDateTime appointmentDate,
+                       AppointmentStatus status,
+                       Citizen citizen,
+                       Department department) {
         this.appointmentDate = appointmentDate;
         this.status = status;
         this.citizen = citizen;

@@ -1,16 +1,20 @@
 package gr.hua.dit.mycitygov.core.service.model;
 
-import gr.hua.dit.mycitygov.core.model.Request;
+import gr.hua.dit.mycitygov.core.model.RequestLog;
+
+import java.time.LocalDateTime;
+import java.util.List;
 
 import java.time.LocalDateTime;
 
 public record RequestView(
         Long id,
         String protocolNumber,
-        String requestTypeName,
-        Request.Status status,
+        String requestType,
+        String status,
         String description,
-        String citizenName,
-        String assignedEmployeeName,
-        LocalDateTime submittedDate
+        LocalDateTime submittedDate,
+        CitizenView citizen,
+        EmployeeView assignedEmployee,
+        List<RequestLog> logs
 ) {}

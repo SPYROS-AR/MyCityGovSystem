@@ -25,6 +25,7 @@ public abstract class User {
     @Column(nullable = false, unique = true, length = 50)
     private String username;
 
+    @Getter()
     @Column(nullable = false, length = 100)
     private String password;
 

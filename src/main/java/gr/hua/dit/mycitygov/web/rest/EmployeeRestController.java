@@ -1,10 +1,6 @@
 package gr.hua.dit.mycitygov.web.rest;
 
-import gr.hua.dit.mycitygov.core.model.Appointment;
-import gr.hua.dit.mycitygov.core.model.Request;
 import gr.hua.dit.mycitygov.core.service.EmployeeService;
-import gr.hua.dit.mycitygov.core.service.mapper.AppointmentMapper;
-import gr.hua.dit.mycitygov.core.service.mapper.RequestMapper;
 import gr.hua.dit.mycitygov.core.service.model.AppointmentView;
 import gr.hua.dit.mycitygov.core.service.model.RequestView;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -13,7 +9,6 @@ import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.stream.Collectors;
 
 /**
  * REST Controller for Employee Operations
@@ -29,15 +24,15 @@ import java.util.stream.Collectors;
 public class EmployeeRestController {
 
     private final EmployeeService employeeService;
-    private final RequestMapper requestMapper;
-    private final AppointmentMapper appointmentMapper;
 
-    public EmployeeRestController(EmployeeService employeeService,
-                                  RequestMapper requestMapper,
-                                  AppointmentMapper appointmentMapper) {
+    public EmployeeRestController(EmployeeService employeeService) {
         this.employeeService = employeeService;
-        this.requestMapper = requestMapper;
-        this.appointmentMapper = appointmentMapper;
+    }
+
+
+    @GetMapping // redirect straight to dashboard (from /employee)
+    public String redirectEmployee() {
+        return "redirect:/employee/dashboard";
     }
 
     /**
@@ -48,14 +43,8 @@ public class EmployeeRestController {
     @GetMapping("/requests")
     public ResponseEntity<List<RequestView>> getDepartmentRequests() {
         Long currentEmployeeId = 1L; // Mock ID
-        List<Request> requests = employeeService.getRequestsForEmployeeDepartment(currentEmployeeId);
-
-        // map to dto
-        List<RequestView> requestViews = requests
-                .stream()
-                .map(requestMapper::convertRequestToRequestView)
-                .collect(Collectors.toList());
-        return ResponseEntity.ok(requestViews);
+        List<RequestView> requests = employeeService.getRequestsForEmployeeDepartment(currentEmployeeId);
+        return ResponseEntity.ok(requests);
     }
 
     /**
@@ -66,8 +55,8 @@ public class EmployeeRestController {
      */
     @GetMapping("/request/{id}")
     public ResponseEntity<RequestView> getRequest(@PathVariable Long id) {
-        Request request = employeeService.getRequestById(id);
-        return ResponseEntity.ok(requestMapper.convertRequestToRequestView(request));
+        RequestView request = employeeService.getRequestById(id);
+        return ResponseEntity.ok((request));
     }
 
     /**
@@ -80,9 +69,7 @@ public class EmployeeRestController {
     public ResponseEntity<RequestView> assignRequest(@PathVariable Long id) {
         Long currentEmployeeId = 1L;
         employeeService.assignRequestToEmployee(id, currentEmployeeId);
-        return ResponseEntity.ok(requestMapper.
-                convertRequestToRequestView(employeeService.
-                        getRequestById(id)));
+        return ResponseEntity.ok(employeeService.getRequestById(id));
     }
 
     /**
@@ -95,7 +82,7 @@ public class EmployeeRestController {
     public ResponseEntity<RequestView> approveRequest(@PathVariable Long id) {
         Long currentEmployeeId = 1L;
         employeeService.approveRequest(id, currentEmployeeId);
-        return ResponseEntity.ok(requestMapper.convertRequestToRequestView(employeeService.getRequestById(id)));
+        return ResponseEntity.ok(employeeService.getRequestById(id));
     }
 
     /**
@@ -109,7 +96,7 @@ public class EmployeeRestController {
     public ResponseEntity<RequestView> rejectRequest(@PathVariable Long id, @RequestBody String reason) {
         Long currentEmployeeId = 1L;
         employeeService.rejectRequest(id, currentEmployeeId, reason);
-        return ResponseEntity.ok(requestMapper.convertRequestToRequestView(employeeService.getRequestById(id)));
+        return ResponseEntity.ok(employeeService.getRequestById(id));
     }
 
     /**
@@ -120,12 +107,7 @@ public class EmployeeRestController {
     @GetMapping("/appointments")
     public ResponseEntity<List<AppointmentView>> getAppointments() {
         Long currentEmployeeId = 1L;
-        List<Appointment> entities = employeeService.getAppointmentsForEmployeeDepartment(currentEmployeeId);
-
-        List<AppointmentView> appointmentViews = entities.stream()
-                .map(appointmentMapper::toAppointmentView)
-                .collect(Collectors.toList());
-
+        List<AppointmentView> appointmentViews = employeeService.getAppointmentsForEmployeeDepartment(currentEmployeeId);
         return ResponseEntity.ok(appointmentViews);
     }
 

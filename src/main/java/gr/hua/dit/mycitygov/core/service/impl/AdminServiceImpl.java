@@ -6,8 +6,10 @@ import gr.hua.dit.mycitygov.core.model.RequestType;
 import gr.hua.dit.mycitygov.core.model.User;
 import gr.hua.dit.mycitygov.core.repository.*;
 import gr.hua.dit.mycitygov.core.service.AdminService;
-import gr.hua.dit.mycitygov.core.service.model.CreateRequestTypeRequest;
-import gr.hua.dit.mycitygov.core.service.model.SystemStatistics;
+import gr.hua.dit.mycitygov.core.service.mapper.DepartmentMapper;
+import gr.hua.dit.mycitygov.core.service.mapper.RequestTypeMapper;
+import gr.hua.dit.mycitygov.core.service.mapper.UserMapper;
+import gr.hua.dit.mycitygov.core.service.model.*;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -21,21 +23,31 @@ import java.util.stream.Collectors;
 public class AdminServiceImpl implements AdminService {
 
     private final RequestRepository requestRepository;
+    private final RequestTypeMapper requestTypeMapper;
     private final DepartmentRepository departmentRepository;
+    private final DepartmentMapper departmentMapper;
     private final RequestTypeRepository requestTypeRepository;
     private final CitizenRepository citizenRepository;
     private final UserRepository userRepository;
+    private final UserMapper userMapper;
 
     public AdminServiceImpl(RequestRepository requestRepository,
+                            RequestTypeMapper requestTypeMapper,
                             DepartmentRepository departmentRepository,
+                            DepartmentMapper departmentMapper,
                             RequestTypeRepository requestTypeRepository,
-                            CitizenRepository citizenRepository, UserRepository userRepository) {
+                            CitizenRepository citizenRepository, UserRepository userRepository,
+                            UserMapper userMapper) {
         this.requestRepository = requestRepository;
+        this.requestTypeMapper = requestTypeMapper;
         this.departmentRepository = departmentRepository;
+        this.departmentMapper = departmentMapper;
         this.requestTypeRepository = requestTypeRepository;
         this.citizenRepository = citizenRepository;
         this.userRepository = userRepository;
+        this.userMapper = userMapper;
     }
+
     @Override
     @Transactional(readOnly = true)
     public SystemStatistics getSystemStatistics() {
@@ -82,19 +94,31 @@ public class AdminServiceImpl implements AdminService {
     }
 
     @Override
-    public List<RequestType> getAllRequestTypes() {
+    public List<RequestTypeView> getAllRequestTypes() {
         // Return items by ascending order
-        return requestTypeRepository.findAll(Sort.by(Sort.Direction.ASC, "id"));
+
+        List<RequestType> allRequestTypes = requestTypeRepository.findAll(Sort.by(Sort.Direction.ASC, "id"));
+        return allRequestTypes
+                .stream()
+                .map(requestTypeMapper::toDto) // Μετατροπή
+                .collect(Collectors.toList());
     }
 
     @Override
-    public List<Department> getAllDepartments(){
-        return  departmentRepository.findAll();
+    public List<DepartmentView> getAllDepartments() {
+        List<Department> departments = departmentRepository.findAll();
+        return departments.stream()
+                .map(departmentMapper::toDto)
+                .collect(Collectors.toList());
     }
 
     @Override
-    public List<User> getAllUsers(){
-        return userRepository.findAll();
+    public List<UserView> getAllUsers() {
+        List<User> users = userRepository.findAll();
+        return users.stream()
+                .map(userMapper::toDto) //
+                .collect(Collectors.toList());
+
     }
 
     @Override
@@ -138,5 +162,4 @@ public class AdminServiceImpl implements AdminService {
         type.setDepartment(newDept);
         requestTypeRepository.save(type);
     }
-
 }

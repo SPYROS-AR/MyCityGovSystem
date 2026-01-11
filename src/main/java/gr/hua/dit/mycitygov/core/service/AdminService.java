@@ -1,11 +1,8 @@
 package gr.hua.dit.mycitygov.core.service;
 
 
-import gr.hua.dit.mycitygov.core.model.Department;
 import gr.hua.dit.mycitygov.core.model.RequestType;
-import gr.hua.dit.mycitygov.core.model.User;
-import gr.hua.dit.mycitygov.core.service.model.CreateRequestTypeRequest;
-import gr.hua.dit.mycitygov.core.service.model.SystemStatistics;
+import gr.hua.dit.mycitygov.core.service.model.*;
 
 import java.util.List;
 
@@ -14,13 +11,13 @@ import java.util.List;
  */
 public interface AdminService {
 
-    List<RequestType> getAllRequestTypes();
+    List<RequestTypeView> getAllRequestTypes();
 
-    List<Department> getAllDepartments();
+    List<DepartmentView> getAllDepartments();
 
     SystemStatistics getSystemStatistics();
 
-    List<User> getAllUsers();
+    List<UserView> getAllUsers();
 
     void createRequestType(CreateRequestTypeRequest request);
 

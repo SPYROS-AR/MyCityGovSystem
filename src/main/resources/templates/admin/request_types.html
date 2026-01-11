@@ -1,5 +1,6 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head>
     <title>Request Types</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -7,6 +8,29 @@
     <link th:href="@{/css/style.css}" rel="stylesheet">
 </head>
 <body>
+<nav class="navbar-custom">
+    <div class="container d-flex justify-content-between">
+        <span>MyCityGov</span>
+
+        <div sec:authorize="isAuthenticated()">
+            <span>
+                User: <strong sec:authentication="principal.firstName"></strong>
+                      <strong sec:authentication="principal.lastName"></strong>
+            </span>
+            <span class="badge bg-light text-dark ms-2" sec:authentication="principal.role"></span>
+
+            <form th:action="@{/logout}" method="post" class="d-inline ms-3">
+                <button type="submit" class="btn btn-sm btn-outline-light">
+                    Logout
+                </button>
+            </form>
+        </div>
+
+        <div sec:authorize="!isAuthenticated()">
+            <a th:href="@{/login}">Login</a>
+        </div>
+    </div>
+</nav>
 <div class="container mt-4">
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h2>Available Request Types</h2>
@@ -26,8 +50,8 @@
         <tbody>
         <tr th:each="type : ${requestTypes}">
             <td th:text="${type.name}"></td>
-            <td th:text="${type.requestCategory}"></td>
-            <td th:text="${type.department.name}"></td>
+            <td th:text="${type.category}"></td>
+            <td th:text="${type.departmentName}"></td>
             <td>
                          <span class="badge rounded-pill"
                                th:classappend="${type.active} ? 'text-bg-success' : 'text-bg-danger'"
@@ -47,7 +71,7 @@
                     <ul class="dropdown-menu dropdown-menu-end shadow">
 
                         <li>
-                            <form th:action="@{/admin/request-types/{id}/toggle(id=${type.id})}" method="post">
+                            <form th:action="@{/admin/request-types/{id}/toggle(id=${type.id})}" th:method="post">
                                 <button class="dropdown-item" type="submit">
                                     <span th:text="${type.active} ? 'Deactivate' : 'Activate'"></span>
                                 </button>
@@ -77,7 +101,7 @@
 <div class="modal fade" id="reassignModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
-            <form th:action="@{/admin/request-types/reassign}" method="post">
+            <form th:action="@{/admin/request-types/reassign}" th:method="post">
                 <div class="modal-header">
                     <h5 class="modal-title">Reassign Department</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>

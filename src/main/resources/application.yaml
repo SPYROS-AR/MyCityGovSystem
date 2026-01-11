@@ -28,3 +28,10 @@ spring:
           auth: true
           starttls:
             enable: true
+
+app:
+  jwt:
+    issuer: "my-city-gov-api"
+    audience: "my-city-gov-app"
+    secret: "MIA_POLY_MEGALI_MISTIKI_FRASE_GIA_TO_SIGNATURE_TOY_TOKEN_PREPEI_NA_EINAI_LARGE"
+    ttl-minutes: 60

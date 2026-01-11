@@ -1,11 +1,13 @@
 package gr.hua.dit.mycitygov.web.ui;
 
 
-import gr.hua.dit.mycitygov.core.model.User;
+
 import gr.hua.dit.mycitygov.core.service.AdminService;
 import gr.hua.dit.mycitygov.core.service.model.CreateRequestTypeRequest;
 import gr.hua.dit.mycitygov.core.service.model.SystemStatistics;
+import gr.hua.dit.mycitygov.core.service.model.UserView;
 import jakarta.validation.Valid;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -14,6 +16,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @Controller
+@PreAuthorize("hasRole('ADMIN')")
 @RequestMapping("/admin")
 public class AdminController {
 
@@ -21,6 +24,11 @@ public class AdminController {
 
     public AdminController(AdminService adminService) {
         this.adminService = adminService;
+    }
+
+    @GetMapping // redirect straight to dashboard (from /admin)
+    public String redirectAdmin() {
+        return "redirect:/admin/dashboard";
     }
 
     /**
@@ -35,7 +43,7 @@ public class AdminController {
 
     @GetMapping("/users")
     public String users(Model model){
-        List<User> users = adminService.getAllUsers();
+        List<UserView> users = adminService.getAllUsers();
         model.addAttribute("users", users);
         return "admin/users";
     }
@@ -46,6 +54,7 @@ public class AdminController {
     @GetMapping("/request-types")
     public String listRequestTypes(Model model) {
         model.addAttribute("requestTypes", adminService.getAllRequestTypes());
+        model.addAttribute("departments", adminService.getAllDepartments());
         return "admin/request_types";
     }
 
