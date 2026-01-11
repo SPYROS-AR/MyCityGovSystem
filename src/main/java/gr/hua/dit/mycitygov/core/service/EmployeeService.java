@@ -1,5 +1,6 @@
 package gr.hua.dit.mycitygov.core.service;
 
+import gr.hua.dit.mycitygov.core.model.Employee;
 import gr.hua.dit.mycitygov.core.model.Request;
 import gr.hua.dit.mycitygov.core.service.model.AppointmentView;
 import gr.hua.dit.mycitygov.core.service.model.EmployeeView;
@@ -94,4 +95,11 @@ public interface EmployeeService {
      * @param rescheduledDateTime The new date and time
      */
     void rescheduleAppointment(Long appointmentId, java.time.LocalDateTime rescheduledDateTime);
+
+    /**
+     * Finds an employee by their username
+     * @param username The username of the logged-in user
+     * @return The EmployeeView DTO
+     */
+    Employee getEmployeeByUsername(String username);
 }

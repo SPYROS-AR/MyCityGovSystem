@@ -8,6 +8,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
+import java.security.Principal;
 import java.time.LocalDateTime;
 
 /**
@@ -33,10 +34,10 @@ public class EmployeeController {
      * @return The "employee/dashboard" view template (HTML page)
      */
     @GetMapping("/dashboard")
-    public String dashboard(Model model) {
-        // TODO that would be done with Spring Security
-        Long currentEmployeeId = 1L; // mock id
-        model.addAttribute("requests", employeeService.getRequestsForEmployeeDepartment(currentEmployeeId));
+    public String dashboard(Model model, Principal principal) {
+        String username = principal.getName();  // username to search in the db
+        Long empId = employeeService.getEmployeeByUsername(username).getId();    // get employee dto
+        model.addAttribute("requests", employeeService.getRequestsForEmployeeDepartment(empId));
         return "employee/dashboard";
     }
 
@@ -63,8 +64,8 @@ public class EmployeeController {
      * @return Redirects back to the dashboard
      */
     @PostMapping("/request/{id}/assign")
-    public String assignRequest(@PathVariable("id") Long requestId) {
-        Long currentEmployeeId = 1L; // Mock ID  (TODO: Security)
+    public String assignRequest(@PathVariable("id") Long requestId, Principal principal) {
+        Long currentEmployeeId = employeeService.getEmployeeByUsername(principal.getName()).getId();
         employeeService.assignRequestToEmployee(requestId, currentEmployeeId);
         return "redirect:/employee/dashboard";
     }
@@ -77,8 +78,8 @@ public class EmployeeController {
      * @return Redirects back to the dashboard
      */
     @PostMapping("/request/{id}/approve")
-    public String approveRequest(@PathVariable("id") Long requestId) {
-        Long currentEmployeeId = 1L;
+    public String approveRequest(@PathVariable("id") Long requestId, Principal principal) {
+        Long currentEmployeeId = employeeService.getEmployeeByUsername(principal.getName()).getId();
         employeeService.approveRequest(requestId, currentEmployeeId);
         return "redirect:/employee/dashboard";
     }
@@ -93,8 +94,9 @@ public class EmployeeController {
      */
     @PostMapping("/request/{id}/reject")
     public String rejectRequest(@PathVariable("id") Long requestId,
-                                @RequestParam(required = false) String reason) {
-        Long currentEmployeeId = 1L;
+                                @RequestParam(required = false) String reason,
+                                Principal principal) {
+        Long currentEmployeeId = employeeService.getEmployeeByUsername(principal.getName()).getId();
 
         // default rejection message
         if (reason == null || reason.trim().isEmpty()) {
@@ -112,8 +114,8 @@ public class EmployeeController {
      * @return The "employee/appointments" view template
      */
     @GetMapping("/appointments")
-    public String appointments(Model model) {
-        Long currentEmployeeId = 1L;
+    public String appointments(Model model, Principal principal) {
+        Long currentEmployeeId = employeeService.getEmployeeByUsername(principal.getName()).getId();
         model.addAttribute("appointments", employeeService.getAppointmentsForEmployeeDepartment(currentEmployeeId));
         return "employee/appointments";
     }
