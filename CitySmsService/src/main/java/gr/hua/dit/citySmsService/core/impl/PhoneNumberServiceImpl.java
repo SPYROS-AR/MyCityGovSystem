@@ -1,4 +1,4 @@
-package gr.hua.dit.noc.core.impl;
+package gr.hua.dit.citySmsService.core.impl;
 
 import com.google.i18n.phonenumbers.NumberParseException;
 import com.google.i18n.phonenumbers.PhoneNumberUtil;
