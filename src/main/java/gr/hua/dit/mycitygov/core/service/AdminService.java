@@ -25,6 +25,8 @@ public interface AdminService {
 
     List<DepartmentScheduleView> getDepartmentSchedule(Long departmentId);
 
+    void createDepartment(String name, String description);
+
     void updateDepartmentSchedule(Long departmentId, java.time.DayOfWeek day, java.time.LocalTime start, java.time.LocalTime end);
 
     void updateDepartmentInfo(Long id, String name, String description);

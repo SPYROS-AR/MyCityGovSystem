@@ -143,6 +143,21 @@ public class AdminServiceImpl implements AdminService {
 
     @Override
     @Transactional
+    public void createDepartment(String name, String description) {
+        // Check if it violates unique constrains
+        if (departmentRepository.findByName(name).isPresent()) {
+            throw new RuntimeException("Department with name " + name + " already exists.");
+        }
+
+        Department department = new Department();
+        department.setName(name);
+        department.setDescription(description);
+
+        departmentRepository.save(department);
+    }
+
+    @Override
+    @Transactional
     public void updateDepartmentSchedule(Long departmentId, java.time.DayOfWeek day, java.time.LocalTime start, java.time.LocalTime end) {
         if (start.isAfter(end)) {
             throw new IllegalArgumentException("Start time (" + start + ") must be before end time (" + end + ")");

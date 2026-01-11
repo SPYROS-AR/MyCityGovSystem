@@ -1,9 +1,7 @@
 package gr.hua.dit.mycitygov.web.ui;
 
 
-
 import gr.hua.dit.mycitygov.core.model.Department;
-import gr.hua.dit.mycitygov.core.model.DepartmentSchedule;
 import gr.hua.dit.mycitygov.core.service.AdminService;
 import gr.hua.dit.mycitygov.core.service.model.CreateRequestTypeRequest;
 import gr.hua.dit.mycitygov.core.service.model.DepartmentScheduleView;
@@ -50,7 +48,7 @@ public class AdminController {
     }
 
     @GetMapping("/users")
-    public String users(Model model){
+    public String users(Model model) {
         List<UserView> users = adminService.getAllUsers();
         model.addAttribute("users", users);
         return "admin/users";
@@ -74,8 +72,7 @@ public class AdminController {
      */
     @GetMapping("/request-types/new")
     public String showCreateRequestTypeForm(Model model) {
-        // Initialize an empty DTO for the form binding
-        // Assuming your record constructor matches: name, category, slaDays, departmentId, requiredDocuments
+
         CreateRequestTypeRequest form = new CreateRequestTypeRequest("", null, 1, null, "");
 
         model.addAttribute("form", form);
@@ -121,7 +118,6 @@ public class AdminController {
     }
 
 
-
     // --- DEPARTMENT MANAGEMENT ---
 
     /**
@@ -133,7 +129,21 @@ public class AdminController {
         return "admin/departments"; // You need to create this template if you want it to work
     }
 
-    // 1. Σελίδα Πληροφοριών & Επεξεργασίας (Info + Schedule)
+    @PostMapping("/departments")
+    public String createDepartment(@RequestParam("name") String name,
+                                   @RequestParam("description") String description,
+                                   RedirectAttributes redirectAttributes) {
+        try {
+            adminService.createDepartment(name, description);
+            redirectAttributes.addFlashAttribute("successMessage", "Department created successfully!");
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Error: " + e.getMessage());
+        }
+
+        return "redirect:/admin/departments";
+    }
+
+    // Information and edit page
     @GetMapping("/departments/{id}/info")
     public String departmentInfo(@PathVariable Long id, Model model) {
         // Get department
@@ -150,7 +160,7 @@ public class AdminController {
         return "admin/department-info"; // Το νέο template
     }
 
-    // Update basic info ( name, description)
+    // Update basic info (name, description)
     @PostMapping("/departments/{id}/update")
     public String updateDepartmentInfo(@PathVariable Long id,
                                        @RequestParam("name") String name,
@@ -161,12 +171,11 @@ public class AdminController {
 
     // Update schedule for specific department
     @PostMapping("/departments/{id}/schedule")
-    public String updateSchedule(
-            @PathVariable Long id,
-            @RequestParam DayOfWeek day,
-            @RequestParam LocalTime start,
-            @RequestParam LocalTime end,
-            RedirectAttributes redirectAttributes) { // <--- Required for flash messages
+    public String updateSchedule(@PathVariable Long id,
+                                @RequestParam DayOfWeek day,
+                                @RequestParam LocalTime start,
+                                @RequestParam LocalTime end,
+                                RedirectAttributes redirectAttributes) {
 
         try {
             adminService.updateDepartmentSchedule(id, day, start, end);

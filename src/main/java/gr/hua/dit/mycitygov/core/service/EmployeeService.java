@@ -7,6 +7,7 @@ import gr.hua.dit.mycitygov.core.service.model.RequestView;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Optional;
 
 /**
  * Service interface defining the business logic for Employee operations
@@ -17,6 +18,8 @@ public interface EmployeeService {
      * @return List of Employee entities
      */
     List<EmployeeView> getAllEmployees();
+
+    Optional<EmployeeView> getEmployeeByUsername(String username);
 
     /**
      * Retrieves all requests associated with the department of a specific employee

@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <title>Page Not Found - 404</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link th:href="@{/css/style.css}" rel="stylesheet">
+</head>
+<body class="d-flex align-items-center justify-content-center" style="height: 100vh; background-color: #f4f4f4;">
+
+<div class="text-center">
+    <h1 class="display-1 fw-bold" style="color: #009879;">404</h1>
+    <h2 class="mb-4">Page Not Found</h2>
+    <p class="lead mb-4">Oops! The page you are looking for does not exist or has been moved.</p>
+
+    <div class="alert alert-light d-inline-block border" role="alert" sec:authorize="isAuthenticated()">
+        Logged in as: <strong sec:authentication="name"></strong>
+    </div>
+    <br><br>
+
+    <div class="d-grid gap-2 d-sm-flex justify-content-sm-center">
+
+        <a th:href="@{/admin/dashboard}"
+           sec:authorize="hasRole('ADMIN')"
+           class="btn-custom btn-primary-custom px-4 gap-3">
+            Back to Admin Dashboard
+        </a>
+
+        <a th:href="@{/employee/dashboard}"
+           sec:authorize="hasRole('EMPLOYEE')"
+           class="btn-custom btn-primary-custom px-4 gap-3">
+            Back to Employee Dashboard
+        </a>
+
+        <a th:href="@{/citizen/requests}"
+           sec:authorize="hasRole('CITIZEN')"
+           class="btn-custom btn-primary-custom px-4 gap-3">
+            Back to My Requests
+        </a>
+
+        <a th:href="@{/}"
+           sec:authorize="!isAuthenticated()"
+           class="btn-custom btn-primary-custom px-4 gap-3">
+            Go to Login
+        </a>
+    </div>
+</div>
+
+</body>
+</html>

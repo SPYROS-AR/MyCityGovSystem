@@ -8,6 +8,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
+import java.security.Principal;
 import java.time.LocalDateTime;
 
 /**
@@ -34,8 +35,6 @@ public class EmployeeController {
      */
     @GetMapping("/dashboard")
     public String dashboard(Model model) {
-        // TODO that would be done with Spring Security
-        Long currentEmployeeId = 1L; // mock id
         model.addAttribute("requests", employeeService.getRequestsForEmployeeDepartment(currentEmployeeId));
         return "employee/dashboard";
     }
@@ -63,9 +62,9 @@ public class EmployeeController {
      * @return Redirects back to the dashboard
      */
     @PostMapping("/request/{id}/assign")
-    public String assignRequest(@PathVariable("id") Long requestId) {
-        Long currentEmployeeId = 1L; // Mock ID  (TODO: Security)
-        employeeService.assignRequestToEmployee(requestId, currentEmployeeId);
+    public String assignRequest(@PathVariable("id") Long requestId, Principal principal) {
+
+        employeeService.assignRequestToEmployee(requestId, principalId);
         return "redirect:/employee/dashboard";
     }
 
@@ -78,8 +77,7 @@ public class EmployeeController {
      */
     @PostMapping("/request/{id}/approve")
     public String approveRequest(@PathVariable("id") Long requestId) {
-        Long currentEmployeeId = 1L;
-        employeeService.approveRequest(requestId, currentEmployeeId);
+        employeeService.approveRequest(requestId, id);
         return "redirect:/employee/dashboard";
     }
 
@@ -94,7 +92,6 @@ public class EmployeeController {
     @PostMapping("/request/{id}/reject")
     public String rejectRequest(@PathVariable("id") Long requestId,
                                 @RequestParam(required = false) String reason) {
-        Long currentEmployeeId = 1L;
 
         // default rejection message
         if (reason == null || reason.trim().isEmpty()) {
@@ -113,7 +110,6 @@ public class EmployeeController {
      */
     @GetMapping("/appointments")
     public String appointments(Model model) {
-        Long currentEmployeeId = 1L;
         model.addAttribute("appointments", employeeService.getAppointmentsForEmployeeDepartment(currentEmployeeId));
         return "employee/appointments";
     }

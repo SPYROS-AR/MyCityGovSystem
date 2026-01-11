@@ -42,7 +42,6 @@ public class EmployeeRestController {
      */
     @GetMapping("/requests")
     public ResponseEntity<List<RequestView>> getDepartmentRequests() {
-        Long currentEmployeeId = 1L; // Mock ID
         List<RequestView> requests = employeeService.getRequestsForEmployeeDepartment(currentEmployeeId);
         return ResponseEntity.ok(requests);
     }
@@ -67,7 +66,6 @@ public class EmployeeRestController {
      */
     @PostMapping("/request/{id}/assign")
     public ResponseEntity<RequestView> assignRequest(@PathVariable Long id) {
-        Long currentEmployeeId = 1L;
         employeeService.assignRequestToEmployee(id, currentEmployeeId);
         return ResponseEntity.ok(employeeService.getRequestById(id));
     }
@@ -80,7 +78,6 @@ public class EmployeeRestController {
      */
     @PostMapping("/request/{id}/approve")
     public ResponseEntity<RequestView> approveRequest(@PathVariable Long id) {
-        Long currentEmployeeId = 1L;
         employeeService.approveRequest(id, currentEmployeeId);
         return ResponseEntity.ok(employeeService.getRequestById(id));
     }
@@ -94,7 +91,6 @@ public class EmployeeRestController {
      */
     @PostMapping("/request/{id}/reject")
     public ResponseEntity<RequestView> rejectRequest(@PathVariable Long id, @RequestBody String reason) {
-        Long currentEmployeeId = 1L;
         employeeService.rejectRequest(id, currentEmployeeId, reason);
         return ResponseEntity.ok(employeeService.getRequestById(id));
     }
@@ -106,7 +102,6 @@ public class EmployeeRestController {
      */
     @GetMapping("/appointments")
     public ResponseEntity<List<AppointmentView>> getAppointments() {
-        Long currentEmployeeId = 1L;
         List<AppointmentView> appointmentViews = employeeService.getAppointmentsForEmployeeDepartment(currentEmployeeId);
         return ResponseEntity.ok(appointmentViews);
     }

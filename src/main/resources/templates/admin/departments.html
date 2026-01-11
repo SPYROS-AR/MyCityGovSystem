@@ -34,6 +34,9 @@
 <div class="container mt-4">
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h2>Departments</h2>
+        <button type="button" class="btn-custom btn-primary-custom" data-bs-toggle="modal" data-bs-target="#createDepartmentModal">
+            + New Department
+        </button>
     </div>
 
     <table class="styled-table">
@@ -41,7 +44,9 @@
         <tr>
             <th>ID</th>
             <th>Name</th>
-            <th>Description</th> <th>Actions</th>     </tr>
+            <th>Description</th>
+            <th>Actions</th>
+        </tr>
         </thead>
         <tbody>
         <tr th:each="dept : ${departments}">
@@ -63,5 +68,33 @@
         <a th:href="@{/admin/dashboard}" class="btn-custom btn-secondary-custom">Back to Dashboard</a>
     </div>
 </div>
+
+<div class="modal fade" id="createDepartmentModal" tabindex="-1" aria-labelledby="createDepartmentModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="createDepartmentModalLabel">Create New Department</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form th:action="@{/admin/departments}" method="post">
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="deptName" class="form-label">Department Name</label>
+                        <input type="text" class="form-control" id="deptName" name="name" required placeholder="e.g. Technical Services">
+                    </div>
+                    <div class="mb-3">
+                        <label for="deptDesc" class="form-label">Description</label>
+                        <textarea class="form-control" id="deptDesc" name="description" rows="3" placeholder="Description of responsibilities..."></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary" style="background-color: #009879; border: none;">Create</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
 </body>
 </html>
