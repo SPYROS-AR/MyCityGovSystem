@@ -10,6 +10,7 @@ import gr.hua.dit.mycitygov.core.service.model.BookAppointmentRequest;
 import gr.hua.dit.mycitygov.core.service.model.RequestView;
 import gr.hua.dit.mycitygov.core.service.model.SubmitRequestRequest;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -17,6 +18,7 @@ import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/citizen")
+@PreAuthorize("hasRole('CITIZEN')")
 public class CitizenRestController {
 
     private final CitizenService citizenService;
