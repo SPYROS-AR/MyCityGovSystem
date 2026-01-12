@@ -10,7 +10,8 @@
 
 <nav class="navbar-custom">
     <div class="container d-flex justify-content-between">
-        <a th:href="@{/}" style="color: white; font-size: 1.2em;">MyCityGov</a>
+<!--        <a th:href="@{/}" style="color: white; font-size: 1.2em;">MyCityGov</a>-->
+        <span>MyCityGov</span>
 
         <div sec:authorize="isAuthenticated()">
             <span>
@@ -20,7 +21,7 @@
             <span class="badge bg-light text-dark ms-2" sec:authentication="principal.role"></span>
 
             <form th:action="@{/logout}" method="post" class="d-inline ms-3">
-                <button type="submit" class="btn btn-sm btn-outline-light" style="border-radius: 20px;">
+                <button type="submit" class="btn btn-sm btn-outline-light">
                     Logout
                 </button>
             </form>
