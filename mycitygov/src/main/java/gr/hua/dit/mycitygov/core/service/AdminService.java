@@ -58,7 +58,7 @@ public interface AdminService {
      * Retrieves the weekly schedule for a specific department.
      *
      * @param departmentId The ID of the department.
-     * @return A list of {@link DepartmentScheduleView} DTOs representing the opening hours for each day.
+     * @return A sorted list of {@link DepartmentScheduleView} DTOs representing the opening hours for each day.
      */
     List<DepartmentScheduleView> getDepartmentSchedule(Long departmentId);
 

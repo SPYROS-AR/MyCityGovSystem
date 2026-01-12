@@ -18,4 +18,6 @@ public interface RequestRepository extends JpaRepository<Request, Long> {
     Optional<Request> findByProtocolNumber(String protocolNumber);
     // Returns all Requests submitted by a citizen
     List<Request> findByCitizenId(Long citizenId);
+
+
 }

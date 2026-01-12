@@ -4,9 +4,12 @@
 <head>
     <title>Admin Dashboard</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
     <link th:href="@{/css/style.css}" rel="stylesheet">
 </head>
-<body><nav class="navbar-custom">
+<body>
+
+<nav class="navbar-custom">
     <div class="container d-flex justify-content-between">
         <span>MyCityGov</span>
 
@@ -33,58 +36,93 @@
 <div class="container mt-4">
     <h2>System Statistics</h2>
 
-    <div class="row g-3 mb-4">
-        <div class="col-md">
-            <div class="p-3 bg-white shadow-sm border rounded text-center">
-                <h6 class="text-muted">Total Requests</h6>
-                <h3 th:text="${stats.totalRequests}">0</h3>
+    <h5 class="text-muted mb-3">Request Overview</h5>
+    <div class="row g-3 mb-5">
+        <div class="col-md-3">
+            <div class="card p-3 shadow-sm border-0 border-start border-4 border-primary text-center">
+                <h6 class="text-muted text-uppercase small">Total Requests</h6>
+                <h2 class="mb-0" th:text="${stats.totalRequests}">0</h2>
             </div>
         </div>
-        <div class="col-md">
-            <div class="p-3 bg-white shadow-sm border rounded text-center">
-                <h6 class="text-warning">Pending</h6>
-                <h3 th:text="${stats.pendingRequests}" class="text-warning">0</h3>
+        <div class="col-md-3">
+            <div class="card p-3 shadow-sm border-0 border-start border-4 border-warning text-center">
+                <h6 class="text-muted text-uppercase small">Pending</h6>
+                <h2 class="mb-0 text-warning" th:text="${stats.pendingRequests}">0</h2>
             </div>
         </div>
-        <div class="col-md">
-            <div class="p-3 bg-white shadow-sm border rounded text-center">
-                <h6 class="text-success">Completed</h6>
-                <h3 th:text="${stats.completedRequests}" class="text-success">0</h3>
+        <div class="col-md-3">
+            <div class="card p-3 shadow-sm border-0 border-start border-4 border-success text-center">
+                <h6 class="text-muted text-uppercase small">Completed</h6>
+                <h2 class="mb-0 text-success" th:text="${stats.completedRequests}">0</h2>
             </div>
         </div>
-        <div class="col-md">
-            <div class="p-3 bg-white shadow-sm border rounded text-center">
-                <h6 class="text-danger">Overdue (SLA)</h6>
-                <h3 th:text="${stats.overdueRequests}" class="text-danger">0</h3>
-            </div>
-        </div>
-        <div class="col-md">
-            <div class="p-3 bg-white shadow-sm border rounded text-center">
-                <h6 class="text-primary">Citizens</h6>
-                <h3 th:text="${stats.totalCitizens}">0</h3>
+        <div class="col-md-3">
+            <div class="card p-3 shadow-sm border-0 border-start border-4 border-danger text-center">
+                <h6 class="text-muted text-uppercase small">Overdue (SLA)</h6>
+                <h2 class="mb-0 text-danger" th:text="${stats.overdueRequests}">0</h2>
             </div>
         </div>
     </div>
 
-    <div class="mb-5">
-        <h4>Requests by Department</h4>
-        <div class="row g-3">
-            <div class="col-md-4" th:each="entry : ${stats.requestsByDepartment}">
-                <div class="p-3 bg-light border rounded d-flex justify-content-between align-items-center">
-                    <span class="fw-bold" th:text="${entry.key}">Department Name</span>
-                    <span class="badge bg-secondary rounded-pill fs-6" th:text="${entry.value}">0</span>
+    <div class="row g-4 mb-5">
+
+        <div class="col-md-4">
+            <h5 class="text-muted mb-3">User Base</h5>
+            <div id="user-card" class="card shadow-sm border-0 bg-primary text-white p-4 text-center">
+                <div class="mb-2">
+                    <i class="bi bi-people-fill display-4"></i>
                 </div>
-            </div>
-            <div class="col-12" th:if="${stats.requestsByDepartment.isEmpty()}">
-                <p class="text-muted">No department statistics available.</p>
+                <h6 class="text-uppercase small" style="opacity: 0.8;">Registered Citizens</h6>
+                <h1 class="display-4 fw-bold mb-0" th:text="${stats.totalCitizens}">0</h1>
             </div>
         </div>
-    </div>
+
+        <div class="col-md-7 offset-md-1">
+            <h5 class="text-muted mb-3">Requests by Department</h5>
+
+            <div id="dept-list" class="pe-2" style="overflow-y: auto;">
+
+                <div class="row g-3">
+                    <div class="col-md-6" th:each="entry : ${stats.requestsByDepartment}">
+                        <div class="p-3 bg-light border rounded d-flex justify-content-between align-items-center">
+                            <span class="fw-bold" th:text="${entry.key}">Department Name</span>
+                            <span class="badge bg-white text-dark border shadow-sm rounded-pill fs-6"
+                                  th:text="${entry.value}">0</span>
+                        </div>
+                    </div>
+
+                    <div class="col-12" th:if="${stats.requestsByDepartment.isEmpty()}">
+                        <p class="text-muted fst-italic">No department statistics available.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
 
     <div class="d-flex gap-3">
         <a th:href="@{/admin/request-types}" class="btn-custom btn-primary-custom">Manage Request Types</a>
         <a th:href="@{/admin/departments}" class="btn-custom btn-secondary-custom">View Departments</a>
         <a th:href="@{/admin/users}" class="btn-custom btn-secondary-custom">View Users</a>
     </div>
-</div></body>
+
+</div>
+
+<script>
+    // Syncs request count per department div with count div height
+    function syncHeights() {
+        const userCard = document.getElementById('user-card');
+        const deptList = document.getElementById('dept-list');
+
+        if (userCard && deptList) {
+            // Get the pixel height of the User Card
+            const height = userCard.offsetHeight;
+            // Apply it as the max-height for the list
+            deptList.style.maxHeight = height + 'px';
+        }
+    }
+    // Run when page loads
+    window.addEventListener('load', syncHeights);
+    window.addEventListener('resize', syncHeights);
+</script>
+
+</body>
 </html>

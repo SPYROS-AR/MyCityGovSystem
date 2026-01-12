@@ -13,6 +13,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -79,11 +81,18 @@ public class AdminServiceImpl implements AdminService {
                 .count();
 
         // Requests per department (Map<Department name, count>)
-        Map<String, Long> requestsByDepartment = allRequests.stream()
-                .collect(Collectors.groupingBy(
-                        r -> r.getDepartment().getName(),
-                        Collectors.counting()
-                ));
+        Map<String, Long> requestsByDepartment = new HashMap<>();
+        List<Department> allDepartments = departmentRepository.findAll();
+
+        for (Department dept : allDepartments) {
+            // Filter the big list of requests to find matches for THIS department
+            long count = allRequests.stream()
+                    .filter(r -> r.getDepartment().getId().equals(dept.getId()))
+                    .count();
+
+            // Put the result (even if it is 0) into the map
+            requestsByDepartment.put(dept.getName(), count);
+        }
 
         // Overdue requests
         long overdueRequests = allRequests.stream()
@@ -138,6 +147,8 @@ public class AdminServiceImpl implements AdminService {
         return scheduleRepository.findByDepartmentId(departmentId)
                 .stream()
                 .map(scheduleMapper::toDto)
+                // Return sorted list based on DayOfWeek
+                .sorted(Comparator.comparing(DepartmentScheduleView::dayOfWeek))
                 .collect(Collectors.toList());
     }
 
