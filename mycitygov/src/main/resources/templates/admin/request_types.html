@@ -125,3 +125,13 @@
         </div>
     </div>
 </div>
+
+<script>
+    function setRequestTypeId(id) {
+        // 1. Find the hidden input field in the modal
+        const hiddenInput = document.getElementById('newRequestTypeId');
+
+        // 2. Set its value to the ID of the row we clicked
+        hiddenInput.value = id;
+    }
+</script>
