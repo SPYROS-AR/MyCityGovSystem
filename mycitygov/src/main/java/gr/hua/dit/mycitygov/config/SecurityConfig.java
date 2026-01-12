@@ -88,6 +88,7 @@ public class SecurityConfig {
                         // allow everyone to access these paths
                         .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll()
                         .requestMatchers("/", "/login", "/citizen/register", "/css/**", "/js/**", "/images/**").permitAll()
+                        .requestMatchers("/error").permitAll()
                         // require special privileges
                         .requestMatchers("/admin/**").hasRole("ADMIN")
                         .requestMatchers("/employee/**").hasRole("EMPLOYEE")
