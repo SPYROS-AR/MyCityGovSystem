@@ -91,11 +91,11 @@ public class InitService implements CommandLineRunner {
 
             // 7. RequestType Entity (ΠΡΟΣΟΧΗ: Προστέθηκαν οι ημέρες SLA στο τέλος)
             RequestType wasteType = initRequestType("WASTE_COLLECTION", RequestType.RequestCategory.PROBLEM, cleanliness, 5);
-            initRequestType("ROAD_REPAIR", RequestType.RequestCategory.PROBLEM, technical, 10);
+            RequestType road_repair = initRequestType("ROAD_REPAIR", RequestType.RequestCategory.PROBLEM, technical, 10);
 
             // 8. Request & 9. RequestLog Entities
-            initRequests(cleanliness, emily, wasteType, emp1);
-
+            initRequests( "REQ-2025-001", cleanliness, emily, wasteType, emp1);
+            initRequests("REQ-2025-002", technical  , emily, road_repair, emp1);
             // 10. Appointment Entity
             initAppointments(cleanliness, emily);
 
@@ -192,18 +192,19 @@ public class InitService implements CommandLineRunner {
         });
     }
 
-    private void initRequests(Department dept, Citizen citizen, RequestType type, Employee employee) {
-        if (requestRepository.findByProtocolNumber("REQ-2025-001").isEmpty()) {
+    private void initRequests(String protocolNumber, Department dept, Citizen citizen, RequestType type, Employee employee) {
+        if (requestRepository.findByProtocolNumber(protocolNumber).isEmpty()) {
             Request req = new Request();
-            req.setProtocolNumber("REQ-2025-001");
-            req.setSubmittedDate(LocalDateTime.now().minusHours(2));
+            req.setProtocolNumber(protocolNumber);
             req.setDescription("Pothole reported at Main Street.");
             req.setStatus(Request.Status.PROCESSING);
             req.setDepartment(dept);
             req.setCitizen(citizen);
             req.setRequestType(type);
             req.setAssignedEmployee(employee);
-
+            if (requestRepository.count() == 0) { // First request is be overdue
+                req.setSubmittedDate(LocalDateTime.now().minusMonths(1));
+            }
             // Initialize RequestLog Entity
             RequestLog log = new RequestLog();
             log.setActionDate(LocalDateTime.now());

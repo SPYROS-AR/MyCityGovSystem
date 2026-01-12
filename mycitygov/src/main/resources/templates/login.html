@@ -13,12 +13,11 @@
         <p class="text-muted">Sign in to your account</p>
     </div>
 
-    <form id="loginForm" th:action="@{/login}" method="post">
+    <form th:action="@{/login}" method="post">
 
-        <div id="error-alert" class="alert alert-danger d-none">
+        <div th:if="${param.error}" class="alert alert-danger">
             Invalid username or password.
         </div>
-
         <div th:if="${param.logout}" class="alert alert-success">
             You have been logged out.
         </div>
@@ -42,41 +41,6 @@
         </small>
     </div>
 </div>
-
-<script>
-    document.getElementById('loginForm').addEventListener('submit', function(event) {
-        // Stop the form from refreshing the page immediately
-        event.preventDefault();
-
-        const form = event.target;
-        const formData = new FormData(form);
-        const errorAlert = document.getElementById('error-alert');
-
-        // Send the data via fetch (AJAX)
-        fetch(form.action, {
-            method: 'POST',
-            body: formData,
-            // Depending on your backend setup, you might need to handle CSRF tokens here
-        })
-            .then(response => {
-                // Check if the login failed
-                if (response.url.includes('error')) {
-                    // Show the error message without refreshing
-                    errorAlert.classList.remove('d-none');
-                    // Optional: Clear the password field
-                    document.getElementById('password').value = '';
-                } else {
-                    // D. If login is successful, manually redirect the user
-                    window.location.href = response.url;
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                errorAlert.textContent = "An unexpected error occurred.";
-                errorAlert.classList.remove('d-none');
-            });
-    });
-</script>
 
 </body>
 </html>

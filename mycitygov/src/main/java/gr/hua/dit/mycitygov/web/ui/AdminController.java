@@ -241,14 +241,26 @@ public class AdminController {
      * @param id          The ID of the department to update.
      * @param name        The new name.
      * @param description The new description.
+     * Adds appropriate message to model
      * @return A redirect back to the department info page.
      */
     @PostMapping("/departments/{id}/update")
     public String updateDepartmentInfo(@PathVariable Long id,
                                        @RequestParam("name") String name,
-                                       @RequestParam("description") String description) {
-        adminService.updateDepartmentInfo(id, name, description);
-        return "redirect:/admin/departments/" + id + "/info?success";
+                                       @RequestParam("description") String description,
+                                       RedirectAttributes redirectAttributes) { // 1. Προσθήκη παραμέτρου
+        try {
+            adminService.updateDepartmentInfo(id, name, description);
+            // Success message
+            redirectAttributes.addFlashAttribute("successMessage", "Department updated successfully!");
+        } catch (org.springframework.dao.DataIntegrityViolationException e) {
+            // Catch "Duplicate Key" error
+            redirectAttributes.addFlashAttribute("errorMessage", "Error: A department with this name already exists.");
+        } catch (Exception e) {
+            // Catch general error
+            redirectAttributes.addFlashAttribute("errorMessage", "Update failed: " + e.getMessage());
+        }
+        return "redirect:/admin/departments/" + id + "/info";
     }
 
     /**
