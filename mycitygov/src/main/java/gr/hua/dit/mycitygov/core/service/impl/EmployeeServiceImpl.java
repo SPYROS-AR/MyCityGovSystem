@@ -104,6 +104,51 @@ public class EmployeeServiceImpl implements EmployeeService {
     }
 
     @Override
+    @Transactional(readOnly = true)
+    public List<EmployeeView> getEmployeesByDepartment(Long departmentId) {
+        return employeeRepository.findByDepartmentId(departmentId)
+                .stream()
+                .map(employeeMapper::toDto)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    @Transactional
+    public void updateRequestProgress(Long requestId, Long employeeId, Request.Status newStatus, String comment) {
+        Request request = requestRepository.findById(requestId)
+                .orElseThrow(() -> new RuntimeException("Request not found"));
+
+        Employee employee = employeeRepository.findById(employeeId)
+                .orElseThrow(() -> new RuntimeException("Employee not found"));
+
+        Request.Status oldStatus = request.getStatus();
+
+        // update the status if it's changed
+        if (newStatus != null) {
+            request.setStatus(newStatus);
+        }
+
+        // Log
+        RequestLog log = new RequestLog();
+        log.setActionDate(LocalDateTime.now());
+        // if comment exists add it to the log else add a default message
+        log.setComment((comment != null && !comment.isBlank()) ? comment : "Status updated to " + newStatus);
+        log.setOldStatus(oldStatus);
+        log.setNewStatus(request.getStatus());
+        log.setRequest(request);
+        log.setEmployee(employee);
+
+        request.getLogs().add(log);
+        requestRepository.save(request);
+
+        if (newStatus == Request.Status.PENDING_DOCS) {
+            smsPort.sendSms(request.getCitizen().getMobilePhoneNumber(),
+                    "Your request status changed to: " + newStatus + ". " + comment);
+        }
+
+    }
+
+    @Override
     @Transactional
     public RequestView getRequestById(Long id) {
         Request request = requestRepository.findById(id)
@@ -131,9 +176,15 @@ public class EmployeeServiceImpl implements EmployeeService {
         Employee employee = employeeRepository
                 .findById(employeeId)
                 .orElseThrow(() -> new RuntimeException("Employee with id " + employeeId + " not found"));
+
+        if (!request.getDepartment().getId().equals(employee.getDepartment().getId())) {
+            throw new RuntimeException("Cannot assign request to an employee of a different department!");
+        }
         Request.Status oldStatus = request.getStatus();
         request.setAssignedEmployee(employee);          // update request to include employee
-        request.setStatus(Request.Status.PROCESSING);   // change request status to processing
+        if (request.getStatus() == Request.Status.SUBMITTED) {
+            request.setStatus(Request.Status.PROCESSING);
+        }
 
         RequestLog log = new RequestLog();
         log.setActionDate(LocalDateTime.now());

@@ -14,10 +14,14 @@ import java.util.List;
 public class RequestMapper {
     private final CitizenMapper citizenMapper;
     private final EmployeeMapper employeeMapper;
+    private final DepartmentMapper departmentMapper;
 
-    public RequestMapper(CitizenMapper citizenMapper, EmployeeMapper employeeMapper) {
+    public RequestMapper(CitizenMapper citizenMapper,
+                         EmployeeMapper employeeMapper,
+                         DepartmentMapper departmentMapper) {
         this.citizenMapper = citizenMapper;
         this.employeeMapper = employeeMapper;
+        this.departmentMapper = departmentMapper;
     }
 
     public RequestView toDto(final Request request) {
@@ -37,7 +41,8 @@ public class RequestMapper {
                 request.getSubmittedDate(),
                 citizenMapper.toDto(request.getCitizen()),
                 employeeMapper.toDto(request.getAssignedEmployee()),
-                request.getLogs()
+                request.getLogs(),
+                departmentMapper.toDto(request.getDepartment())
         );
     }
 }

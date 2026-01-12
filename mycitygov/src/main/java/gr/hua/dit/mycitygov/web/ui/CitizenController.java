@@ -5,6 +5,7 @@ import gr.hua.dit.mycitygov.core.model.Request;
 import gr.hua.dit.mycitygov.core.security.ApplicationUserDetails;
 import gr.hua.dit.mycitygov.core.service.CitizenService;
 import gr.hua.dit.mycitygov.core.service.mapper.AppointmentMapper;
+import gr.hua.dit.mycitygov.core.service.mapper.CitizenMapper;
 import gr.hua.dit.mycitygov.core.service.mapper.RequestMapper;
 import gr.hua.dit.mycitygov.core.service.model.*;
 import org.springframework.security.core.Authentication;
@@ -17,9 +18,6 @@ import java.security.Principal;
 import java.util.List;
 import java.util.stream.Collectors;
 
-/**
- * MVC Controller handling the Citizen's UI (HTML pages).
- */
 @Controller
 @RequestMapping("/citizen")
 public class CitizenController {
@@ -27,13 +25,16 @@ public class CitizenController {
     private final CitizenService citizenService;
     private final RequestMapper requestMapper;
     private final AppointmentMapper appointmentMapper;
+    private final CitizenMapper citizenMapper;
 
     public CitizenController(CitizenService citizenService,
                              RequestMapper requestMapper,
-                             AppointmentMapper appointmentMapper) {
+                             AppointmentMapper appointmentMapper,
+                             CitizenMapper citizenMapper) {
         this.citizenService = citizenService;
         this.requestMapper = requestMapper;
         this.appointmentMapper = appointmentMapper;
+        this.citizenMapper = citizenMapper;
     }
 
     private Long getCurrentUserId(Authentication authentication) {
@@ -41,27 +42,17 @@ public class CitizenController {
         return userDetails.personId();
     }
 
-    /**
-     * Redirects to login page if accessing root /citizen.
-     */
     @GetMapping
     public String index() {
-        return "redirect:/citizen/login";
+        return "redirect:/citizen/requests/my";
     }
 
-    /**
-     * Shows the login form.
-     * @return The "citizen/login" view template.
-     */
     @GetMapping("/login")
     public String showLoginForm() { return "citizen/login"; }
 
     @GetMapping("/register")
     public String showRegisterForm(Model model) {
-        // Empty DTO for the form
-        model.addAttribute("citizen", new CreateCitizenRequest(
-                "", "", "", "", "", "", "", ""
-        ));
+        model.addAttribute("citizen", new CreateCitizenRequest("", "", "", "", "", "", "", ""));
         return "citizen/register";
     }
 
@@ -69,17 +60,12 @@ public class CitizenController {
     public String register(@ModelAttribute("citizen") CreateCitizenRequest request,
                            BindingResult bindingResult,
                            Model model) {
-        // Call service to create citizen
         CreateCitizenResult result = citizenService.createCitizen(request);
-
         if (!result.created()) {
-            // If error (e.g. email exists), show it on the page
             model.addAttribute("error", result.reason());
             model.addAttribute("citizen", request);
             return "citizen/register";
         }
-
-        // Success -> Redirect to login
         return "redirect:/citizen/login?success";
     }
 
@@ -88,7 +74,8 @@ public class CitizenController {
     @GetMapping("/requests/new")
     public String showCreateRequestForm(Model model) {
         model.addAttribute("requestTypes", citizenService.getAllRequestTypes());
-        model.addAttribute("submitRequest", new SubmitRequestRequest(null, ""));
+        // ΔΙΟΡΘΩΣΗ ΕΔΩ: Προστέθηκε το null ως 3ο όρισμα για το MultipartFile
+        model.addAttribute("submitRequest", new SubmitRequestRequest(null, "", null));
         return "citizen/request-new";
     }
 
@@ -102,11 +89,9 @@ public class CitizenController {
     @GetMapping("/requests/my")
     public String showMyRequests(Model model, Principal principal) {
         var citizen = citizenService.getCitizenByUsername(principal.getName());
-
         if (citizen == null) {
             throw new RuntimeException("Logged in user is not found in Citizen database!");
         }
-
         Long citizenId = citizen.getId();
 
         List<Request> requests = citizenService.getMyRequests(citizenId);
@@ -133,12 +118,10 @@ public class CitizenController {
     @PostMapping("/appointments")
     public String bookAppointment(@ModelAttribute BookAppointmentRequest bookAppointment, Model model, Principal principal) {
         Long citizenId = citizenService.getCitizenByUsername(principal.getName()).getId();
-
         try {
             citizenService.bookAppointment(bookAppointment, citizenId);
             return "redirect:/citizen/appointments/my";
         } catch (RuntimeException e) {
-            // Show error if appointment is outside working hours
             model.addAttribute("error", e.getMessage());
             model.addAttribute("departments", citizenService.getAllDepartments());
             return "citizen/appointment-new";
@@ -148,12 +131,10 @@ public class CitizenController {
     @GetMapping("/appointments/my")
     public String showMyAppointments(Model model, Principal principal) {
         Long citizenId = citizenService.getCitizenByUsername(principal.getName()).getId();
-
         List<Appointment> appointments = citizenService.getMyAppointments(citizenId);
         List<AppointmentView> appointmentViews = appointments.stream()
                 .map(appointmentMapper::toAppointmentView)
                 .collect(Collectors.toList());
-
         model.addAttribute("appointments", appointmentViews);
         return "citizen/appointments-list";
     }
@@ -164,5 +145,10 @@ public class CitizenController {
     // --- PROFILE ---
 
     @GetMapping("/profile")
-    public String showProfile() { return "citizen/profile"; }
+    public String showProfile(Model model, Principal principal) {
+        var citizenEntity = citizenService.getCitizenByUsername(principal.getName());
+        CitizenView citizenView = citizenMapper.toDto(citizenEntity);
+        model.addAttribute("citizen", citizenView);
+        return "citizen/profile";
+    }
 }

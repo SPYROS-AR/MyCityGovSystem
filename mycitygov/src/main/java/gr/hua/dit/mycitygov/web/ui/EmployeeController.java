@@ -1,6 +1,9 @@
 package gr.hua.dit.mycitygov.web.ui;
 
+import gr.hua.dit.mycitygov.core.model.Employee;
+import gr.hua.dit.mycitygov.core.model.Request;
 import gr.hua.dit.mycitygov.core.service.EmployeeService;
+import gr.hua.dit.mycitygov.core.service.model.EmployeeView;
 import gr.hua.dit.mycitygov.core.service.model.RequestView;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -11,6 +14,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.security.Principal;
 import java.time.LocalDateTime;
+import java.util.List;
 
 /**
  * Controller for handling all web requests related to the Employee
@@ -50,9 +54,22 @@ public class EmployeeController {
      * @return The "employee/request_details" view template
      */
     @GetMapping("/request/{id}")
-    public String viewRequestDetails(@PathVariable("id") Long id, Model model) {
+    public String viewRequestDetails(@PathVariable("id") Long id,
+                                     Model model,
+                                     Principal principal) {
         RequestView request = employeeService.getRequestById(id);
+        Employee currentEmployee = employeeService.getEmployeeByUsername(principal.getName());
+
+        List<EmployeeView> colleagues = List.of();
+        if (currentEmployee.getDepartment() != null) {
+            colleagues = employeeService.getEmployeesByDepartment(currentEmployee.getDepartment().getId());
+        } else {
+            System.err.println("CAUTION " + currentEmployee.getUsername() + " doesn't have a department");
+        }
+
         model.addAttribute("request", request);
+        model.addAttribute("colleagues", colleagues);
+        model.addAttribute("statuses", Request.Status.values());
         return "employee/request_details";
     }
 
@@ -65,10 +82,19 @@ public class EmployeeController {
      * @return Redirects back to the dashboard
      */
     @PostMapping("/request/{id}/assign")
-    public String assignRequest(@PathVariable("id") Long requestId, Principal principal) {
-        Long currentEmployeeId = employeeService.getEmployeeByUsername(principal.getName()).getId();
-        employeeService.assignRequestToEmployee(requestId, currentEmployeeId);
-        return "redirect:/employee/dashboard";
+    public String assignRequest(@PathVariable("id") Long requestId,
+                                @RequestParam(required = false) Long assigneeId,
+                                Principal principal,
+                                RedirectAttributes redirectAttributes) {
+        Long targetEmployeeId;
+        if (assigneeId != null) {
+            targetEmployeeId = assigneeId;
+        } else {
+            targetEmployeeId = employeeService.getEmployeeByUsername(principal.getName()).getId();
+        }
+        employeeService.assignRequestToEmployee(requestId, targetEmployeeId);
+        redirectAttributes.addFlashAttribute("successMessage", "Request assigned successfully.");
+        return "redirect:/employee/request/" + requestId;
     }
 
     /**
@@ -106,6 +132,22 @@ public class EmployeeController {
 
         employeeService.rejectRequest(requestId, currentEmployeeId, reason);
         return "redirect:/employee/dashboard";
+    }
+
+    @PostMapping("/request/{id}/update-progress")
+    public String updateRequestProgress(@PathVariable("id") Long requestId,
+                                        @RequestParam("status") Request.Status status,
+                                        @RequestParam(value = "comment", required = false) String comment,
+                                        Principal principal,
+                                        RedirectAttributes redirectAttributes) {
+
+        Long currentEmployeeId = employeeService.getEmployeeByUsername(principal.getName()).getId();
+
+        employeeService.updateRequestProgress(requestId, currentEmployeeId, status, comment);
+
+        redirectAttributes.addFlashAttribute("successMessage", "Request progress updated successfully.");
+
+        return "redirect:/employee/request/" + requestId;
     }
 
     /**
