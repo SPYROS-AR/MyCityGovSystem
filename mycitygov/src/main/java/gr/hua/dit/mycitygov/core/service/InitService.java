@@ -118,7 +118,7 @@ public class InitService implements CommandLineRunner {
             admin.setFirstName("John");
             admin.setLastName("Admin");
             admin.setUsername("admin");
-            admin.setPassword(passwordEncoder.encode("admin123"));
+            admin.setPassword(passwordEncoder.encode("p"));
             admin.setEmail("admin@mycity.gov");
             adminRepository.save(admin);
             logger.info("Entity 'Admin' initialized.");
@@ -152,7 +152,7 @@ public class InitService implements CommandLineRunner {
         if (emp == null) {
             emp = new Employee();
             emp.setUsername(username);
-            emp.setPassword(passwordEncoder.encode("password"));
+            emp.setPassword(passwordEncoder.encode("p"));
             emp.setFirstName(first);
             emp.setLastName(last);
             emp.setEmail(email);
@@ -167,7 +167,7 @@ public class InitService implements CommandLineRunner {
         Citizen c1 = citizenRepository.findByEmail("emily.t@gmail.com").orElseGet(() -> {
             Citizen c = new Citizen();
             c.setUsername("citizen1");
-            c.setPassword(passwordEncoder.encode("password"));
+            c.setPassword(passwordEncoder.encode("p"));
             c.setFirstName("Emily");
             c.setLastName("Thompson");
             c.setEmail("emily.t@gmail.com");

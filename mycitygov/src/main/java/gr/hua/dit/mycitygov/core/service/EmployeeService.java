@@ -2,6 +2,7 @@ package gr.hua.dit.mycitygov.core.service;
 
 import gr.hua.dit.mycitygov.core.model.Employee;
 import gr.hua.dit.mycitygov.core.model.Request;
+import gr.hua.dit.mycitygov.core.model.RequestDocument;
 import gr.hua.dit.mycitygov.core.service.model.AppointmentView;
 import gr.hua.dit.mycitygov.core.service.model.EmployeeView;
 import gr.hua.dit.mycitygov.core.service.model.RequestView;
@@ -119,4 +120,11 @@ public interface EmployeeService {
      * @return The EmployeeView DTO
      */
     Employee getEmployeeByUsername(String username);
+
+    /**
+     * Returns a document based on the id
+     * @param documentId the documents id
+     * @return  the returned document
+     */
+    RequestDocument getDocument(Long documentId);
 }

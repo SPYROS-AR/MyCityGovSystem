@@ -4,11 +4,13 @@ import gr.hua.dit.mycitygov.core.model.Request;
 import gr.hua.dit.mycitygov.core.model.RequestLog;
 import gr.hua.dit.mycitygov.core.service.model.CitizenView;
 import gr.hua.dit.mycitygov.core.service.model.EmployeeView;
+import gr.hua.dit.mycitygov.core.service.model.RequestDocumentView;
 import gr.hua.dit.mycitygov.core.service.model.RequestView;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Component
 public class RequestMapper {
@@ -29,8 +31,19 @@ public class RequestMapper {
 
         String assignedEmployeeName = "-";
         if (request.getAssignedEmployee() != null) {
-            assignedEmployeeName = request.getAssignedEmployee().getFirstName() + " " + request.getAssignedEmployee().getLastName();
+            assignedEmployeeName = request
+                    .getAssignedEmployee()
+                    .getFirstName() + " " + request.getAssignedEmployee().getLastName();
         }
+
+        List<RequestDocumentView> documents = request
+                .getDocuments()
+                .stream()
+                .map(document -> new RequestDocumentView(
+                        document.getId(),
+                        document.getFileName(),
+                        document.getFileName()))
+                .collect(Collectors.toList());
 
         return new RequestView(
                 request.getId(),
@@ -42,7 +55,9 @@ public class RequestMapper {
                 citizenMapper.toDto(request.getCitizen()),
                 employeeMapper.toDto(request.getAssignedEmployee()),
                 request.getLogs(),
-                departmentMapper.toDto(request.getDepartment())
+                departmentMapper.toDto(request.getDepartment()),
+                request.getDueDate(),
+                documents
         );
     }
 }

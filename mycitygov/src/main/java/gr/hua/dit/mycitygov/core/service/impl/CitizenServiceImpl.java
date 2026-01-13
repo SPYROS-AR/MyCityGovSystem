@@ -60,7 +60,10 @@ public class CitizenServiceImpl implements CitizenService {
                               RequestRepository requestRepository,
                               RequestTypeRepository requestTypeRepository,
                               AppointmentRepository appointmentRepository,
-                              DepartmentRepository departmentRepository, DepartmentScheduleRepository departmentScheduleRepository, DepartmentScheduleMapper departmentScheduleMapper, SmsNotificationPort smsPort) {
+                              DepartmentRepository departmentRepository,
+                              DepartmentScheduleRepository departmentScheduleRepository,
+                              DepartmentScheduleMapper departmentScheduleMapper,
+                              SmsNotificationPort smsPort) {
         this.passwordEncoder = passwordEncoder;
         this.citizenRepository = citizenRepository;
         this.citizenMapper = citizenMapper;
@@ -245,6 +248,7 @@ public class CitizenServiceImpl implements CitizenService {
      * @return A list of {@link Request} entities belonging to the citizen.
      */
     @Override
+    @Transactional(readOnly = true)
     public List<Request> getMyRequests(Long citizenId) { return requestRepository.findByCitizenId(citizenId); }
 
     /**
@@ -254,6 +258,7 @@ public class CitizenServiceImpl implements CitizenService {
      * @return A list of {@link RequestType} entities.
      */
     @Override
+    @Transactional(readOnly = true)
     public List<RequestType> getAllRequestTypes() { return requestTypeRepository.findAll(); }
 
     /**

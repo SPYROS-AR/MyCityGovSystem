@@ -52,6 +52,9 @@
             <div class="text-muted">
                 Submitted on <span th:text="${#temporals.format(request?.submittedDate, 'dd/MM/yyyy HH:mm')}"></span>
             </div>
+            <div class="text-danger" th:if="${request.dueDate != null}">
+                Due Date: <span th:text="${#temporals.format(request.dueDate, 'dd/MM/yyyy')}"></span>
+            </div>
         </div>
         <div class="text-end">
             <a th:href="@{/employee/dashboard}" class="btn-custom btn-primary-custom mb-3">
@@ -90,6 +93,40 @@
     </div>
 
     <div class="mb-5">
+        <h5 class="section-title">Uploaded Documents</h5>
+        <div class="card-custom bg-white p-0">
+            <div class="card-body p-0">
+                <table class="table table-hover mb-0" style="border-radius: 15px; overflow: hidden;">
+                    <thead class="bg-light">
+                    <tr>
+                        <th class="ps-4">File Name</th>
+                        <th>Type</th>
+                        <th class="text-end pe-4">Action</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="doc : ${request.documents}">
+                        <td class="ps-4">
+                            <i class="bi bi-file-earmark-text me-2"></i>
+                            <span th:text="${doc.fileName}"></span>
+                        </td>
+                        <td th:text="${doc.fileType}"></td>
+                        <td class="text-end pe-4">
+                            <a th:href="@{/employee/request/document/{id}(id=${doc.id})}"
+                               class="btn btn-sm btn-outline-primary rounded-pill">
+                                Download
+                            </a>
+                        </td>
+                    </tr>
+                    <tr th:if="${#lists.isEmpty(request.documents)}">
+                        <td colspan="3" class="text-center text-muted py-3">
+                            No documents uploaded by the citizen.
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
         <h5 class="section-title">Description</h5>
         <div class="info-box" th:text="${request?.description}" style="min-height: 100px;"></div>
     </div>

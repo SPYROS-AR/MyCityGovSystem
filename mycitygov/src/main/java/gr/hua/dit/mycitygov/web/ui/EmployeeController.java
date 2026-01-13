@@ -2,10 +2,14 @@ package gr.hua.dit.mycitygov.web.ui;
 
 import gr.hua.dit.mycitygov.core.model.Employee;
 import gr.hua.dit.mycitygov.core.model.Request;
+import gr.hua.dit.mycitygov.core.model.RequestDocument;
 import gr.hua.dit.mycitygov.core.service.EmployeeService;
 import gr.hua.dit.mycitygov.core.service.model.EmployeeView;
 import gr.hua.dit.mycitygov.core.service.model.RequestView;
 import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -212,5 +216,15 @@ public class EmployeeController {
             redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
         }
         return "redirect:/employee/appointments";
+    }
+
+    @GetMapping("/request/document/{id}")
+    public ResponseEntity<byte[]> downloadDocument(@PathVariable Long id) {
+        RequestDocument doc = employeeService.getDocument(id);
+
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + doc.getFileName() + "\"")
+                .contentType(MediaType.parseMediaType(doc.getContentType()))
+                .body(doc.getData());
     }
 }

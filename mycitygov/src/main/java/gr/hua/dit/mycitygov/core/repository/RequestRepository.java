@@ -3,6 +3,8 @@ package gr.hua.dit.mycitygov.core.repository;
 import gr.hua.dit.mycitygov.core.model.Employee;
 import gr.hua.dit.mycitygov.core.model.Request;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -17,7 +19,8 @@ public interface RequestRepository extends JpaRepository<Request, Long> {
     // Returns a request based on the protocolNumber
     Optional<Request> findByProtocolNumber(String protocolNumber);
     // Returns all Requests submitted by a citizen
-    List<Request> findByCitizenId(Long citizenId);
+    @Query("SELECT r FROM Request r LEFT JOIN FETCH r.documents WHERE r.citizen.id = :citizenId")
+    List<Request> findByCitizenId(@Param("citizenId") Long citizenId);
 
 
 }

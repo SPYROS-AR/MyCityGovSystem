@@ -31,6 +31,7 @@ public class EmployeeServiceImpl implements EmployeeService {
     private final AppointmentRepository appointmentRepository;
     private final SmsNotificationPort smsPort;
     private final DepartmentScheduleRepository departmentScheduleRepository;
+    private final RequestDocumentRepository requestDocumentRepository;
 
     // mappers
     private final RequestMapper requestMapper;
@@ -45,7 +46,8 @@ public class EmployeeServiceImpl implements EmployeeService {
                                AppointmentMapper appointmentMapper,
                                EmployeeMapper employeeMapper,
                                SmsNotificationPort smsPort,
-                               DepartmentScheduleRepository departmentScheduleRepository) {
+                               DepartmentScheduleRepository departmentScheduleRepository,
+                               RequestDocumentRepository requestDocumentRepository) {
         if (employeeRepository == null) throw new NullPointerException("employeeRepository cannot be null");
         if (userRepository == null) throw new NullPointerException("userRepository cannot be null");
         if (requestRepository == null) throw new NullPointerException("requestRepository cannot be null");
@@ -55,6 +57,7 @@ public class EmployeeServiceImpl implements EmployeeService {
         if (employeeMapper == null) throw new NullPointerException("employeeMapper cannot be null");
         if (smsPort == null) throw new NullPointerException("smsPort cannot be null");
         if (departmentScheduleRepository == null) throw new NullPointerException("departmentScheduleRepository cannot be null");
+        if (requestDocumentRepository == null) throw new NullPointerException("requestDocumentRepository cannot be null");
 
         this.employeeRepository = employeeRepository;
         this.requestRepository = requestRepository;
@@ -64,6 +67,7 @@ public class EmployeeServiceImpl implements EmployeeService {
         this.employeeMapper = employeeMapper;
         this.smsPort = smsPort;
         this.departmentScheduleRepository = departmentScheduleRepository;
+        this.requestDocumentRepository = requestDocumentRepository;
     }
 
     @Override
@@ -71,6 +75,13 @@ public class EmployeeServiceImpl implements EmployeeService {
     public Employee getEmployeeByUsername(String username) {
         return employeeRepository.findByUsername(username)
                 .orElseThrow(() -> new RuntimeException("Employee with username " + username + " not found"));
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public RequestDocument getDocument(Long documentId) {
+        return requestDocumentRepository.findById(documentId)
+                .orElseThrow(() -> new RuntimeException("Document with id " + documentId + " not found"));
     }
 
     @Override

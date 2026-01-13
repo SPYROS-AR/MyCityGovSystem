@@ -105,6 +105,41 @@ public class EmployeeRestController {
     }
 
     /**
+     * Updates the progress status of a specific request and adds a comment to the log
+     * @param id
+     * @param status
+     * @param comment
+     * @param principal
+     * @return A confirmation message indicating the update was successful
+     */
+    @PostMapping("/request/{id}/progress")
+    public ResponseEntity<String> updateRequestProgress(
+            @PathVariable Long id,
+            @RequestParam("status") gr.hua.dit.mycitygov.core.model.Request.Status status,
+            @RequestParam(value = "comment", required = false) String comment,
+            Principal principal) {
+
+        Long currentEmployeeId = employeeService.getEmployeeByUsername(principal.getName()).getId();
+        employeeService.updateRequestProgress(id, currentEmployeeId, status, comment);
+
+        return ResponseEntity.ok("Request progress updated");
+    }
+
+    /**
+     * Downloads a document associated with a specific request
+     * @param id of the document to retrieve
+     * @return containing the file bytes, with headers set for file download
+     */
+    @GetMapping("/request/document/{id}")
+    public ResponseEntity<byte[]> downloadDocument(@PathVariable Long id) {
+        var doc = employeeService.getDocument(id);
+        return ResponseEntity.ok()
+                .header(org.springframework.http.HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + doc.getFileName() + "\"")
+                .contentType(org.springframework.http.MediaType.parseMediaType(doc.getContentType()))
+                .body(doc.getData());
+    }
+
+    /**
      * Retrieves all appointments for the current employee's department
      *
      * @return A list of {@link AppointmentView} DTOs

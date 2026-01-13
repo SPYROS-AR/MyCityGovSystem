@@ -15,5 +15,7 @@ public record RequestView(
         CitizenView citizen,
         EmployeeView assignedEmployee,
         List<RequestLog> logs,
-        DepartmentView department
+        DepartmentView department,
+        LocalDateTime dueDate,
+        List<RequestDocumentView> documents
 ) {}

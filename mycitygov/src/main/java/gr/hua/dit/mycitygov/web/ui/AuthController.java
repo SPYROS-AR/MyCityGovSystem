@@ -23,7 +23,8 @@ public class AuthController {
             final Model model
     ) {
         if (AuthUtils.isAuthenticated(authentication)) {
-            return "redirect:/profile";
+//            return "redirect:/profile";
+            return "redirect:/citizen/requests";
         }
 
         // Spring Security appends ?error or ?logout; show friendly messages.
