@@ -9,8 +9,10 @@ import gr.hua.dit.mycitygov.core.service.mapper.RequestTypeMapper;
 import gr.hua.dit.mycitygov.core.service.mapper.UserMapper;
 import gr.hua.dit.mycitygov.core.service.model.*;
 import org.springframework.data.domain.Sort;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDateTime;
 import java.util.Comparator;
@@ -138,7 +140,7 @@ public class AdminServiceImpl implements AdminService {
     @Transactional(readOnly = true)
     public Department getDepartmentById(Long id) {
         return departmentRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Department not found"));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Department not found"));
     }
 
     @Override
