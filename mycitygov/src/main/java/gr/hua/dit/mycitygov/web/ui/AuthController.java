@@ -22,12 +22,23 @@ public class AuthController {
             final HttpServletRequest request,
             final Model model
     ) {
-        if (AuthUtils.isAuthenticated(authentication)) {
-//            return "redirect:/profile";
-            return "redirect:/citizen/requests";
+        if (authentication != null && authentication.isAuthenticated() &&
+                !authentication.getPrincipal().equals("anonymousUser")) {
+
+            var authorities = authentication.getAuthorities();
+
+            if (authorities.stream().anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"))) {
+                return "redirect:/admin/dashboard";
+            }
+            else if (authorities.stream().anyMatch(a -> a.getAuthority().equals("ROLE_EMPLOYEE"))) {
+                return "redirect:/employee/dashboard";
+            }
+            else {
+                return "redirect:/citizen/requests";
+            }
         }
 
-        // Spring Security appends ?error or ?logout; show friendly messages.
+
         if (request.getParameter("error") != null) {
             model.addAttribute("error", "Invalid email or password.");
         }
