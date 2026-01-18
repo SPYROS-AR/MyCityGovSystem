@@ -8,6 +8,7 @@ import gr.hua.dit.mycitygov.core.service.mapper.AppointmentMapper;
 import gr.hua.dit.mycitygov.core.service.mapper.CitizenMapper;
 import gr.hua.dit.mycitygov.core.service.mapper.RequestMapper;
 import gr.hua.dit.mycitygov.core.service.model.*;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -149,5 +150,12 @@ public class CitizenController {
         CitizenView citizenView = citizenMapper.toDto(citizenEntity);
         model.addAttribute("citizen", citizenView);
         return "citizen/profile";
+    }
+
+    @GetMapping("/department/{id}/schedule")
+    @ResponseBody
+    public ResponseEntity<List<DepartmentScheduleView>> getDepartmentSchedule(@PathVariable Long id) {
+        List<DepartmentScheduleView> schedule = citizenService.getDepartmentSchedule(id);
+        return ResponseEntity.ok(schedule);
     }
 }

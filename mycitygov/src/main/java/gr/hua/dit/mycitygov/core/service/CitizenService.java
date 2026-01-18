@@ -1,10 +1,7 @@
 package gr.hua.dit.mycitygov.core.service;
 
 import gr.hua.dit.mycitygov.core.model.*;
-import gr.hua.dit.mycitygov.core.service.model.BookAppointmentRequest;
-import gr.hua.dit.mycitygov.core.service.model.CreateCitizenRequest;
-import gr.hua.dit.mycitygov.core.service.model.CreateCitizenResult;
-import gr.hua.dit.mycitygov.core.service.model.SubmitRequestRequest;
+import gr.hua.dit.mycitygov.core.service.model.*;
 
 import java.util.List;
 
@@ -76,4 +73,6 @@ public interface CitizenService {
      * @return List of Department entities
      */
     List<Department> getAllDepartments();
+
+    List<DepartmentScheduleView> getDepartmentSchedule(Long departmentId);
 }

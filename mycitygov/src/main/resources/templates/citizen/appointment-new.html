@@ -28,7 +28,7 @@
 <div class="container mt-5" style="max-width: 600px;">
     <div class="card shadow border-0">
         <div class="card-header bg-white border-bottom-0 pt-4 px-4">
-            <h3 class="mb-0 text-warning">+ Book Appointment</h3>
+            <h3 class="mb-0 text-warning">Book Appointment</h3>
         </div>
         <div class="card-body p-4">
 
@@ -74,17 +74,15 @@
 
 <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
 <script>
-    let currentSchedules = []; // Stores schedule data from API
-    let fpInstance = null;     // Flatpickr instance
+    let currentSchedules = [];
+    let fpInstance = null;
 
-    // 1. When Department Changes -> Fetch Schedule
     async function onDepartmentChange() {
         const deptId = document.getElementById("departmentId").value;
         const dateInput = document.getElementById("datePart");
         const timeSelect = document.getElementById("timePart");
         const infoDiv = document.getElementById("scheduleInfo");
 
-        // Reset fields
         dateInput.value = "";
         dateInput.disabled = true;
         dateInput.placeholder = "Loading schedule...";
@@ -93,19 +91,14 @@
         infoDiv.textContent = "";
 
         try {
-            // Call API
-            const response = await fetch(`/api/citizen/department/${deptId}/schedule`);
+            const response = await fetch(`/citizen/department/${deptId}/schedule`);
             if (!response.ok) throw new Error("Failed to fetch schedule");
 
             currentSchedules = await response.json();
 
-            // Re-enable and Re-init Date Picker
             dateInput.disabled = false;
             dateInput.placeholder = "dd/mm/yyyy";
 
-            // Map Java DayOfWeek (MONDAY) to JS getDay() (1)
-            // Java: MONDAY, TUESDAY... SUNDAY
-            // JS: 0=Sun, 1=Mon, ..., 6=Sat
             const dayMap = {
                 "SUNDAY": 0, "MONDAY": 1, "TUESDAY": 2, "WEDNESDAY": 3,
                 "THURSDAY": 4, "FRIDAY": 5, "SATURDAY": 6
@@ -122,7 +115,6 @@
                 minDate: "today",
                 disable: [
                     function(date) {
-                        // Disable if day is NOT in allowed list
                         return !allowedDays.includes(date.getDay());
                     }
                 ],
@@ -136,10 +128,10 @@
         } catch (error) {
             console.error(error);
             dateInput.placeholder = "Error loading schedule";
+            infoDiv.textContent = "Could not load schedule. Please try again.";
         }
     }
 
-    // 2. When Date Selected -> Populate Time Slots
     function updateTimeSlots(date) {
         const timeSelect = document.getElementById("timePart");
         timeSelect.innerHTML = '<option value="" disabled selected>-- Choose Time --</option>';
@@ -147,23 +139,19 @@
 
         if (!date) return;
 
-        // Find schedule for this day
         const days = ["SUNDAY", "MONDAY", "TUESDAY", "WEDNESDAY", "THURSDAY", "FRIDAY", "SATURDAY"];
         const dayName = days[date.getDay()];
         const schedule = currentSchedules.find(s => s.dayOfWeek === dayName);
 
         if (!schedule) return;
 
-        // Generate 30-min slots between Start and End time
-        // API returns "08:00:00". We need minutes.
         const startParts = schedule.startTime.split(":");
         const endParts = schedule.endTime.split(":");
 
         let startMins = parseInt(startParts[0]) * 60 + parseInt(startParts[1]);
         let endMins = parseInt(endParts[0]) * 60 + parseInt(endParts[1]);
 
-        // Stop 30 mins before closing time to allow appointment duration
-        endMins -= 30;
+        endMins -= 30; // Last slot
 
         for (let time = startMins; time <= endMins; time += 30) {
             const h = Math.floor(time / 60).toString().padStart(2, '0');
@@ -177,7 +165,6 @@
         }
     }
 
-    // 3. Combine Date+Time on Submit
     function submitForm() {
         const dateVal = document.getElementById('datePart').value;
         const timeVal = document.getElementById('timePart').value;

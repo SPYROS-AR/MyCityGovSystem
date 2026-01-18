@@ -18,6 +18,7 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 /**
  * Implementation of the {@link CitizenService} interface.
@@ -340,4 +341,12 @@ public class CitizenServiceImpl implements CitizenService {
      */
     @Override
     public List<Department> getAllDepartments() { return departmentRepository.findAll(); }
+
+    @Override
+    public List<DepartmentScheduleView> getDepartmentSchedule(Long departmentId) {
+        return departmentScheduleRepository.findByDepartmentId(departmentId)
+                .stream()
+                .map(departmentScheduleMapper::toDto)
+                .collect(Collectors.toList());
+    }
 }
