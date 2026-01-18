@@ -11,4 +11,5 @@ import java.util.Optional;
 public interface RequestTypeRepository extends JpaRepository<RequestType, Long> {
     Optional<RequestType> findByName(String name);
 
+    List<RequestType> findByIsActiveTrue();
 }

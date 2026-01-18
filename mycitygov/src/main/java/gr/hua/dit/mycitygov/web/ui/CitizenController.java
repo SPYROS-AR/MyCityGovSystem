@@ -74,7 +74,6 @@ public class CitizenController {
     @GetMapping("/requests/new")
     public String showCreateRequestForm(Model model) {
         model.addAttribute("requestTypes", citizenService.getAllRequestTypes());
-        // ΔΙΟΡΘΩΣΗ ΕΔΩ: Προστέθηκε το null ως 3ο όρισμα για το MultipartFile
         model.addAttribute("submitRequest", new SubmitRequestRequest(null, "", null));
         return "citizen/request-new";
     }

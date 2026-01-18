@@ -40,7 +40,7 @@
 
                 <div class="mb-4">
                     <label class="form-label fw-bold">Select Department:</label>
-                    <select name="departmentId" class="form-select" required>
+                    <select id="departmentId" name="departmentId" class="form-select" required onchange="onDepartmentChange()">
                         <option value="" disabled selected>-- Select Department --</option>
                         <option th:each="dept : ${departments}"
                                 th:value="${dept.id}"
@@ -50,29 +50,14 @@
 
                 <div class="mb-4">
                     <label class="form-label fw-bold">Select Date:</label>
-                    <input type="text" id="datePart" class="form-control" placeholder="dd/mm/yyyy" required>
-                    <div class="form-text">Available: Monday - Friday</div>
+                    <input type="text" id="datePart" class="form-control" placeholder="Select a department first..." disabled required>
+                    <div id="scheduleInfo" class="form-text text-info"></div>
                 </div>
 
                 <div class="mb-4">
                     <label class="form-label fw-bold">Select Time:</label>
-                    <select id="timePart" class="form-select" required>
-                        <option value="" disabled selected>-- Choose Time --</option>
-                        <option value="08:00">08:00</option>
-                        <option value="08:30">08:30</option>
-                        <option value="09:00">09:00</option>
-                        <option value="09:30">09:30</option>
-                        <option value="10:00">10:00</option>
-                        <option value="10:30">10:30</option>
-                        <option value="11:00">11:00</option>
-                        <option value="11:30">11:30</option>
-                        <option value="12:00">12:00</option>
-                        <option value="12:30">12:30</option>
-                        <option value="13:00">13:00</option>
-                        <option value="13:30">13:30</option>
-                        <option value="14:00">14:00</option>
-                        <option value="14:30">14:30</option>
-                        <option value="15:00">15:00</option>
+                    <select id="timePart" class="form-select" disabled required>
+                        <option value="" disabled selected>-- Select Date first --</option>
                     </select>
                 </div>
 
@@ -89,20 +74,110 @@
 
 <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
 <script>
-    // 1. Initialize Flatpickr
-    const fp = flatpickr("#datePart", {
-        dateFormat: "Y-m-d",
-        altInput: true,
-        altFormat: "d/m/Y",
-        minDate: "today",
-        disable: [
-            function(date) {
-                return (date.getDay() === 0 || date.getDay() === 6);
-            }
-        ]
-    });
+    let currentSchedules = []; // Stores schedule data from API
+    let fpInstance = null;     // Flatpickr instance
 
-    // 2. Combine Date+Time and Disable Button
+    // 1. When Department Changes -> Fetch Schedule
+    async function onDepartmentChange() {
+        const deptId = document.getElementById("departmentId").value;
+        const dateInput = document.getElementById("datePart");
+        const timeSelect = document.getElementById("timePart");
+        const infoDiv = document.getElementById("scheduleInfo");
+
+        // Reset fields
+        dateInput.value = "";
+        dateInput.disabled = true;
+        dateInput.placeholder = "Loading schedule...";
+        timeSelect.innerHTML = '<option value="" disabled selected>-- Select Date first --</option>';
+        timeSelect.disabled = true;
+        infoDiv.textContent = "";
+
+        try {
+            // Call API
+            const response = await fetch(`/api/citizen/department/${deptId}/schedule`);
+            if (!response.ok) throw new Error("Failed to fetch schedule");
+
+            currentSchedules = await response.json();
+
+            // Re-enable and Re-init Date Picker
+            dateInput.disabled = false;
+            dateInput.placeholder = "dd/mm/yyyy";
+
+            // Map Java DayOfWeek (MONDAY) to JS getDay() (1)
+            // Java: MONDAY, TUESDAY... SUNDAY
+            // JS: 0=Sun, 1=Mon, ..., 6=Sat
+            const dayMap = {
+                "SUNDAY": 0, "MONDAY": 1, "TUESDAY": 2, "WEDNESDAY": 3,
+                "THURSDAY": 4, "FRIDAY": 5, "SATURDAY": 6
+            };
+
+            const allowedDays = currentSchedules.map(s => dayMap[s.dayOfWeek]);
+
+            if (fpInstance) fpInstance.destroy();
+
+            fpInstance = flatpickr("#datePart", {
+                dateFormat: "Y-m-d",
+                altInput: true,
+                altFormat: "d/m/Y",
+                minDate: "today",
+                disable: [
+                    function(date) {
+                        // Disable if day is NOT in allowed list
+                        return !allowedDays.includes(date.getDay());
+                    }
+                ],
+                onChange: function(selectedDates, dateStr) {
+                    updateTimeSlots(selectedDates[0]);
+                }
+            });
+
+            infoDiv.textContent = "Schedule loaded based on department hours.";
+
+        } catch (error) {
+            console.error(error);
+            dateInput.placeholder = "Error loading schedule";
+        }
+    }
+
+    // 2. When Date Selected -> Populate Time Slots
+    function updateTimeSlots(date) {
+        const timeSelect = document.getElementById("timePart");
+        timeSelect.innerHTML = '<option value="" disabled selected>-- Choose Time --</option>';
+        timeSelect.disabled = false;
+
+        if (!date) return;
+
+        // Find schedule for this day
+        const days = ["SUNDAY", "MONDAY", "TUESDAY", "WEDNESDAY", "THURSDAY", "FRIDAY", "SATURDAY"];
+        const dayName = days[date.getDay()];
+        const schedule = currentSchedules.find(s => s.dayOfWeek === dayName);
+
+        if (!schedule) return;
+
+        // Generate 30-min slots between Start and End time
+        // API returns "08:00:00". We need minutes.
+        const startParts = schedule.startTime.split(":");
+        const endParts = schedule.endTime.split(":");
+
+        let startMins = parseInt(startParts[0]) * 60 + parseInt(startParts[1]);
+        let endMins = parseInt(endParts[0]) * 60 + parseInt(endParts[1]);
+
+        // Stop 30 mins before closing time to allow appointment duration
+        endMins -= 30;
+
+        for (let time = startMins; time <= endMins; time += 30) {
+            const h = Math.floor(time / 60).toString().padStart(2, '0');
+            const m = (time % 60).toString().padStart(2, '0');
+            const val = `${h}:${m}`;
+
+            const opt = document.createElement("option");
+            opt.value = val;
+            opt.textContent = val;
+            timeSelect.appendChild(opt);
+        }
+    }
+
+    // 3. Combine Date+Time on Submit
     function submitForm() {
         const dateVal = document.getElementById('datePart').value;
         const timeVal = document.getElementById('timePart').value;
@@ -112,11 +187,9 @@
             return false;
         }
 
-        // Combine to ISO format: YYYY-MM-DDTHH:mm
         const finalString = dateVal + 'T' + timeVal;
         document.getElementById('finalDateTime').value = finalString;
 
-        // Disable button to prevent double-booking
         const btn = document.getElementById('submitBtn');
         btn.disabled = true;
         btn.innerText = "Booking...";

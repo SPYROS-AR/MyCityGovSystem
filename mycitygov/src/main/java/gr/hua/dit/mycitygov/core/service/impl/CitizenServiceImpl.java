@@ -255,11 +255,11 @@ public class CitizenServiceImpl implements CitizenService {
      * Retrieves all available request types configured in the system.
      * Used to populate selection lists in the UI.
      *
-     * @return A list of {@link RequestType} entities.
+     * @return List of {@link RequestType} entities.
      */
     @Override
     @Transactional(readOnly = true)
-    public List<RequestType> getAllRequestTypes() { return requestTypeRepository.findAll(); }
+    public List<RequestType> getAllRequestTypes() { return requestTypeRepository.findByIsActiveTrue(); }
 
     /**
      * Books an appointment for a citizen with a specified department and appointment date
