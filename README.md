@@ -70,7 +70,7 @@ Run the full system (App, Microservice, Database) with Docker Compose.
     ```bash
     docker-compose up --build -d
     ```
-4.  Wait for the logs to confirm startup.
+4.  Wait for all the containers to start
 
 ---
 
@@ -89,3 +89,4 @@ Run the full system (App, Microservice, Database) with Docker Compose.
 * **Admin**: `admin` / `p`
 * **Citizen**: `citizen1` / `p`
 * **Employee**: `emp1` / `p`
+* **Client**: `my_app` / `secret`
