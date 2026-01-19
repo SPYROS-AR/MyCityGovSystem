@@ -75,7 +75,7 @@ public class CitizenController {
     @GetMapping("/requests/new")
     public String showCreateRequestForm(Model model) {
         model.addAttribute("requestTypes", citizenService.getAllRequestTypes());
-        model.addAttribute("submitRequest", new SubmitRequestRequest(null, "", null));
+        model.addAttribute("submitRequest", new SubmitRequestRequest(null, "", "", null));
         return "citizen/request-new";
     }
 
