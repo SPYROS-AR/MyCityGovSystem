@@ -18,9 +18,10 @@ spring:
         dialect: org.hibernate.dialect.PostgreSQLDialect
         format_sql: true
 
-  sms:
-    service:
-      url: ${SMS_SERVICE_URL:http://localhost:8081}
+sms:
+  service:
+    url: ${SMS_SERVICE_URL:http://localhost:8081}
+    token: "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJteWNpdHlnb3Ytc3lzdGVtIn0.l-3f3u6G7q3T5y-k6K4k6J4k6I4k6H4k6G4k6F4k6E4"
 
 app:
   jwt:

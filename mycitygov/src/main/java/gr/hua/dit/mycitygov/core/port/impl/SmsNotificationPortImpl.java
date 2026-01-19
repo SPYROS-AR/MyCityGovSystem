@@ -25,6 +25,9 @@ public class SmsNotificationPortImpl implements SmsNotificationPort {
     @Value("${sms.service.url}")
     private String smsServiceUrl;
 
+    @Value("${sms.service.token}")
+    private String serviceToken;
+
     /**
      * Constructs the SmsNotificationPortImpl and initializes the RestClient
      */
@@ -47,6 +50,7 @@ public class SmsNotificationPortImpl implements SmsNotificationPort {
 
             SendSmsResult result = restClient.post()
                     .uri(smsServiceUrl + "/api/v1/sms")
+                    .header("Authorization", "Bearer " + serviceToken)
                     .body(request)
                     .retrieve()
                     .body(SendSmsResult.class);
