@@ -107,7 +107,7 @@ public class InitService implements CommandLineRunner {
 
     private void initClients() {
         if (clientRepository.findByName("my_app").isEmpty()) {
-            clientRepository.save(new Client("my_app", passwordEncoder.encode("secret123"), "CLIENT_READ"));
+            clientRepository.save(new Client("my_app", passwordEncoder.encode("secret"), "CLIENT_READ"));
             logger.info("Entity 'Client' initialized.");
         }
     }

@@ -3,10 +3,7 @@ package gr.hua.dit.mycitygov.core.service.impl;
 import gr.hua.dit.mycitygov.core.model.*;
 import gr.hua.dit.mycitygov.core.repository.*;
 import gr.hua.dit.mycitygov.core.service.AdminService;
-import gr.hua.dit.mycitygov.core.service.mapper.DepartmentMapper;
-import gr.hua.dit.mycitygov.core.service.mapper.DepartmentScheduleMapper;
-import gr.hua.dit.mycitygov.core.service.mapper.RequestTypeMapper;
-import gr.hua.dit.mycitygov.core.service.mapper.UserMapper;
+import gr.hua.dit.mycitygov.core.service.mapper.*;
 import gr.hua.dit.mycitygov.core.service.model.*;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
@@ -25,36 +22,47 @@ import java.util.stream.Collectors;
 @Service
 public class AdminServiceImpl implements AdminService {
 
+    // Repositories
     private final RequestRepository requestRepository;
     private final RequestTypeMapper requestTypeMapper;
     private final DepartmentRepository departmentRepository;
-    private final DepartmentMapper departmentMapper;
     private final DepartmentScheduleRepository scheduleRepository;
-    private final DepartmentScheduleMapper scheduleMapper;
     private final RequestTypeRepository requestTypeRepository;
     private final CitizenRepository citizenRepository;
     private final UserRepository userRepository;
+    // Mappers
+    private final DepartmentMapper departmentMapper;
+    private final DepartmentScheduleMapper scheduleMapper;
     private final UserMapper userMapper;
+    private final CitizenMapper citizenMapper;
+    private final EmployeeMapper employeeMapper;
 
     public AdminServiceImpl(RequestRepository requestRepository,
                             RequestTypeMapper requestTypeMapper,
                             DepartmentRepository departmentRepository,
-                            DepartmentMapper departmentMapper,
                             DepartmentScheduleRepository scheduleRepository,
-                            DepartmentScheduleMapper scheduleMapper,
                             RequestTypeRepository requestTypeRepository,
-                            CitizenRepository citizenRepository, UserRepository userRepository,
-                            UserMapper userMapper) {
+                            UserRepository userRepository,
+                            CitizenRepository citizenRepository,
+                            UserMapper userMapper,
+                            DepartmentMapper departmentMapper,
+                            DepartmentScheduleMapper scheduleMapper,
+                            CitizenMapper citizenMapper,
+                            EmployeeMapper employeeMapper) {
+
         this.requestRepository = requestRepository;
         this.requestTypeMapper = requestTypeMapper;
         this.departmentRepository = departmentRepository;
-        this.departmentMapper = departmentMapper;
         this.scheduleRepository = scheduleRepository;
-        this.scheduleMapper = scheduleMapper;
         this.requestTypeRepository = requestTypeRepository;
         this.citizenRepository = citizenRepository;
         this.userRepository = userRepository;
+
+        this.departmentMapper = departmentMapper;
+        this.scheduleMapper = scheduleMapper;
         this.userMapper = userMapper;
+        this.citizenMapper = citizenMapper;
+        this.employeeMapper = employeeMapper;
     }
 
     @Override
@@ -134,6 +142,21 @@ public class AdminServiceImpl implements AdminService {
                 .map(userMapper::toDto) //
                 .collect(Collectors.toList());
 
+    }
+    @Override
+    @Transactional(readOnly = true)
+    public Object getUserDetails(Long userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        if (user instanceof Citizen) {
+            return citizenMapper.toDto((Citizen) user);
+        } else if (user instanceof Employee) {
+            return employeeMapper.toDto((Employee) user);
+        } else {
+            // Fallback for Admin that doesn't have any extra fields
+            return userMapper.toDto(user);
+        }
     }
 
     @Override

@@ -68,6 +68,9 @@ public class AdminController {
         return "admin/dashboard";
     }
 
+
+    // -- USERS --
+
     /**
      * Displays a list of all registered users in the system.
      *
@@ -79,6 +82,24 @@ public class AdminController {
         List<UserView> users = adminService.getAllUsers();
         model.addAttribute("users", users);
         return "admin/users";
+    }
+
+    @GetMapping("/users/{id}/info")
+    public String userDetails(@PathVariable Long id, Model model) {
+        Object userDto = adminService.getUserDetails(id);
+
+        model.addAttribute("userDetails", userDto);
+
+        // We can use a simple logic to determine the type for the UI
+        String userType = "ADMIN";
+        if (userDto instanceof gr.hua.dit.mycitygov.core.service.model.CitizenView) {
+            userType = "CITIZEN";
+        } else if (userDto instanceof gr.hua.dit.mycitygov.core.service.model.EmployeeView) {
+            userType = "EMPLOYEE";
+        }
+        model.addAttribute("userType", userType);
+
+        return "admin/user_details";
     }
 
 

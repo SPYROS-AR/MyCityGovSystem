@@ -65,7 +65,7 @@
             <td th:text="${dept.name}"></td>
             <td th:text="${dept.description}"></td>
             <td>
-                <a th:href="@{'/admin/departments/' + ${dept.id} + '/info'}"
+                <a th:href="@{'/admin/departments/{id}/info'(id=${dept.id})}"
                    class="btn-custom btn-primary-custom"
                    style="padding: 5px 10px; font-size: 0.9em;">
                     Edit / Info

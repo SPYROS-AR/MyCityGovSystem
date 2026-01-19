@@ -46,6 +46,15 @@ public interface AdminService {
     List<UserView> getAllUsers();
 
     /**
+     * Returns a DTO based on user's role
+     *
+     * @param userId
+     * @return
+     */
+    Object getUserDetails(Long userId);
+
+
+    /**
      * Retrieves the full entity of a specific department by its ID.
      *
      * @param id The unique identifier of the department.

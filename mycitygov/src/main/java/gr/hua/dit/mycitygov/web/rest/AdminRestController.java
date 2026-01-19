@@ -47,6 +47,7 @@ public class AdminRestController {
         return ResponseEntity.ok(adminService.getSystemStatistics());
     }
 
+    // -- USERS --
     /**
      * Retrieves a list of all users registered in the system.
      *
@@ -55,6 +56,23 @@ public class AdminRestController {
     @GetMapping("/users")
     public ResponseEntity<List<UserView>> getAllUsers() {
         return ResponseEntity.ok(adminService.getAllUsers());
+    }
+
+    /**
+     * Returns DTO based on user's role
+     *
+     * @param id
+     * @return
+     */
+    @GetMapping("/users/{id}/info")
+    public ResponseEntity<?> getUserInformation(@PathVariable Long id) {
+        try {
+            // Get DTO based on role
+            Object userDto = adminService.getUserDetails(id);
+            return ResponseEntity.ok(userDto);
+        } catch (RuntimeException e) {
+            return ResponseEntity.notFound().build();
+        }
     }
 
 
