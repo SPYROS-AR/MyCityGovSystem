@@ -5,9 +5,11 @@ import gr.hua.dit.mycitygov.core.port.SmsNotificationPort;
 import gr.hua.dit.mycitygov.core.repository.*;
 import gr.hua.dit.mycitygov.core.service.EmployeeService;
 import gr.hua.dit.mycitygov.core.service.mapper.AppointmentMapper;
+import gr.hua.dit.mycitygov.core.service.mapper.DepartmentScheduleMapper;
 import gr.hua.dit.mycitygov.core.service.mapper.EmployeeMapper;
 import gr.hua.dit.mycitygov.core.service.mapper.RequestMapper;
 import gr.hua.dit.mycitygov.core.service.model.AppointmentView;
+import gr.hua.dit.mycitygov.core.service.model.DepartmentScheduleView;
 import gr.hua.dit.mycitygov.core.service.model.EmployeeView;
 import gr.hua.dit.mycitygov.core.service.model.RequestView;
 import org.springframework.stereotype.Service;
@@ -37,6 +39,7 @@ public class EmployeeServiceImpl implements EmployeeService {
     private final RequestMapper requestMapper;
     private final AppointmentMapper appointmentMapper;
     private final EmployeeMapper employeeMapper;
+    private final DepartmentScheduleMapper departmentScheduleMapper;
 
     public EmployeeServiceImpl(EmployeeRepository employeeRepository,
                                UserRepository userRepository,
@@ -47,7 +50,8 @@ public class EmployeeServiceImpl implements EmployeeService {
                                EmployeeMapper employeeMapper,
                                SmsNotificationPort smsPort,
                                DepartmentScheduleRepository departmentScheduleRepository,
-                               RequestDocumentRepository requestDocumentRepository) {
+                               RequestDocumentRepository requestDocumentRepository,
+                               DepartmentScheduleMapper departmentScheduleMapper) {
         if (employeeRepository == null) throw new NullPointerException("employeeRepository cannot be null");
         if (userRepository == null) throw new NullPointerException("userRepository cannot be null");
         if (requestRepository == null) throw new NullPointerException("requestRepository cannot be null");
@@ -58,7 +62,7 @@ public class EmployeeServiceImpl implements EmployeeService {
         if (smsPort == null) throw new NullPointerException("smsPort cannot be null");
         if (departmentScheduleRepository == null) throw new NullPointerException("departmentScheduleRepository cannot be null");
         if (requestDocumentRepository == null) throw new NullPointerException("requestDocumentRepository cannot be null");
-
+        if (departmentScheduleMapper == null) throw new NullPointerException("departmentScheduleMapper cannot be null");
         this.employeeRepository = employeeRepository;
         this.requestRepository = requestRepository;
         this.appointmentRepository = appointmentRepository;
@@ -68,6 +72,7 @@ public class EmployeeServiceImpl implements EmployeeService {
         this.smsPort = smsPort;
         this.departmentScheduleRepository = departmentScheduleRepository;
         this.requestDocumentRepository = requestDocumentRepository;
+        this.departmentScheduleMapper = departmentScheduleMapper;
     }
 
     @Override
@@ -82,6 +87,19 @@ public class EmployeeServiceImpl implements EmployeeService {
     public RequestDocument getDocument(Long documentId) {
         return requestDocumentRepository.findById(documentId)
                 .orElseThrow(() -> new RuntimeException("Document with id " + documentId + " not found"));
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<DepartmentScheduleView> getDepartmentScheduleForEmployee(Long employeeId) {
+        return departmentScheduleRepository
+                .findByDepartmentId(employeeRepository
+                        .findById(employeeId)
+                        .orElseThrow(() -> new RuntimeException("Employee with id " + employeeId + " not found"))
+                        .getDepartment().getId())
+                .stream()
+                .map(departmentScheduleMapper::toDto)
+                .collect(Collectors.toList());
     }
 
     @Override

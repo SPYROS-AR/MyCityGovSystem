@@ -167,7 +167,10 @@ public class EmployeeController {
     @GetMapping("/appointments")
     public String appointments(Model model, Principal principal) {
         Long currentEmployeeId = employeeService.getEmployeeByUsername(principal.getName()).getId();
+        // get appointments
         model.addAttribute("appointments", employeeService.getAppointmentsForEmployeeDepartment(currentEmployeeId));
+        // get department schedule
+        model.addAttribute("schedules", employeeService.getDepartmentScheduleForEmployee(currentEmployeeId));
         return "employee/appointments";
     }
 

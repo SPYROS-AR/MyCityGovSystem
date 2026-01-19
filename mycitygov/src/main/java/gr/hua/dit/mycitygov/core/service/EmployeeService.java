@@ -4,6 +4,7 @@ import gr.hua.dit.mycitygov.core.model.Employee;
 import gr.hua.dit.mycitygov.core.model.Request;
 import gr.hua.dit.mycitygov.core.model.RequestDocument;
 import gr.hua.dit.mycitygov.core.service.model.AppointmentView;
+import gr.hua.dit.mycitygov.core.service.model.DepartmentScheduleView;
 import gr.hua.dit.mycitygov.core.service.model.EmployeeView;
 import gr.hua.dit.mycitygov.core.service.model.RequestView;
 import org.springframework.transaction.annotation.Transactional;
@@ -127,4 +128,11 @@ public interface EmployeeService {
      * @return  the returned document
      */
     RequestDocument getDocument(Long documentId);
+
+    /**
+     * Returns the time schedule of a department that an employee works on
+     * @param employeeId the id of the employee that works on the department
+     * @return A List of DepartmentScheduleView
+     */
+    List<DepartmentScheduleView> getDepartmentScheduleForEmployee(Long employeeId);
 }
