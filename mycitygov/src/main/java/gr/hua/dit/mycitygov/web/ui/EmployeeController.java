@@ -73,7 +73,11 @@ public class EmployeeController {
 
         model.addAttribute("request", request);
         model.addAttribute("colleagues", colleagues);
-        model.addAttribute("statuses", Request.Status.values());
+        model.addAttribute("statuses", List.of(
+                Request.Status.PROCESSING,
+                Request.Status.PENDING_DOCS,
+                Request.Status.RECEIVED
+        ));
         return "employee/request_details";
     }
 
