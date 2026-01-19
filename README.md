@@ -1,142 +1,91 @@
 # MyCityGov
 
----
-
-### Description
-
-Digital Requests & Appointments Municipality Gate
+> **Course Assignment:** Distributed Systems
+> **Topic:** Digital Municipality Gateway & Microservices Architecture
 
 ---
 
-### Available log-in roles:
-- Citizen
-- Employee (Case Handler)
-- Admin
+## About The Project
+
+**MyCityGov** is a distributed platform connecting citizens with municipal services. It enables digital request submissions, issue reporting, and appointment scheduling. The system uses a microservices architecture, separating core business logic from notification handling.
 
 ---
 
-### Available services:
+## System Architecture
 
-Citizens can:
-- Submit digital requests to the Municipality (releases, licenses, certificates)
-- Report problems in the city (potholes, lighting, cleanliness)
-- Schedule appointments with municipal services (Citizens' Service Center, Technical Services, Social Services, etc.)
+The system consists of three containerized components:
 
-Municipality services can process all of the above with traceability and citizen notice
+1.  **MyCityGov Core**: A Spring Boot application handling the web UI, authentication, and main business logic.
+2.  **CitySmsService**: A standalone microservice dedicated to asynchronous SMS notifications.
+3.  **Database**: A shared PostgreSQL instance for persistent storage.
 
 ---
 
-## Prerequisites
+## Key Features
 
-### To Run the Application (using Docker)
-* **[Docker Desktop](https://www.docker.com/products/docker-desktop/)**: The only requirement to build and run the entire system (App + Database + Tools). You do **not** need Java or Maven installed on your machine just to run it.
+### For Citizens
+* **Profiles**: Register and manage personal details.
+* **Requests**: Apply for certificates or report city issues (e.g., potholes).
+* **Appointments**: Book slots with specific departments.
+* **Tracking**: Monitor the status of requests in real-time.
 
-### To Develop the Application (using an IDE)
-* **[Java Development Kit (JDK) 21](https://www.oracle.com/java/technologies/downloads/#java21)**: Required for your IDE (IntelliJ, Eclipse, VS Code) to compile code and provide intellisense.
-* **[Maven](https://maven.apache.org/download.cgi)** (Optional): The project includes a Maven Wrapper (`mvnw`), so a local Maven installation is not strictly required.
+### For Employees
+* **Dashboard**: View assigned tasks and daily schedules.
+* **Processing**: Approve, reject, or update the status of citizen requests.
+* **Scheduling**: Manage and reschedule appointments.
+
+### For Administrators
+* **Analytics**: Monitor system usage and department performance.
+* **Configuration**: Manage departments, operating hours, and service types.
+* **Users**: Oversee all system accounts and roles.
 
 ---
 
 ## Tech Stack
 
-This project is built using [Java 21](https://docs.oracle.com/en/java/javase/21/) and [Spring Boot 3.4.1](https://docs.spring.io/spring-boot/).
-
-### Core & Web
-
-* [Spring Boot Starter Web](https://mvnrepository.com/artifact/org.springframework.boot/spring-boot-starter-web): Handles the web layer and includes embedded Tomcat.
-* [Thymeleaf](https://www.thymeleaf.org/): Server-side Java template engine for rendering HTML views.
-* Validation: Implements [Hibernate Validator](https://hibernate.org/validator/).
-
-### Data & Persistence
-
-* [Spring Data JPA](https://spring.io/projects/spring-data-jpa): Abstraction over Hibernate.
-* **PostgreSQL**: Production-grade relational database (containerized).
-* **Docker Compose**: Orchestrates the Application, Database, and pgAdmin containers.
-
-### Security
-
-* [Spring Security](https://spring.io/projects/spring-security): Handles authentication and authorization.
+* **Language**: Java 21
+* **Framework**: Spring Boot 3.4
+* **Database**: PostgreSQL
+* **Frontend**: Thymeleaf & Bootstrap 5
+* **Infrastructure**: Docker & Docker Compose
 
 ---
 
-## Build & Run (Docker Compose)
+## Deployment
 
-The easiest and recommended way to run the application is using Docker Compose.
+Run the full system (App, Microservice, Database) with Docker Compose.
 
-This project can be executed in two modes depending on your testing needs.
-## Clone the repository
-Go to your desired directory, where you want the project to be installed:
-```bash
-  cd $DESIRED_DIRECTORY
-```
+**Prerequisites:** Docker Desktop installed.
 
-Clone repository from [GitFront](https://gitfront.io/):
-```bash
-  git clone https://gitfront.io/r/spyros/kj1VBg62UHX4/mycitygov.git
-```
-
-Go to the project's directory:
-```bash
-  cd mycitygov
-```
-
-### Option A: Full Docker Execution (Recommended for Grading)
-This method launches the entire stack (App + DB + Admin) in isolated containers, requiring no local Java setup.
-
-1.  Open a terminal in the project root directory.
-2.  Build and start the containers:
+**How to Run:**
+1. Clone the repository in the desired location using:
     ```bash
-    docker-compose up --build
+    git clone https://github.com/SPYROS-AR/MyCityGovSystem.git
     ```
-3.  Wait for the logs to indicate startup (`Started MyCityGovApplication in ... seconds`).
-4.  Access the services:
-    * **Web Application**: [http://localhost:8080](http://localhost:8080)
-    * **Swagger API Docs**: [http://localhost:8080/swagger-ui/index.html](http://localhost:8080/swagger-ui/index.html)
-    * **pgAdmin 4**: [http://localhost:5050](http://localhost:5050)
-
-### Option B: Hybrid Mode (Local Java + Docker DB)
-Use this mode for development or debugging the Java code while keeping the database containerized.
-
-1.  Start only the infrastructure containers:
+2. Go inside the project root using:
+   ```bash
+   cd MyCityGovSystem
+   ```    
+3.  Run the command:
     ```bash
-    docker-compose up db pgadmin -d
+    docker-compose up --build -d
     ```
-2.  Run the Spring Boot application using the Maven wrapper:
-    * **Windows**:
-        ```cmd
-        .\mvnw.cmd spring-boot:run
-        ```
-    * **Mac/Linux**:
-        ```bash
-        ./mvnw spring-boot:run
-        ```
----
-
-## Email Notifications (Testing)
-
-The application uses **Mailtrap** for email testing. Emails are **not** sent to real addresses but are captured in a sandbox environment.
-
-**To view sent emails:**
-1.  Log in to [Mailtrap.io](https://mailtrap.io).
-2.  Go to **Email Testing** > **Inboxes**.
-3.  All system notifications (Approvals, Rejections, Appointment changes) will appear there.
-
-*(Note: You need to configure your Mailtrap credentials in `src/main/resources/application.yaml`)*
+4.  Wait for the logs to confirm startup.
 
 ---
 
-## API Documentation
+## Access Points
 
-The REST API is fully documented using OpenAPI/Swagger.
-
-* **UI Interface**: [http://localhost:8080/swagger-ui/index.html](http://localhost:8080/swagger-ui/index.html)
-    * Explore endpoints for Employees (`/api/employee/**`)
-    * Test requests directly from the browser
-
-* **OpenAPI JSON**: [http://localhost:8080/v3/api-docs](http://localhost:8080/v3/api-docs)
+| Service | URL |
+| :--- | :--- |
+| **Web App** | `http://localhost:8080` |
+| **Core API Docs** | `http://localhost:8080/swagger-ui/index.html` |
+| **SMS Service API** | `http://localhost:8081/swagger-ui.html` |
 
 ---
 
+## Default Credentials
 
-
-
+* **Admin**: `admin` / `p`
+* **Citizen**: `citizen1` / `p`
+* **Employee**: `emp1` / `p`
