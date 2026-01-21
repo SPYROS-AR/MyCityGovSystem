@@ -12,6 +12,7 @@ public class RequestTypeMapper {
                 requestType.getId(),
                 requestType.getName(),
                 requestType.getRequestCategory().toString(), // Enum -> String
+                requestType.getRequiredDocuments(),
                 requestType.getDepartment() != null ? requestType.getDepartment().getName() : "N/A",
                 requestType.getSlaDays(),
                 requestType.isActive()

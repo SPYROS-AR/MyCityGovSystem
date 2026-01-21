@@ -245,6 +245,7 @@ public class AdminServiceImpl implements AdminService {
         RequestType requestType = new RequestType();
         requestType.setName(request.name());
         requestType.setRequestCategory(request.requestCategory());
+        requestType.setRequiredDocuments(request.requiredDocuments());
         requestType.setSlaDays(request.slaDays());
         requestType.setDepartment(department);
         requestType.setActive(true);

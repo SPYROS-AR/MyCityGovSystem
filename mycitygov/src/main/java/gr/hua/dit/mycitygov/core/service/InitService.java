@@ -90,8 +90,8 @@ public class InitService implements CommandLineRunner {
             Citizen emily = citizens.get(0);
 
             // 7. RequestType Entity (ΠΡΟΣΟΧΗ: Προστέθηκαν οι ημέρες SLA στο τέλος)
-            RequestType wasteType = initRequestType("WASTE_COLLECTION", RequestType.RequestCategory.PROBLEM, cleanliness, 5);
-            RequestType road_repair = initRequestType("ROAD_REPAIR", RequestType.RequestCategory.PROBLEM, technical, 10);
+            RequestType wasteType = initRequestType("WASTE_COLLECTION", RequestType.RequestCategory.PROBLEM,"Photo of waste", cleanliness, 5);
+            RequestType road_repair = initRequestType("ROAD_REPAIR", RequestType.RequestCategory.PROBLEM,"Photo, Incident Report", technical, 10);
 
             // 8. Request & 9. RequestLog Entities
             initRequests( "REQ-2025-001", cleanliness, emily, wasteType, emp1);
@@ -179,11 +179,12 @@ public class InitService implements CommandLineRunner {
         return List.of(c1);
     }
 
-    private RequestType initRequestType(String name, RequestType.RequestCategory category, Department dept, Integer sla) {
+    private RequestType initRequestType(String name, RequestType.RequestCategory category, String documents, Department dept, Integer sla) {
         return requestTypeRepository.findByName(name).orElseGet(() -> {
             RequestType rt = new RequestType();
             rt.setName(name);
             rt.setRequestCategory(category);
+            rt.setRequiredDocuments(documents);
             rt.setDepartment(dept);
             rt.setSlaDays(sla);
             rt.setActive(true);

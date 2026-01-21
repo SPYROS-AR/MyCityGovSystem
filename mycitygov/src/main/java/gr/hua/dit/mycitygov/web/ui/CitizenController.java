@@ -14,6 +14,8 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MaxUploadSizeExceededException;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.security.Principal;
 import java.util.List;
@@ -75,7 +77,7 @@ public class CitizenController {
     @GetMapping("/requests/new")
     public String showCreateRequestForm(Model model) {
         model.addAttribute("requestTypes", citizenService.getAllRequestTypes());
-        model.addAttribute("submitRequest", new SubmitRequestRequest(null, "", null));
+        model.addAttribute("submitRequest", new SubmitRequestRequest(null, "", "", null));
         return "citizen/request-new";
     }
 
@@ -152,10 +154,18 @@ public class CitizenController {
         return "citizen/profile";
     }
 
+    // --- SCHEDULE ENDPOINT ---
     @GetMapping("/department/{id}/schedule")
     @ResponseBody
     public ResponseEntity<List<DepartmentScheduleView>> getDepartmentSchedule(@PathVariable Long id) {
         List<DepartmentScheduleView> schedule = citizenService.getDepartmentSchedule(id);
         return ResponseEntity.ok(schedule);
+    }
+
+    // --- EXCEPTION HANDLER ---
+    @ExceptionHandler(MaxUploadSizeExceededException.class)
+    public String handleMaxSizeException(MaxUploadSizeExceededException exc, RedirectAttributes redirectAttributes) {
+        redirectAttributes.addFlashAttribute("error", "File too large! The maximum allowed size is 10MB.");
+        return "redirect:/citizen/requests/new";
     }
 }

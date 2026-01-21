@@ -7,5 +7,7 @@ import org.springframework.web.multipart.MultipartFile;
 public record SubmitRequestRequest(
         @NotNull Long requestTypeId,
         @NotBlank String description,
+
+        String requiredDocuments,
         MultipartFile attachment
 ) {}

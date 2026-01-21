@@ -43,6 +43,7 @@
         <tr>
             <th>Service Name</th>
             <th>Category</th>
+            <th>Required Documents</th>
             <th>Department</th>
             <th>SLA Days</th>
             <th>Status</th>
@@ -53,6 +54,7 @@
         <tr th:each="type : ${requestTypes}">
             <td th:text="${type.name}"></td>
             <td th:text="${type.category}"></td>
+            <td th:text="${type.requiredDocuments}"></td>
             <td th:text="${type.departmentName}"></td>
             <td th:text="${type.slaDays}"></td>
             <td>
