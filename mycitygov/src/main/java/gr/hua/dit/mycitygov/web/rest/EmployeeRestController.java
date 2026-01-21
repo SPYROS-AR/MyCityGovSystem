@@ -69,9 +69,12 @@ public class EmployeeRestController {
      * @return The updated {@link RequestView}
      */
     @PostMapping("/request/{id}/assign")
-    public ResponseEntity<RequestView> assignRequest(@PathVariable Long id, Principal principal) {
+    public ResponseEntity<RequestView> assignRequest(@PathVariable Long id,
+                                                     @RequestParam(required = false) Long assigneeId,
+                                                     Principal principal) {
         Long currentEmployeeId = employeeService.getEmployeeByUsername(principal.getName()).getId();
-        employeeService.assignRequestToEmployee(id, currentEmployeeId);
+        Long targetEmployeeId = (assigneeId != null) ? assigneeId : currentEmployeeId;
+        employeeService.assignRequestToEmployee(id, targetEmployeeId, currentEmployeeId);
         return ResponseEntity.ok(employeeService.getRequestById(id));
     }
 

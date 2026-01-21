@@ -19,6 +19,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import java.security.Principal;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * Controller for handling all web requests related to the Employee
@@ -66,7 +67,10 @@ public class EmployeeController {
 
         List<EmployeeView> colleagues = List.of();
         if (currentEmployee.getDepartment() != null) {
-            colleagues = employeeService.getEmployeesByDepartment(currentEmployee.getDepartment().getId());
+            List<EmployeeView> allColleagues = employeeService.getEmployeesByDepartment(currentEmployee.getDepartment().getId());
+            colleagues = allColleagues.stream()
+                    .filter(emp -> !emp.id().equals(currentEmployee.getId()))
+                    .collect(Collectors.toList());
         } else {
             System.err.println("CAUTION " + currentEmployee.getUsername() + " doesn't have a department");
         }
@@ -94,13 +98,14 @@ public class EmployeeController {
                                 @RequestParam(required = false) Long assigneeId,
                                 Principal principal,
                                 RedirectAttributes redirectAttributes) {
+        Long assignerId = employeeService.getEmployeeByUsername(principal.getName()).getId();    //
         Long targetEmployeeId;
         if (assigneeId != null) {
             targetEmployeeId = assigneeId;
         } else {
-            targetEmployeeId = employeeService.getEmployeeByUsername(principal.getName()).getId();
+            targetEmployeeId = assignerId;   // assign to me
         }
-        employeeService.assignRequestToEmployee(requestId, targetEmployeeId);
+        employeeService.assignRequestToEmployee(requestId, targetEmployeeId, assignerId);
         redirectAttributes.addFlashAttribute("successMessage", "Request assigned successfully.");
         return "redirect:/employee/request/" + requestId;
     }

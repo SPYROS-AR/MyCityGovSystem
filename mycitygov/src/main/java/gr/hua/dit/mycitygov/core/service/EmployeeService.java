@@ -72,7 +72,7 @@ public interface EmployeeService {
      * @param requestId The request ID
      * @param employeeId The employee ID
      */
-    void assignRequestToEmployee(Long requestId, Long employeeId);
+    void assignRequestToEmployee(Long requestId, Long assigneeId, Long assignerId);
 
     /**
      * Rejects a request, logs the reason, and updates status to REJECTED

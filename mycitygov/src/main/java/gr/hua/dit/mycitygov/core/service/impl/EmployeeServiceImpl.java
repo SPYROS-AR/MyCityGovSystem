@@ -198,30 +198,40 @@ public class EmployeeServiceImpl implements EmployeeService {
 
     @Override
     @Transactional
-    public void assignRequestToEmployee(Long requestId, Long employeeId) {
+    public void assignRequestToEmployee(Long requestId, Long assigneeId, Long assignerId) {
         Request request = requestRepository
                 .findById(requestId)
                 .orElseThrow(() -> new RuntimeException("Request with id "+ requestId +"not found"));
-        Employee employee = employeeRepository
-                .findById(employeeId)
-                .orElseThrow(() -> new RuntimeException("Employee with id " + employeeId + " not found"));
 
-        if (!request.getDepartment().getId().equals(employee.getDepartment().getId())) {
+        // get the employee that assigns the request
+        Employee assigner = employeeRepository
+                .findById(assignerId)
+                .orElseThrow(() -> new RuntimeException("Employee with id " + assignerId + " not found"));
+
+        // get the employee that is assigned to the request
+        Employee assignee = employeeRepository
+                .findById(assigneeId)
+                .orElseThrow(() -> new RuntimeException("Assignee with id " + assigneeId + " not found"));
+
+        if (!request.getDepartment().getId().equals(assigner.getDepartment().getId())) {
             throw new RuntimeException("Cannot assign request to an employee of a different department!");
         }
+
         Request.Status oldStatus = request.getStatus();
-        request.setAssignedEmployee(employee);          // update request to include employee
+
+        request.setAssignedEmployee(assignee);          // update request to include employee
+
         if (request.getStatus() == Request.Status.SUBMITTED) {
             request.setStatus(Request.Status.PROCESSING);
         }
 
         RequestLog log = new RequestLog();
         log.setActionDate(LocalDateTime.now());
-        log.setComment("Assigned to: " + employee.getFirstName() + " " + employee.getLastName());
+        log.setComment("Assigned to: " + assignee.getFirstName() + " " + assignee.getLastName());
         log.setOldStatus(oldStatus);
         log.setNewStatus(Request.Status.PROCESSING);
         log.setRequest(request);
-        log.setEmployee(employee); // or the current user if distinct from the assigned one
+        log.setEmployee(assigner);
 
         request.getLogs().add(log);
 
