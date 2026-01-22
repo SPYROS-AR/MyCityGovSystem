@@ -47,6 +47,9 @@ The system consists of three containerized components:
 * **Framework**: Spring Boot 3.4
 * **Database**: PostgreSQL
 * **Frontend**: Thymeleaf & Bootstrap 5
+* **Security**: Spring Security & JWT (via jjwt)
+* **Documentation**: SpringDoc OpenAPI (Swagger UI)
+* **Utilities**: Project Lombok
 * **Infrastructure**: Docker & Docker Compose
 
 ---
