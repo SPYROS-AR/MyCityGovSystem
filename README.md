@@ -84,7 +84,6 @@ Run the full system (App, Microservice, Database) with Docker Compose.
 | **Web App** | `http://localhost:8080/login` |
 | **Core API Docs** | `http://localhost:8080/swagger-ui/index.html` |
 | **SMS Service API** | `http://localhost:8081/swagger-ui.html` |
-| **Online Server** | `https://mycitygovsystem-production.up.railway.app/login` |
 
 ---
 
