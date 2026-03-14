@@ -89,7 +89,9 @@ Run the full system (App, Microservice, Database) with Docker Compose.
 
 ## Default Credentials
 
-* **Admin**: `admin` / `p`
-* **Citizen**: `citizen1` / `p`
-* **Employee**: `emp1` / `p`
-* **Client**: `my_app` / `secret`
+| Login as: | Username | Password |
+| :--- | :--- | :--- |
+| **Admin** | `admin` | `p` |
+| **Citizen** | `citizen1` | `p` |
+| **Employee** | `emp1` | `p` |
+| **Client** | `my_app` | `secret` |
