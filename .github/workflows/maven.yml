@@ -10,6 +10,23 @@ jobs:
   build-and-test:
     runs-on: ubuntu-latest
 
+    # 1. Spin up a temporary PostgreSQL database for the tests
+    services:
+      db:
+        image: postgres:15-alpine
+        env:
+          POSTGRES_DB: municipality_db
+          POSTGRES_USER: user
+          POSTGRES_PASSWORD: password
+        ports:
+          - 5432:5432
+        # Wait for the DB to be ready before starting the tests
+        options: >-
+          --health-cmd "pg_isready -U user -d municipality_db"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+
     steps:
     - name: Checkout code
       uses: actions/checkout@v3
@@ -29,6 +46,9 @@ jobs:
 
     - name: Build and Test MyCityGov Core
       working-directory: ./mycitygov
+      # 2. Override the database URL to point to the local service container
+      env:
+        SPRING_DATASOURCE_URL: jdbc:postgresql://localhost:5432/municipality_db
       run: |
         chmod +x mvnw
         ./mvnw clean test
