@@ -1,0 +1,43 @@
+name: Docker Build and Publish
+
+on:
+  push:
+    tags: [ 'v*.*.*' ] # Triggers on version tags e.g., v1.0.0
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}
+
+jobs:
+  build-and-push-images:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Log in to the Container registry
+        uses: docker/login-action@v2
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      # Build and push Core App
+      - name: Build and push MyCityGov App
+        uses: docker/build-push-action@v4
+        with:
+          context: ./mycitygov
+          push: true
+          tags: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-core:latest, ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-core:${{ github.ref_name }}
+
+      # Build and push SMS Service
+      - name: Build and push CitySmsService
+        uses: docker/build-push-action@v4
+        with:
+          context: ./CitySmsService
+          push: true
+          tags: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-sms:latest, ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-sms:${{ github.ref_name }}
