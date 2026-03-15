@@ -2,7 +2,6 @@
 
 [![Java CI with Maven](https://github.com/SPYROS-AR/MyCityGovSystem/actions/workflows/maven.yml/badge.svg)](https://github.com/SPYROS-AR/MyCityGovSystem/actions/workflows/maven.yml)
 [![Docker Publish](https://github.com/SPYROS-AR/MyCityGovSystem/actions/workflows/docker-publish.yml/badge.svg)](https://github.com/SPYROS-AR/MyCityGovSystem/actions/workflows/docker-publish.yml)
-[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=mycitygov-core&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=mycitygov-core)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 > **Course Assignment:** Distributed Systems
