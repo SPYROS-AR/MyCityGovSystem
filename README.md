@@ -1,8 +1,8 @@
 # MyCityGov
 
-[![Java CI with Maven](https://github.com/SPYROS-AR/MyCityGovSystem/actions/workflows/maven.yml/badge.svg)](https://github.com/SPYROS-AR/MyCityGovSystem/actions/workflows/maven.yml)
-[![Docker Publish](https://github.com/SPYROS-AR/MyCityGovSystem/actions/workflows/docker-publish.yml/badge.svg)](https://github.com/SPYROS-AR/MyCityGovSystem/actions/workflows/docker-publish.yml)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Maven Build](https://img.shields.io/github/actions/workflow/status/SPYROS-AR/MyCityGovSystem/maven.yml?style=for-the-badge&label=Maven%20Build)](https://github.com/SPYROS-AR/MyCityGovSystem/actions/workflows/maven.yml)
+[![Docker Build](https://img.shields.io/github/actions/workflow/status/SPYROS-AR/MyCityGovSystem/docker-publish.yml?style=for-the-badge&label=Docker%20Build)](https://github.com/SPYROS-AR/MyCityGovSystem/actions/workflows/docker-publish.yml)
+![License](https://img.shields.io/badge/License-MIT-darkred?style=for-the-badge)
 
 > **Course Assignment:** Distributed Systems
 > 
